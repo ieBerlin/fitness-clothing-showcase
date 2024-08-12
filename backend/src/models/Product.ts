@@ -1,18 +1,20 @@
 import { Document, Schema, model, Types } from "mongoose";
-import { ISize } from "./Size";
+import { Color, Season } from "../config/product-attributes";
 
-enum Season {
-  Winter = "WINTER",
-  Autumn = "AUTUMN",
-  Spring = "SPRING",
-  Summer = "SUMMER",
+interface Size {
+  name: string;
+  quantity: number;
+}
+interface ColorOption {
+  name: Color;
+  availableSizes: Size[];
 }
 
-interface IProduct extends Document {
+export interface IProduct extends Document {
   productId: string;
   productName: string;
   productDescription: string;
-  sizes: Types.DocumentArray<ISize>;
+  colors: ColorOption[];
   isUnisex: boolean;
   season: Season;
   woolPercentage: number;
@@ -25,11 +27,7 @@ const ProductSchema: Schema = new Schema({
   productId: { type: String, required: true, unique: true },
   productName: { type: String, required: true },
   productDescription: { type: String, required: true },
-  sizes: {
-    type: [{ type: Schema.Types.ObjectId, ref: "Size" }],
-    required: true,
-    default: [],
-  },
+  colors: { type: [String], required: true },
   isUnisex: { type: Boolean, required: true },
   season: { type: String, enum: Object.values(Season), required: true },
   woolPercentage: { type: Number, required: true, min: 0, max: 100 },
@@ -38,6 +36,6 @@ const ProductSchema: Schema = new Schema({
   image: { type: [String], required: true },
 });
 
-const Product = model<IProduct>("Product", ProductSchema, "products");
+const Product = model<IProduct>("Product", ProductSchema, "Product");
 
 export default Product;
