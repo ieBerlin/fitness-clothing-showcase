@@ -11,9 +11,9 @@ const getSection = async (req: Request, res: Response) => {
         .json({ success: false, message: "Section ID is required" });
     }
 
-    const section = await Section.findById(sectionId);
+    const section = await Section.find({ sectionId });
 
-    if (!section) {
+    if (section.length === 0) {
       return res
         .status(404)
         .json({ success: false, message: "Section not found" });

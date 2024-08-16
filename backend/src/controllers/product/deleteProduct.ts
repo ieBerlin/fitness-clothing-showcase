@@ -1,15 +1,32 @@
 import { Request, Response } from "express";
 import Product from "../../models/Product";
+import Section from "../../models/Section";
+import mongoose from "mongoose";
 
 const deleteProduct = async (req: Request, res: Response) => {
   try {
     const { productId } = req.params;
-    const product = await Product.findByIdAndDelete(productId);
 
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid product ID" });
+    }
+
+    // Find and delete the product
+    const product = await Product.findByIdAndDelete(productId);
     if (!product) {
       return res
         .status(404)
         .json({ success: false, message: "Product not found" });
+    }
+
+    const sections = await Section.find({ items: productId });
+    for (const section of sections) {
+      section.items = section.items.filter(
+        (item) => item.toString() !== productId
+      );
+      await section.save(); // Save the updated section
     }
 
     res

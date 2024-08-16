@@ -1,39 +1,70 @@
-import { Document, Schema, model, Types } from "mongoose";
-import { Color, Season } from "../config/product-attributes";
+import { Document, Schema, model } from "mongoose";
+import { Color, Season, Availability } from "../config/product-attributes";
+import { IImage } from "./Image";
 
 interface Size {
   name: string;
   quantity: number;
+  sizeAvailability: Availability;
 }
+
 interface ColorOption {
   name: Color;
   availableSizes: Size[];
 }
 
 export interface IProduct extends Document {
-  productId: string;
   productName: string;
   productDescription: string;
   colors: ColorOption[];
   isUnisex: boolean;
-  season: Season;
-  woolPercentage: number;
+  season: Season[];
+  woolPercentage?: number;
   price: number;
   releaseDate: Date;
-  image: string[];
+  images: IImage[];
+  availability: Availability;
 }
 
 const ProductSchema: Schema = new Schema({
-  productId: { type: String, required: true, unique: true },
   productName: { type: String, required: true },
   productDescription: { type: String, required: true },
-  colors: { type: [String], required: true },
+  colors: [
+    {
+      name: { type: String, enum: Object.values(Color), required: true },
+      availableSizes: [
+        {
+          name: { type: String, required: true },
+          quantity: { type: Number, required: true },
+          sizeAvailability: {
+            type: String,
+            enum: Object.values(Availability),
+            required: true,
+          },
+        },
+      ],
+    },
+  ],
   isUnisex: { type: Boolean, required: true },
-  season: { type: String, enum: Object.values(Season), required: true },
-  woolPercentage: { type: Number, required: true, min: 0, max: 100 },
+  season: { type: [String], enum: Object.values(Season), required: true },
+  swoolPercentage: { type: Number, min: 0, max: 100 },
   price: { type: Number, required: true },
   releaseDate: { type: Date, required: true },
-  image: { type: [String], required: true },
+  images: [
+    {
+      pathname: { type: String, required: true },
+      angle: {
+        type: String,
+        enum: ["back", "front", "side", "top", "bottom"],
+        required: true,
+      },
+    },
+  ],
+  availability: {
+    type: String,
+    enum: Object.values(Availability),
+    required: true,
+  },
 });
 
 const Product = model<IProduct>("Product", ProductSchema, "Product");

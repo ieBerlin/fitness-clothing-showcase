@@ -22,25 +22,23 @@ export async function createAdmin(adminData: AdminData) {
   const { email, password: plaintextPassword } = adminData;
 
   try {
-    const hashedPassword = await bcrypt.hash(plaintextPassword, saltRounds);
+    const hashedPassword = await hashPassword(plaintextPassword);
     const existingAdmin = await doesAdminExist(email);
     if (existingAdmin) {
       throw new Error("Admin with this email already exists.");
     }
+    return await Admin.create({ adminEmail: email, adminPassword: hashedPassword });
+    // const newAdmin = await Admin.create({
+    //   adminEmail: email,
+    //   adminPassword: hashedPassword,
+    // });
 
-    // Create the admin
-    const newAdmin = await Admin.create({
-      adminId: new Date().getTime().toString(),
-      adminEmail: email,
-      adminPassword: hashedPassword,
-    });
-
-    return newAdmin;
+    // return newAdmin;
   } catch (error) {
     console.error("Error creating admin:", error);
-    throw new Error(
-      "Error creating admin: " + (error as Error).message ||
-        "Something went wrong"
-    );
+    throw new Error('Error occured')
   }
+}
+export default async function hashPassword(password: string): Promise<string> {
+  return await bcrypt.hash(password, saltRounds);
 }

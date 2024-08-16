@@ -1,18 +1,18 @@
 import { Document, model, Schema } from "mongoose";
-import { IProduct as product } from "./Product";
+import { IProduct } from "./Product";
 
 interface ISection extends Document {
-  id: string;
+  sectionId: string;
   name: string;
   description: string;
-  items: product[];
+  items: IProduct[];
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 const SectionSchema: Schema = new Schema(
   {
-    id: {
+    sectionId: {
       type: String,
       required: true,
       trim: true,

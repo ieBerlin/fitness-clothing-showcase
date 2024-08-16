@@ -9,6 +9,7 @@ import {
 
 const createAdmin = async (req: Request, res: Response) => {
   try {
+    console.log(res.locals.admin)
     const { email, password } = req.body;
 
     const errors: ValidationError[] = [];
@@ -46,7 +47,7 @@ const createAdmin = async (req: Request, res: Response) => {
       .status(201)
       .json({ success: true, message: "Admin created successfully" });
   } catch (error) {
-    console.error("Error creating admin:", error || "Error creating admin");
+    // console.error("Error creating admin:", error || "Error creating admin");
     res.status(500).json({ success: false, message: "Error creating admin" });
   }
 };

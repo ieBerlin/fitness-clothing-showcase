@@ -23,40 +23,21 @@ export async function verifyJwt(token: string): Promise<VerificationToken> {
       decoded: null,
     };
   }
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET_KEY) as JwtPayload;
-    const admin = await Admin.findOne({ email: decoded.email }).exec();
-
-    if (!admin) {
-      return {
-        isValid: false,
-        isExpired: true,
-        decoded: null,
-      };
-    }
-
+  const decoded = jwt.verify(token, JWT_SECRET_KEY) as JwtPayload;
+  const admin = await Admin.findOne({ adminEmail: decoded.email }).exec();
+  if (!admin) {
     return {
-      isValid: true,
-      isExpired: false,
-      decoded: decoded,
+      isValid: false,
+      isExpired: true,
+      decoded: null,
     };
-  } catch (error) {
-    if (error instanceof jwt.TokenExpiredError) {
-      return {
-        isValid: false,
-        isExpired: true,
-        decoded: null,
-      };
-    } else {
-      console.error("JWT verification error:", error);
-      return {
-        isValid: false,
-        isExpired: false,
-        decoded: null,
-      };
-    }
   }
+  
+  return {
+    isValid: true,
+    isExpired: false,
+    decoded: {...decoded,id:admin._id },
+  };
 }
 
 export function signJwt(email: string): string {

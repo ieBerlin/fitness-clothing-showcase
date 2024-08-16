@@ -1,9 +1,9 @@
 import { Router } from "express";
 import getAllSections from "../controllers/section/getAllSections";
 import getSection from "../controllers/section/getSection";
-import updateSection from "../controllers/section/updateSection";
-import deserializeUser from "../middlewares/deserializeUser";
+import updateSectionItems from "../controllers/section/updateSectionItems";
 import adminAuth from "../middlewares/adminAuth";
+import deserializeAdmin from "../middlewares/deserializeAdmin";
 
 const router = Router();
 
@@ -12,6 +12,6 @@ router.get("/", getAllSections);
 router.get("/:sectionId", getSection);
 
 // Admin routes
-router.put("/:sectionId", deserializeUser, adminAuth, updateSection);
+router.put("/:sectionId", deserializeAdmin, adminAuth, updateSectionItems);
 
 export default router;
