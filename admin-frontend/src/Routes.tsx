@@ -19,6 +19,7 @@ import ViewProfilePage from "./pages/ViewProfilePage";
 import AdminProfile from "./pages/AdminProfile";
 import AdminDetails from "./pages/AdminDetails";
 import { authenticatedLoader } from "./utils/http";
+import RootLayout from "./components/RootLayout";
 
 const routes = createBrowserRouter([
   {
@@ -29,6 +30,7 @@ const routes = createBrowserRouter([
   {
     path: "/",
     loader: authenticatedLoader,
+    element: <RootLayout />,
     errorElement: <GlobalError />,
     children: [
 
@@ -118,21 +120,22 @@ const routes = createBrowserRouter([
           },
         ],
       },
+      {
+        path: "admin",
+        children: [
+          {
+            index: true,
+            element: <AdminProfile />,
+          },
+          {
+            path: ":adminId",
+            element: <AdminDetails />,
+          },
+        ],
+      },
     ],
   },
-  {
-    path: "admin",
-    children: [
-      {
-        index: true,
-        element: <AdminProfile />,
-      },
-      {
-        path: ":adminId",
-        element: <AdminDetails />,
-      },
-    ],
-  },
+
 
   {
     path: "*",
