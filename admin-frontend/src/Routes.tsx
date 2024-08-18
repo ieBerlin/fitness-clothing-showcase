@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import LoginPage from "./pages/LoginPage";
+import LoginPage, { loader as loginLoader } from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
 import ManageProducts from "./pages/ManageProducts";
 import ManageSections from "./pages/ManageSections";
@@ -18,16 +18,20 @@ import UpdateProfilePicturePage from "./pages/UpdateProfilePicturePage";
 import ViewProfilePage from "./pages/ViewProfilePage";
 import AdminProfile from "./pages/AdminProfile";
 import AdminDetails from "./pages/AdminDetails";
+import { authenticatedLoader } from "./utils/http";
 
 const routes = createBrowserRouter([
   {
+    index: true,
+    element: <LoginPage />,
+    loader: loginLoader
+  },
+  {
     path: "/",
+    loader: authenticatedLoader,
     errorElement: <GlobalError />,
     children: [
-      {
-        index: true,
-        element: <LoginPage />,
-      },
+
       {
         path: "dashboard",
         element: <Dashboard />,
