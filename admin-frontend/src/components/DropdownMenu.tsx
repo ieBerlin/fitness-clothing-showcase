@@ -2,7 +2,8 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 const DropdownMenu: React.FC<{
     label: ReactNode,
     content: ReactNode,
-}> = ({ label, content }) => {
+    position?: string;
+}> = ({ label, content, position = 'right-0' }) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownMenuRef = useRef<HTMLDivElement | null>(null);
     const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -43,7 +44,7 @@ const DropdownMenu: React.FC<{
             {isOpen && (
                 <div
                     ref={dropdownMenuRef}
-                    className="rounded-lg absolute right-0 z-10 mt-2 w-56 origin-top-right bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                    className={`rounded-lg absolute ${position} z-10 w-56 origin-top-right bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none`}
                 >
                     {" "}
                     {content}

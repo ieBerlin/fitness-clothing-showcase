@@ -4,7 +4,7 @@ import Navbar from "./Navbar";
 
 function RootLayout() {
   return (
-    <div className="flex flex-row min-h-screen bg-gray-900 text-gray-200">
+    <div className="flex flex-row min-h-screen bg-gray-50 text-gray-200">
       {/* Sidebar */}
       <Sidebar />
 
@@ -14,9 +14,7 @@ function RootLayout() {
         <Navbar />
 
         {/* Main Content Area */}
-        <main className="p-6">
-          <Outlet />
-        </main>
+        <Outlet />
       </div>
     </div>
   );
