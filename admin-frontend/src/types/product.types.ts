@@ -1,14 +1,15 @@
-interface Size {
+export interface Size {
   name: string;
   quantity: number;
   sizeAvailability: Availability;
 }
 
-interface ColorOption {
+export interface ColorOption {
   name: Color;
   availableSizes: Size[];
 }
 export interface Product {
+  _id: string;
   productName: string;
   productDescription: string;
   colors: ColorOption[];
@@ -37,26 +38,26 @@ export enum Season {
 }
 
 export enum Color {
-  BLACK = "black",
-  WHITE = "white",
-  GRAY = "gray",
-  NAVY_BLUE = "navy blue",
-  RED = "red",
-  BLUE = "blue",
-  GREEN = "green",
-  OLIVE = "olive",
-  PURPLE = "purple",
-  PINK = "pink",
-  YELLOW = "yellow",
-  ORANGE = "orange",
-  BROWN = "brown",
-  MAROON = "maroon",
-  BEIGE = "beige",
-  TURQUOISE = "turquoise",
-  TEAL = "teal",
-  BURGUNDY = "burgundy",
-  KHAKI = "khaki",
-  LILAC = "lilac",
+  BLACK = "#000000",
+  WHITE = "#FFFFFF",
+  GRAY = "#808080",
+  NAVY_BLUE = "#000080",
+  RED = "#FF0000",
+  BLUE = "#0000FF",
+  GREEN = "#008000",
+  OLIVE = "#808000",
+  PURPLE = "#800080",
+  PINK = "#FFC0CB",
+  YELLOW = "#FFFF00",
+  ORANGE = "#FFA500",
+  BROWN = "#A52A2A",
+  MAROON = "#800000",
+  BEIGE = "#F5F5DC",
+  TURQUOISE = "#40E0D0",
+  TEAL = "#008080",
+  BURGUNDY = "#800020",
+  KHAKI = "#F0E68C",
+  LILAC = "#C8A2C8",
 }
 
 export enum Availability {
@@ -72,3 +73,8 @@ export interface ProductsResponse {
   success: boolean;
   products: Product[];
 }
+export interface ProductResponse {
+  success: boolean;
+  product: Product;
+}
+export const allSizes = ["XS", "S", "M", "L", "XL", "2XL"];

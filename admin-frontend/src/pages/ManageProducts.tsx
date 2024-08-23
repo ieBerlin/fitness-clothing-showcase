@@ -8,8 +8,16 @@ import StyledAvailability from "../components/StyledAvailability";
 import { debounce } from "lodash";
 import { useQuery } from "@tanstack/react-query";
 import { authHeader } from "../services/auth-header.service";
-import { Availability, ProductsResponse } from "../types/product.types";
+import {
+  Availability,
+  Product,
+  ProductsResponse,
+} from "../types/product.types";
 import DropdownMenu from "../components/DropdownMenu";
+import { openModal } from "../features/modal";
+import { useDispatch } from "react-redux";
+import { ModalType } from "../types/modal.types";
+import { Link } from "react-router-dom";
 
 function ManageProducts() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -60,11 +68,18 @@ function ManageProducts() {
     queryKey: ["products", inputRef.current?.value],
     queryFn: fetchProducts,
   });
+  const dispatch = useDispatch();
+  const handleDeleteButton = (product: Product) => {
+    dispatch(openModal({ type: ModalType.DELETE_PRODUCT, data: product }));
+  };
 
   const handleInputChange = debounce(() => {
     queryClient.invalidateQueries({ queryKey: ["products"] });
   }, 300);
 
+  function handleAddProduct() {
+    dispatch(openModal({ type: "product-added-success" }));
+  }
   const renderContent = (): ReactNode => {
     if (isFetching) {
       return (
@@ -107,9 +122,15 @@ function ManageProducts() {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
-          {productsData.products.map((product, index) => {
-            const { productName, price, availability, isUnisex, releaseDate } =
-              product;
+          {productsData.products.map((product) => {
+            const {
+              _id,
+              productName,
+              price,
+              availability,
+              isUnisex,
+              releaseDate,
+            } = product;
             const colors = product.colors.map((color) => color.name);
             const formattedDate = new Date(releaseDate).toLocaleString(
               "en-US",
@@ -122,7 +143,7 @@ function ManageProducts() {
             );
 
             return (
-              <tr key={index}>
+              <tr key={_id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
                   {productName}
                 </td>
@@ -145,22 +166,19 @@ function ManageProducts() {
                   <DropdownMenu
                     position="top-1 right-1"
                     label={
-                      <button
-                        aria-label="More options"
-                        className="focus:outline-none"
-                      >
-                        <EllipsisHorizontalIcon className="h-5 w-5 text-gray-600 hover:text-gray-800" />
-                      </button>
+                      <EllipsisHorizontalIcon className="h-5 w-5 text-gray-600 hover:text-gray-800" />
                     }
                     content={
                       <div>
-                        <button
+                        <Link
+                          to={`/products/${_id}/edit`}
                           type="button"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 w-full text-left"
                         >
                           Edit Product
-                        </button>
+                        </Link>
                         <button
+                          onClick={() => handleDeleteButton(product)}
                           type="button"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 w-full text-left"
                         >
@@ -181,7 +199,11 @@ function ManageProducts() {
   return (
     <PageTemplate title="All Products">
       <div className="flex w-full justify-end mb-4">
-        <button className="px-4 py-2 rounded-md bg-gray-700 text-white hover:bg-gray-500">
+        <button
+          className="px-4 py-2 rounded-md bg-gray-700 text-white hover:bg-gray-500"
+          onClick={handleAddProduct}
+          type="button"
+        >
           Add Product
         </button>
       </div>

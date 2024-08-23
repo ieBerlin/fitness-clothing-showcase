@@ -2,6 +2,8 @@ import { QueryClient } from "@tanstack/react-query";
 import { authHeader } from "../services/auth-header.service";
 import { json } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { ProductResponse } from "../types/product.types";
+import { FetchProductParams } from "../types/component.types";
 
 export const queryClient = new QueryClient();
 export const API_URL = "http://localhost:5431/api/";
@@ -78,3 +80,26 @@ export function useFetch<T>(initialData: T, fetchedData: T, _arg?: string) {
     error,
   };
 }
+export const fetchProduct = async ({
+  productId,
+}: FetchProductParams): Promise<ProductResponse> => {
+  const url = `${API_URL}product/${productId}`;
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "x-access-token": authHeader().token,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error ${response.status}: Failed to fetch product`);
+  }
+
+  const data: ProductResponse = await response.json();
+  if (!data.success) {
+    throw new Error("Server refused to show product");
+  }
+
+  return data;
+};

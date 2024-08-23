@@ -1,9 +1,9 @@
 import { FC } from "react";
 
 const LoadingSpinner: FC<{
-    fill: string;
-    text: string;
-    dimension: string;
+    fill?: string;
+    text?: string;
+    dimension?: string;
 }> = ({ fill = "blue-600", text = "gray-200", dimension = "8" }) => {
     return <div role="status">
         <svg
