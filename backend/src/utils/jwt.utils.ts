@@ -32,11 +32,11 @@ export async function verifyJwt(token: string): Promise<VerificationToken> {
       decoded: null,
     };
   }
-  
+
   return {
     isValid: true,
     isExpired: false,
-    decoded: {...decoded,id:admin._id },
+    decoded: { ...decoded, id: admin._id },
   };
 }
 

@@ -47,7 +47,7 @@ const ProductSchema: Schema = new Schema({
   ],
   isUnisex: { type: Boolean, required: true },
   season: { type: [String], enum: Object.values(Season), required: true },
-  swoolPercentage: { type: Number, min: 0, max: 100 },
+  woolPercentage: { type: Number, min: 0, max: 100 },
   price: { type: Number, required: true },
   releaseDate: { type: Date, required: true },
   images: [

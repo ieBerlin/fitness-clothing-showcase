@@ -24,7 +24,6 @@ const CheckboxGroup: FC<CheckboxGroupProps> = ({
     const newCheckedValues = checkedValues.includes(value)
       ? checkedValues.filter((v) => v !== value) // Remove the value if already checked
       : [...checkedValues, value]; // Add the value if not checked
-  console.log(newCheckedValues)
     onChangeValues(newCheckedValues); // Trigger a callback or update state
   };
   return (

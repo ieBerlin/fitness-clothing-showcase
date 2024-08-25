@@ -16,21 +16,27 @@ const deserializeAdmin = async (
       : (req.headers["x-access-token"] as string) || null;
 
     if (!accessToken) {
-      return res.status(403).json({ success: false, message: "Access token is required." });
+      return res
+        .status(403)
+        .json({ success: false, message: "Access token is required." });
     }
 
     // Verify the token
     const { decoded, isValid, isExpired } = await verifyJwt(accessToken);
     // Check if the token is valid and not expired
     if (!isValid || isExpired) {
-      return res.status(403).json({ success: false, message: "Invalid or expired token." });
+      return res
+        .status(403)
+        .json({ success: false, message: "Invalid or expired token." });
     }
 
     res.locals.admin = decoded;
     next();
   } catch (error) {
     console.error("Error verifying JWT:", error);
-    return res.status(403).json({ success: false, message: "Failed to authenticate token." });
+    return res
+      .status(403)
+      .json({ success: false, message: "Failed to authenticate token." });
   }
 };
 

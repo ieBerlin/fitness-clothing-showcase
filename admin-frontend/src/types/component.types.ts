@@ -1,5 +1,5 @@
 import { InputHTMLAttributes } from "react";
-import { ColorOption, Size } from "./product.types";
+import { ColorOption, Image, Size } from "./product.types";
 
 export interface NumberInputProps
   extends InputHTMLAttributes<HTMLInputElement> {
@@ -17,7 +17,7 @@ export interface Step {
 export interface SizesProps {
   isUnisex: boolean;
   availableSizes: Size[];
-  visibility:boolean;
+  visibility: boolean;
 }
 
 export interface ColorItemProps {
@@ -32,4 +32,12 @@ export const steps: Step[] = [
 ];
 export interface FetchProductParams {
   productId: string;
+}
+export interface ImagePickerProps {
+  label: string;
+  image?: Image;
+}
+export interface StoreImageResponse {
+  success: boolean;
+  message: string;
 }

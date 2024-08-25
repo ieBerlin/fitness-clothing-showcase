@@ -68,7 +68,7 @@ const addProduct = async (req: Request, res: Response) => {
             field: colorName,
             message: `Invalid color value: ${colorName}`,
           });
-          return; 
+          return;
         }
 
         // Validate availableSizes
@@ -130,6 +130,12 @@ const addProduct = async (req: Request, res: Response) => {
         message: "Price must be a positive number",
       });
     }
+    if (typeof woolPercentage !== "number" || woolPercentage <= 0) {
+      errors.push({
+        field: "Wool Percentage",
+        message: "Wool Percentage must be a positive number",
+      });
+    }
 
     if (!releaseDate || isNaN(Date.parse(releaseDate))) {
       errors.push({ field: "releaseDate", message: "Invalid release date" });
@@ -144,7 +150,6 @@ const addProduct = async (req: Request, res: Response) => {
         message: "Invalid availability value",
       });
     }
-
     if (errors.length > 0) {
       return res.status(400).json({ success: false, errors });
     }

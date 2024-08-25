@@ -12,7 +12,7 @@ import NumberInput from "./NumberInput";
 import SelectInput from "./SelectInput";
 import { ColorItemProps, SizesProps } from "../types/component.types";
 
-const defaultSizes = (isUnisex: boolean): Partial<Size>[] => {
+const defaultSizes = (): Partial<Size>[] => {
   return allSizes.map((size) => ({
     name: size,
     quantity: 0,
@@ -21,14 +21,12 @@ const defaultSizes = (isUnisex: boolean): Partial<Size>[] => {
 };
 
 interface ProductColorsProps {
-  productColors: ColorOption[];
-  selectedColors: ColorOption[];
+  productColors?: ColorOption[];
   isUnisex: boolean;
 }
 
 const ProductColors: FC<ProductColorsProps> = ({
-  productColors,
-  selectedColors,
+  productColors = [],
   isUnisex,
 }) => {
   const colors = productColors;
@@ -38,7 +36,7 @@ const ProductColors: FC<ProductColorsProps> = ({
       if (!isSelected) {
         return {
           name: key as Color,
-          availableSizes: defaultSizes(isUnisex),
+          availableSizes: defaultSizes(),
         } as ColorOption;
       }
       return null;
@@ -54,7 +52,7 @@ const ProductColors: FC<ProductColorsProps> = ({
           <ColorItem
             key={colorOption.name}
             colorOption={colorOption}
-            isSelected={selectedColors.some(
+            isSelected={productColors.some(
               (selected) => selected.name === colorOption.name
             )}
             isUnisex={isUnisex}
@@ -79,9 +77,10 @@ const ColorItem: FC<ColorItemProps> = ({
     isChecked: isSelected,
     isShown: false,
   });
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCheckboxChange = (_: React.ChangeEvent<HTMLInputElement>) => {
     setCheckbox((prev) => ({
-      isShown: prev.isShown ? false : prev.isShown,
+      // isShown: prev.isShown ? false : prev.isShown,
+      isShown: !prev.isChecked,
       isChecked: !prev.isChecked,
     }));
   };
@@ -168,6 +167,7 @@ const Sizes: FC<SizesProps> = ({ visibility, isUnisex, availableSizes }) => {
             <span className="text-gray-900 font-semibold">{size.name}</span>
             <div className="flex gap-4 items-center">
               <NumberInput
+                min={0}
                 label="Quantity"
                 name={size.name}
                 defaultValue={size.quantity}

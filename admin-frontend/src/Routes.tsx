@@ -11,6 +11,7 @@ import AdminActivity from "./pages/AdminActivity";
 import ProductDetails from "./pages/ProductDetails";
 import SectionDetails from "./pages/SectionDetails";
 import EditProduct from "./pages/EditProduct";
+import AddProduct from "./pages/AddProduct";
 import EditSection from "./pages/EditSection";
 import ActivityDetails from "./pages/ActivityDetails";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
@@ -25,7 +26,7 @@ const routes = createBrowserRouter([
   {
     index: true,
     element: <LoginPage />,
-    loader: loginLoader
+    loader: loginLoader,
   },
   {
     path: "/",
@@ -33,7 +34,6 @@ const routes = createBrowserRouter([
     element: <RootLayout />,
     errorElement: <GlobalError />,
     children: [
-
       {
         path: "dashboard",
         element: <Dashboard />,
@@ -44,6 +44,10 @@ const routes = createBrowserRouter([
           {
             index: true,
             element: <ManageProducts />,
+          },
+          {
+            path: "add",
+            element: <AddProduct />,
           },
           {
             path: ":productId",
@@ -135,7 +139,6 @@ const routes = createBrowserRouter([
       },
     ],
   },
-
 
   {
     path: "*",

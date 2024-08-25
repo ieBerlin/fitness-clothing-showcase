@@ -1,3 +1,7 @@
+export interface Image {
+  pathname: string;
+  angle?: "back" | "front" | "side" | "top" | "bottom";
+}
 export interface Size {
   name: string;
   quantity: number;
@@ -18,13 +22,10 @@ export interface Product {
   woolPercentage?: number;
   price: number;
   releaseDate: Date;
-  images: IImage[];
+  images: Image[];
   availability: Availability;
 }
-interface IImage extends Document {
-  pathname: string;
-  angle?: "back" | "front" | "side" | "top" | "bottom";
-}
+
 export const genderSizes = {
   men: ["S", "M", "L", "XL", "2XL"],
   women: ["XS", "S", "M", "L", "XL", "2XL"],
