@@ -10,7 +10,8 @@ import {
 import { ValidationError } from "../types/validation-error.types";
 
 export const queryClient = new QueryClient();
-export const API_URL = "http://localhost:5431/api/";
+export const SERVER_URL = "http://localhost:5431";
+export const API_URL = SERVER_URL + "/api/";
 export async function verifyToken(): Promise<boolean> {
   try {
     const headers = authHeader();
@@ -300,84 +301,94 @@ export const editProduct = async (
   }
 };
 
-// interface StoreImageParams {
-//   productId: string;
-//   imageAngle: string; // e.g., 'front', 'back', etc.
-//   imageFile: File; // This should be the image file to upload
-// }
+interface StoreImageParams {
+  productId: string;
+  imageAngle: string;
+  imageFile: File;
+}
 
-// export const storeImage = async ({ productId, imageAngle, imageFile }: StoreImageParams): Promise<StoreImageResponse> => {
-//   const token = authHeader();
-//   const url = `${API_URL}image/upload/product/${imageAngle}/${productId}`;
-  
-//   if (!token["x-access-token"]) {
-//     throw {
-//       field: "Token",
-//       message: "No token provided",
-//     } as ValidationError;
-//   }
+export const storeImage = async ({
+  productId,
+  imageAngle,
+  imageFile,
+}: StoreImageParams): Promise<StoreImageResponse> => {
+  const token = authHeader();
+  const url = `${API_URL}image/upload/product/${imageAngle}/${productId}`;
 
-//   const formData = new FormData();
-//   formData.append("image", imageFile);
+  if (!token["x-access-token"]) {
+    throw {
+      field: "Token",
+      message: "No token provided",
+    } as ValidationError;
+  }
 
-//   try {
-//     const response = await fetch(url, {
-//       method: "POST",
-//       headers: {
-//         ...token,
-//       },
-//       body: formData,
-//     });
+  const formData = new FormData();
+  formData.append("image", imageFile);
 
-//     const data: StoreImageResponse = await response.json();
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        ...token,
+      },
+      body: formData,
+    });
 
-//     switch (response.status) {
-//       case 200:
-//         return data; // Return the response data if successful
+    const data: StoreImageResponse = await response.json();
 
-//       case 400: {
-//         const errors: ValidationError[] = data.errors ?? [];
-//         throw errors;
-//       }
-//       case 403:
-//         throw [
-//           {
-//             field: "Token",
-//             message: "Invalid token provided.",
-//           } as ValidationError,
-//         ];
-//       case 404:
-//         throw [
-//           {
-//             field: "Product",
-//             message: "Product not found.",
-//           } as ValidationError,
-//         ];
-//       case 500:
-//         throw [
-//           {
-//             field: "Server",
-//             message: "Server error occurred while updating the product.",
-//           } as ValidationError,
-//         ];
-//       default:
-//         throw [
-//           {
-//             field: "Unknown",
-//             message: `Unexpected error: ${response.status}`,
-//           } as ValidationError,
-//         ];
-//     }
-//   } catch (error) {
-//     if (Array.isArray(error)) {
-//       throw error;
-//     }
-//     throw [
-//       {
-//         field: "Network",
-//         message:
-//           error instanceof Error ? error.message : "An unknown error occurred",
-//       } as ValidationError,
-//     ];
-//   }
-// };
+    switch (response.status) {
+      case 200:
+        return data; // Return the response data if successful
+
+      case 400: {
+        const errors: ValidationError[] = [
+          {
+            field: "Unsuccessful Operation",
+            message: data.message,
+          },
+        ];
+        throw errors;
+      }
+
+      case 403:
+        throw [
+          {
+            field: "Token",
+            message: "Invalid token provided.",
+          } as ValidationError,
+        ];
+      case 404:
+        throw [
+          {
+            field: "Product",
+            message: "Product not found.",
+          } as ValidationError,
+        ];
+      case 500:
+        throw [
+          {
+            field: "Server",
+            message: "Server error occurred while updating the product.",
+          } as ValidationError,
+        ];
+      default:
+        throw [
+          {
+            field: "Unknown",
+            message: `Unexpected error: ${response.status}`,
+          } as ValidationError,
+        ];
+    }
+  } catch (error) {
+    if (Array.isArray(error)) {
+      throw error;
+    }
+    throw [
+      {
+        field: "Network",
+        message:
+          error instanceof Error ? error.message : "An unknown error occurred",
+      } as ValidationError,
+    ];
+  }
+};

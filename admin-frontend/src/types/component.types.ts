@@ -34,7 +34,8 @@ export interface FetchProductParams {
   productId: string;
 }
 export interface ImagePickerProps {
-  label: string;
+  productId: string;
+  angle: string;
   image?: Image;
 }
 export interface StoreImageResponse {

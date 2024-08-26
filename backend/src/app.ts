@@ -8,6 +8,7 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(corsMiddleware);
+app.use('/public',express.static('public'))
 // app.use(delayMiddleware);
 const PORT = process.env.PORT || 5431;
 Routes(app);

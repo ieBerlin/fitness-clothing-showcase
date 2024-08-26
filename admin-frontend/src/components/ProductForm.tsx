@@ -1,7 +1,13 @@
 import { FC, FormEvent } from "react";
 import { Form } from "react-router-dom";
 import ProductColors from "../components/ProductColors";
-import { Availability, Image, Product, Season } from "../types/product.types";
+import {
+  Angle,
+  Availability,
+  Image,
+  Product,
+  Season,
+} from "../types/product.types";
 import BasicInformationProductForm from "./BasicInformationProductForm";
 import ImagePicker from "./ImagePicker";
 
@@ -143,18 +149,24 @@ const ProductForm: FC<ProductFormProps> = ({
 
       // Later we edit this
       case "image-upload": {
-        const images: Image[] = defaultValues.images || [];
-        const angles: string[] = ["back", "front", "side", "top", "bottom"];
+        const angles: Angle[] = ["back", "front", "side", "top", "bottom"];
+        const imageMap = new Map<Angle, Image>(
+          (productData.images || []).map((image) => [image.angle, image])
+        );
 
         return (
           <Form onSubmit={onStepNext}>
-            {angles.map((angle) => (
-              <ImagePicker
-                key={`product-image-${angle}`}
-                label={`${angle.charAt(0).toUpperCase() + angle.slice(1)} View`}
-                image={images.find((image) => image.angle === angle)}
-              />
-            ))}
+            {angles.map((angle) => {
+              const image = imageMap.get(angle);
+              return (
+                <ImagePicker
+                  productId={defaultValues._id!}
+                  key={image ? image._id : `product-image-${angle}`}
+                  angle={angle}
+                  image={image}
+                />
+              );
+            })}
           </Form>
         );
       }

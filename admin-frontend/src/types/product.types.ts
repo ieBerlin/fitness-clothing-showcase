@@ -1,6 +1,9 @@
+export type Angle = "back" | "front" | "side" | "top" | "bottom";
+
 export interface Image {
   pathname: string;
-  angle?: "back" | "front" | "side" | "top" | "bottom";
+  angle: Angle;
+  _id: string;
 }
 export interface Size {
   name: string;

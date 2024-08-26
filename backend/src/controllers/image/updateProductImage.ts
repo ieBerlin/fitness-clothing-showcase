@@ -65,6 +65,8 @@ const updateProductImage = async (req: MulterRequest, res: Response) => {
     }
 
     updatedImages.push({ angle: imageAngle, pathname: imagePath } as IImage);
+    console.log(updatedImages)
+    console.log(imageAngle)
     await Product.findByIdAndUpdate(
       productId,
       { $set: { images: updatedImages } },

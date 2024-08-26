@@ -30,8 +30,8 @@ const EditProductPage: React.FC = () => {
   >({
     queryKey: ["product", productId],
     queryFn: () => fetchProduct({ productId: productId as string }),
-    staleTime: Infinity,
   });
+
   const { mutate, isPending } = useMutation<
     ProductResponse,
     ValidationError[],
@@ -127,8 +127,6 @@ const EditProductPage: React.FC = () => {
       updatedProductData.colors = selectedColors;
       setFormData((prevData) => ({ ...prevData, colors: selectedColors }));
       mutate({ ...formData, colors: selectedColors } as Product);
-    } else if (activeStep.id === "image-upload") {
-      console.log("Image Uploaded");
     }
   };
   const handlePreviousStep = () => {

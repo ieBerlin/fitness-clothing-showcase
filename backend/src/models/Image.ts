@@ -1,11 +1,12 @@
 import { Document, Schema, model } from "mongoose";
 
+type Angle = "back" | "front" | "side" | "top" | "bottom";
+
 export interface IImage extends Document {
   pathname: string;
-  angle?: "back" | "front" | "side" | "top" | "bottom";
+  angle?: Angle;
 }
-
-const ImageSchema: Schema = new Schema(
+const ImageSchema: Schema<IImage> = new Schema(
   {
     pathname: {
       type: String,
@@ -22,7 +23,6 @@ const ImageSchema: Schema = new Schema(
     timestamps: true,
   }
 );
-
-const Image = model<IImage>("Image", ImageSchema, "Image");
+const Image = model<IImage>("Image", ImageSchema);
 
 export default Image;

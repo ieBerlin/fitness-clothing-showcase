@@ -1,25 +1,35 @@
 import { FC, useRef, useState } from "react";
 import { ImagePickerProps } from "../types/component.types";
 import { useMutation } from "@tanstack/react-query";
-import { storeImage } from "../utils/http";
+import { SERVER_URL, queryClient, storeImage } from "../utils/http";
 
-const ImagePicker: FC<ImagePickerProps> = ({ label, image }) => {
+const ImagePicker: FC<ImagePickerProps> = ({ productId, angle, image }) => {
   const imageRef = useRef<HTMLInputElement>(null);
-  const [avatar, setAvatar] = useState<string | ArrayBuffer | null>(image?.pathname ?? null);
+  const [avatar, setAvatar] = useState<string | ArrayBuffer | null>(
+    image?.pathname
+      ? `${SERVER_URL}/public/uploads/product/${image?.pathname}`
+      : null
+  );
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  
-//   const { mutate } = useMutation({
-//     mutationKey: ["product"],
-//     mutationFn: storeImage,
-//     onSuccess: () => {
-//       // Handle successful image upload
-//       console.log("Image uploaded successfully.");
-//     },
-//     onError: (error) => {
-//       // Handle image upload errors
-//       console.error("Image upload failed:", error);
-//     },
-//   });
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+
+  const { mutate } = useMutation({
+    mutationKey: ["product", productId],
+    mutationFn: storeImage,
+    onMutate: () => {
+      setIsUploading(true);
+    },
+    onSuccess: () => {
+      console.log("Image uploaded successfully.");
+      queryClient.invalidateQueries({ queryKey: ["product", productId] });
+    },
+    onError: (error) => {
+      console.error("Image upload failed:", error);
+    },
+    onSettled: () => {
+      setIsUploading(false);
+    },
+  });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -29,14 +39,13 @@ const ImagePicker: FC<ImagePickerProps> = ({ label, image }) => {
         setAvatar(reader.result);
       };
       reader.readAsDataURL(file);
-      setSelectedFile(file); // Save the selected file
+      setSelectedFile(file);
     }
   };
 
   const handleUpdateImage = () => {
-    if (selectedFile && image?.angle) {
-      // Use mutation to upload image
-    //   mutate(productId, image.angle, selectedFile);
+    if (selectedFile) {
+      mutate({ productId, imageAngle: angle, imageFile: selectedFile });
     }
   };
 
@@ -48,40 +57,68 @@ const ImagePicker: FC<ImagePickerProps> = ({ label, image }) => {
 
   const handleRemoveImage = () => {
     setAvatar(null);
-    // Handle image removal logic here
+    setSelectedFile(null);
     console.log("Image removed.");
   };
+
+  const avatarSrc = typeof avatar === "string" ? avatar : "";
 
   return (
     <div className="mb-6">
       <label className="block mb-2 text-sm font-medium text-gray-700">
-        {label}
+        {`${angle.charAt(0).toUpperCase() + angle.slice(1)} View`}
       </label>
       <div
-        className="relative border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:border-blue-500 transition-colors"
-        onClick={triggerFileInput}
+        className={`relative border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:border-blue-500 transition-colors ${
+          isUploading ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+        onClick={!isUploading ? triggerFileInput : undefined}
       >
         {avatar ? (
           <>
             <img
-              src={typeof avatar === "string" ? avatar : ""}
+              src={avatarSrc}
               alt="Selected"
               className="object-contain h-40 w-full mb-2 rounded-md"
             />
             <div className="flex flex-row gap-2 mb-2">
               <button
                 type="button"
-                className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                onClick={handleUpdateImage}
+                className="px-4 py-2 bg-green-500 text-white text-sm font-medium rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  triggerFileInput();
+                }}
+                disabled={isUploading}
+                aria-label="Change Image"
               >
                 Change Image
               </button>
+
               <button
                 type="button"
-                className="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
-                onClick={handleRemoveImage}
+                className="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveImage();
+                }}
+                disabled={isUploading}
+                aria-label="Remove Image"
               >
                 Remove Image
+              </button>
+
+              <button
+                type="button"
+                className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUpdateImage();
+                }}
+                disabled={isUploading}
+                aria-label="Upload Image"
+              >
+                Upload Image
               </button>
             </div>
           </>
@@ -94,7 +131,12 @@ const ImagePicker: FC<ImagePickerProps> = ({ label, image }) => {
             <button
               type="button"
               className="mt-2 px-4 py-2 bg-green-500 text-white text-sm font-medium rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-              onClick={triggerFileInput}
+              onClick={(e) => {
+                e.stopPropagation();
+                triggerFileInput();
+              }}
+              disabled={isUploading}
+              aria-label="Upload Image"
             >
               Upload Image
             </button>
