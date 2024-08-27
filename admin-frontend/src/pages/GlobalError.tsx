@@ -4,10 +4,16 @@ import ForbiddenPage from "./ForbiddenPage";
 import { ErrorResponse } from "../types/product.types";
 
 function GlobalError() {
-  const error = useRouteError() as ErrorResponse | unknown;
-  
+  const error = useRouteError();
+
+  // Type guard to check if the error is an ErrorResponse
   const isErrorResponse = (error: unknown): error is ErrorResponse => {
-    return (error as ErrorResponse).statusCode !== undefined;
+    return (error as ErrorResponse)?.statusCode !== undefined;
+  };
+
+  // Type guard to check if the error is a Response object
+  const isResponse = (error: unknown): error is Response => {
+    return (error as Response).status !== undefined;
   };
 
   if (isErrorResponse(error)) {
@@ -17,7 +23,8 @@ function GlobalError() {
       case 404:
         return <NotFoundPage />;
       default: {
-        const errorMessage = error.message || "An unexpected error occurred.";
+        const errorMessage =
+          error.errors?.[0]?.message || "An unexpected error occurred.";
         return (
           <div>
             <h1>Error {error.statusCode}</h1>
@@ -38,18 +45,25 @@ function GlobalError() {
     }
   }
 
-  // Fallback error rendering
+  if (isResponse(error)) {
+    switch (error.status) {
+      case 403:
+        return <ForbiddenPage />;
+      case 404:
+        return <NotFoundPage />;
+      default:
+        return (
+          <div>
+            <h1>Error {error.status}</h1>
+            <p>An unexpected error occurred.</p>
+          </div>
+        );
+    }
+  }
   return (
     <div>
       <h1>Something went wrong!</h1>
-      {error ? (
-        <div>
-          <p>An unexpected error occurred.</p>
-          <pre>{JSON.stringify(error, null, 2)}</pre>
-        </div>
-      ) : (
-        <p>Sorry, there was a problem loading this page.</p>
-      )}
+      <p>Sorry, there was a problem loading this page.</p>
     </div>
   );
 }

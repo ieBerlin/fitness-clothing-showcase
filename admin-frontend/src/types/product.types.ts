@@ -73,10 +73,12 @@ export enum Availability {
   UNAVAILABLE = "unavailable",
 }
 
-export interface ProductsResponse {
-  success: boolean;
+export type ProductsResponse  = {
   products?: Product[];
   count?: number;
+  totalPages?: number;
+  currentPage?: number;
+  totalProducts?: number;
 }
 export interface ProductResponse {
   success: boolean;

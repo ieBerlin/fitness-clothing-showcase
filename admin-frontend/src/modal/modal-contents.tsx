@@ -2,7 +2,16 @@ import { useSelector, useDispatch } from "react-redux";
 import { ActionButton, CancelButton } from "./ActionsButtons";
 import { closeModal, openConfirmationModal } from "../features/modal";
 import { RootState } from "../store/store";
-import { Product } from "../types/product.types";
+import {
+  ErrorResponse,
+  Product,
+  SuccessResponse,
+  ValidationError,
+} from "../types/product.types";
+import { useMutation } from "@tanstack/react-query";
+import { deleteProduct } from "../utils/authUtils";
+import { queryClient } from "../utils/http";
+import { isArray } from "lodash";
 interface ModalContentProps {
   title?: string;
   bodyContent: React.ReactNode;
@@ -82,35 +91,53 @@ export function LogoutModalContent(): ModalContentProps {
 export function ConfirmProductDeletionModal(): ModalContentProps {
   const dispatch = useDispatch();
   const { data } = useSelector((state: RootState) => state.modal);
+  const product = data as Product;
+
+  const { isPending, mutate } = useMutation<
+    SuccessResponse,
+    ErrorResponse,
+    string
+  >({
+    mutationKey: [product?._id],
+    mutationFn: deleteProduct,
+    onSuccess: () => {
+      dispatch(closeModal());
+      dispatch(
+        openConfirmationModal({
+          message: "You have successfully deleted this product.",
+        })
+      );
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+  });
+
   if (!data || (typeof data === "object" && Object.keys(data).length === 0)) {
     return EmptyStateModal();
   }
-  const product = data as Product;
   const handleDelete = () => {
-    dispatch(closeModal());
-    dispatch(
-      openConfirmationModal({
-        message: "You have successfully deleted this product.",
-      })
-    );
+    mutate(product?._id);
   };
 
   return {
-    title: "Are You Sure You Want to Delete This Product?",
+    title: "Delete Product",
     bodyContent: (
       <div>
+        <h2 className="text-lg font-semibold">
+          Are You Sure You Want to Delete This Product?
+        </h2>
         <p className="text-gray-900 font-light">
-          Are you sure you want to delete the product {product.productName}
+          Are you sure you want to delete the product{" "}
+          <strong>{product.productName}</strong>?
         </p>
       </div>
     ),
     actionsButtons: [
       <ActionButton
-        key="delete-confirm"
         label="Delete"
+        isLoading={isPending}
         onConfirm={handleDelete}
       />,
-      <CancelButton key="delete-cancel" />,
+      <CancelButton isLoading={isPending} />,
     ],
   };
 }
@@ -122,6 +149,37 @@ export function SuccessModalContent(message: string): ModalContentProps {
     bodyContent: (
       <div>
         <p className="text-gray-900 font-light">{message}</p>
+      </div>
+    ),
+    actionsButtons: [
+      <ActionButton
+        key="success-ok"
+        label="OK"
+        onConfirm={() => dispatch(closeModal())}
+      />,
+    ],
+  };
+}
+export function FieldsError(): ModalContentProps {
+  const dispatch = useDispatch();
+  const { data } = useSelector((state: RootState) => state.modal);
+  if (!data || !data.errors || !isArray(data.errors) || data.length === 0) {
+    return EmptyStateModal();
+  }
+  const errors: ValidationError[] = (data as ErrorResponse)
+    .errors as ValidationError[];
+  return {
+    title: "Validation Errors",
+    bodyContent: (
+      <div className="error-list">
+        <ul>
+          {errors.map((error, index) => (
+            <li key={index} className="error-item">
+              <span className="error-field">{error.field}:</span>{" "}
+              {error.message}
+            </li>
+          ))}
+        </ul>
       </div>
     ),
     actionsButtons: [

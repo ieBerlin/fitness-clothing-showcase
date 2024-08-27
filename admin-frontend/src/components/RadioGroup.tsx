@@ -11,6 +11,8 @@ interface RadioInputProps
   options: RadioOption[];
   selectedValue?: string;
   name: string;
+  isError?: boolean;
+  errorMessage?: string;
 }
 
 const RadioGroup: FC<RadioInputProps> = ({
@@ -18,6 +20,8 @@ const RadioGroup: FC<RadioInputProps> = ({
   label,
   options = [],
   selectedValue,
+  isError = false,
+  errorMessage,
   ...props
 }) => {
   return (
@@ -37,7 +41,9 @@ const RadioGroup: FC<RadioInputProps> = ({
                 type="radio"
                 name={name}
                 checked={isChecked}
-                className="mr-2 border-gray-200 rounded-full text-blue-600 focus:ring-blue-500"
+                className={`mr-2 border-gray-200 rounded-full text-blue-600 focus:ring-blue-500 ${
+                  isError ? "border-red-500" : ""
+                }`}
                 readOnly
                 {...props}
               />
@@ -51,6 +57,9 @@ const RadioGroup: FC<RadioInputProps> = ({
           );
         })}
       </div>
+      {isError && errorMessage && (
+        <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+      )}
     </div>
   );
 };

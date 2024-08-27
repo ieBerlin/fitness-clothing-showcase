@@ -3,9 +3,10 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLoaderData, useNavigate } from "react-router-dom";
-import { IAdmin, IAuthResponse, IErrorResponse } from "../types/auth.types";
+import { IAdmin } from "../types/auth.types";
 import { login } from "../services/admin.service";
 import { verifyToken } from "../utils/authUtils";
+import { ErrorResponse, SuccessResponse } from "../types/product.types";
 
 function LoginPage() {
   const [inputBorder, setInputBorder] = useState<string>("border-transparent");
@@ -17,24 +18,21 @@ function LoginPage() {
   const navigate = useNavigate();
 
   const { mutate, isPending } = useMutation<
-    IAuthResponse,
-    IErrorResponse,
+    SuccessResponse,
+    ErrorResponse,
     IAdmin
   >({
     mutationKey: ["admin"],
-    mutationFn: async (data: IAdmin) => {
+    mutationFn: async (data) => {
       const result = await login(data);
-      if ("error" in result) {
-        throw result;
-      }
-      localStorage.setItem("token", result.token);
+      localStorage.setItem("token", result.data.token);
       return result;
     },
     onError: (error) => {
       setInputBorder("border-red-500");
       setIsErrorShown(true);
       setErrorMessage(
-        error.status === 400
+        error.statusCode === 400
           ? "Unmatched admin credentials"
           : "An unexpected error occurred"
       );
@@ -158,7 +156,6 @@ function LoginPage() {
 export default LoginPage;
 
 export async function loader(): Promise<boolean> {
-  console.log('token')
   try {
     const tokenResponse = await verifyToken();
     return tokenResponse.success;

@@ -2,10 +2,10 @@ import { Request, Response, NextFunction } from "express";
 import Admin from "../models/Admin";
 import { ErrorResponse } from "../utils/responseInterfaces";
 const adminAuth = async (_: Request, res: Response, next: NextFunction) => {
-  const adminId = res.locals.admin.id;
+  const adminEmail = res.locals.admin.email;
 
   try {
-    const adminExist = await Admin.findById(adminId);
+    const adminExist = await Admin.findOne({ adminEmail });
 
     if (!adminExist) {
       const errorResponse: ErrorResponse = {

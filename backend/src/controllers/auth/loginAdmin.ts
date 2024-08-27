@@ -60,7 +60,6 @@ export default async function login(req: Request, res: Response) {
       success: true,
       data: { token },
     };
-
     return res.status(200).json(successResponse);
   } catch (error) {
     console.error("Error logging in:", error);

@@ -15,35 +15,58 @@ interface VerificationToken {
   decoded: JwtPayload | null;
 }
 
-export async function verifyJwt(token: string): Promise<VerificationToken> {
-  if (!token) {
-    return {
-      isValid: false,
-      isExpired: true,
-      decoded: null,
-    };
+class TokenError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "TokenError";
   }
-  const decoded = jwt.verify(token, JWT_SECRET_KEY) as JwtPayload;
-  const admin = await Admin.findOne({ adminEmail: decoded.email }).exec();
-  if (!admin) {
-    return {
-      isValid: false,
-      isExpired: true,
-      decoded: null,
-    };
-  }
+}
 
-  return {
-    isValid: true,
-    isExpired: false,
-    decoded: { ...decoded, id: admin._id },
-  };
+export async function verifyJwt(token: string): Promise<VerificationToken> {
+  try {
+    if (!token) {
+      throw new TokenError("Token is required");
+    }
+    const decoded = jwt.verify(token, JWT_SECRET_KEY) as JwtPayload;
+    const currentTime = Math.floor(Date.now() / 1000);
+    if (decoded.exp && decoded.exp < currentTime) {
+      throw new TokenError("Token is expired");
+    }
+
+    const admin = await Admin.findOne({ adminEmail: decoded.email }).exec();
+    if (!admin) {
+      throw new TokenError("Invalid token");
+    }
+
+    return {
+      isValid: true,
+      isExpired: false,
+      decoded,
+    };
+  } catch (error) {
+    // console.log(error);
+    if (error instanceof jwt.TokenExpiredError) {
+      return {
+        isValid: false,
+        isExpired: true,
+        decoded: null,
+      };
+    } else if (error instanceof jwt.JsonWebTokenError) {
+      return {
+        isValid: false,
+        isExpired: false,
+        decoded: null,
+      };
+    } else {
+      return {
+        isValid: false,
+        isExpired: false,
+        decoded: null,
+      };
+    }
+  }
 }
 
 export function signJwt(email: string): string {
-  return jwt.sign(
-    { email },
-    JWT_SECRET_KEY,
-    { expiresIn: "24h" } // Use a more common time format for expiration
-  );
+  return jwt.sign({ email }, JWT_SECRET_KEY, { expiresIn: "1d" });
 }

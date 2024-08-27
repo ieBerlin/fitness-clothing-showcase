@@ -9,8 +9,8 @@ import Modal from "./modal/Modal";
 function App() {
   return (
     <Provider store={store}>
-      <Modal />
       <QueryClientProvider client={queryClient}>
+        <Modal />
         <RouterProvider router={routes} />
       </QueryClientProvider>
     </Provider>

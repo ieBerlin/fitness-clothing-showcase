@@ -5,6 +5,8 @@ interface BaseProps {
   label?: string;
   name: string;
   type?: string;
+  isError?: boolean;
+  errorMessage?: string;
 }
 
 // Extend the props for both input and textarea elements
@@ -19,6 +21,8 @@ const TextInput: FC<InputProps> = ({
   placeholder,
   label,
   name,
+  isError = false,
+  errorMessage = "",
   ...props
 }) => {
   return (
@@ -30,9 +34,12 @@ const TextInput: FC<InputProps> = ({
       )}
       {type === "textarea" ? (
         <textarea
-          required
           rows={3}
-          className="py-3 px-4 block border-gray-200 border-2 w-full rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
+          className={`py-3 px-4 block border-2 w-full rounded-lg text-sm focus:outline-none ${
+            isError
+              ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+              : "border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+          }`}
           name={name}
           style={
             props.readOnly
@@ -46,9 +53,12 @@ const TextInput: FC<InputProps> = ({
         />
       ) : (
         <input
-          required
           type={type}
-          className="py-3 px-4 block border-gray-200 border-2 w-full rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
+          className={`py-3 px-4 block border-2 w-full rounded-lg text-sm focus:outline-none ${
+            isError
+              ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+              : "border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+          }`}
           name={name}
           style={
             props.readOnly
@@ -60,6 +70,9 @@ const TextInput: FC<InputProps> = ({
           placeholder={placeholder}
           {...(props as InputHTMLAttributes<HTMLInputElement>)}
         />
+      )}
+      {isError && errorMessage && (
+        <p className="mt-1 text-sm text-red-600">{errorMessage}</p>
       )}
     </div>
   );

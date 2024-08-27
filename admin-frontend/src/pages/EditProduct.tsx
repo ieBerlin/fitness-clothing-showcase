@@ -18,9 +18,12 @@ import { Size } from "../types/product.types";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { editProduct, fetchProduct } from "../utils/authUtils";
 import ErrorDisplay from "../components/ErrorDisplay";
+import { useDispatch } from "react-redux";
+import { openModal } from "../features/modal";
 
 const EditProductPage: React.FC = () => {
   const location = useLocation();
+  const dispatch = useDispatch();
   const step: Step = location.state?.step || steps[0];
   const [activeStep, setActiveStep] = useState<Step>(step);
   const { productId } = useParams<{ productId: string }>();
@@ -34,14 +37,14 @@ const EditProductPage: React.FC = () => {
     queryKey: ["product", productId],
     queryFn: () => fetchProduct({ productId: productId as string }),
   });
-  const { mutate, isPending } = useMutation<
-    SuccessResponse,
-    ErrorResponse,
-    Product
-  >({
+  const {
+    mutate,
+    isPending,
+    error: mutationErrors,
+    isError: isMutationError,
+  } = useMutation<SuccessResponse, ErrorResponse, Product>({
     mutationKey: ["product"],
     mutationFn: editProduct,
-
     onSuccess: (data) => {
       const currentStepIndex = steps.findIndex(
         (step) => step.id === activeStep.id
@@ -50,6 +53,9 @@ const EditProductPage: React.FC = () => {
         setActiveStep(steps[currentStepIndex + 1]);
       }
       return data.data;
+    },
+    onError: (errors) => {
+      // dispatch(openModal({ type: "fields-error", data: errors }));
     },
   });
   const isLoading = isFetching || isPending;
@@ -154,9 +160,15 @@ const EditProductPage: React.FC = () => {
       </div>
     );
   }
+
   return (
     <PageTemplate title="Edit Product Details">
       <ProductForm
+        validationErrors={
+          isMutationError && mutationErrors
+            ? (mutationErrors as unknown as ErrorResponse).errors
+            : undefined
+        }
         isEditing
         isLoading={isLoading}
         productData={formData}

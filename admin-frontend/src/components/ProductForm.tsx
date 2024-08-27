@@ -7,11 +7,13 @@ import {
   Image,
   Product,
   Season,
+  ValidationError,
 } from "../types/product.types";
 import BasicInformationProductForm from "./BasicInformationProductForm";
 import ImagePicker from "./ImagePicker";
 
 interface ProductFormProps {
+  validationErrors?: ValidationError[];
   isLoading?: boolean;
   isEditing?: boolean;
   productData: Partial<Product>;
@@ -22,6 +24,7 @@ interface ProductFormProps {
 }
 
 const ProductForm: FC<ProductFormProps> = ({
+  validationErrors = [],
   isLoading = false,
   isEditing = false,
   productData,
@@ -88,6 +91,7 @@ const ProductForm: FC<ProductFormProps> = ({
       case "basic-info": {
         return (
           <BasicInformationProductForm
+            errors={validationErrors}
             onInputCheckChange={handleInputCheckChange}
             defaultValues={defaultValues as Product}
             isLoading={isLoading}
@@ -184,6 +188,7 @@ const ProductForm: FC<ProductFormProps> = ({
   } else {
     return (
       <BasicInformationProductForm
+        errors={validationErrors}
         onInputCheckChange={handleInputCheckChange}
         defaultValues={defaultValues as Product}
         isLoading={isLoading}

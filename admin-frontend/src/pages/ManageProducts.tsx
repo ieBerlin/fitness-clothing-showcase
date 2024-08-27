@@ -1,72 +1,86 @@
-import { ReactNode, useRef } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import PageTemplate from "../components/PageTemplate";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
 import SearchInput from "../components/SearchInput";
 import LoadingSpinner from "../components/LoadingSpinner";
 import StyledAvailability from "../components/StyledAvailability";
 import { debounce } from "lodash";
-import { useQueries } from "@tanstack/react-query";
-import {
-  Availability,
-  ErrorResponse,
-  Product,
-  SuccessResponse,
-} from "../types/product.types";
+import { useQuery } from "@tanstack/react-query";
+import { Availability, ErrorResponse, Product } from "../types/product.types";
 import DropdownMenu from "../components/DropdownMenu";
 import { openModal } from "../features/modal";
 import { useDispatch } from "react-redux";
 import { ModalType } from "../types/modal.types";
 import { Link } from "react-router-dom";
-import { fetchProduct, fetchProductsCount } from "../utils/authUtils";
+import { fetchProducts } from "../utils/authUtils";
 import ErrorDisplay from "../components/ErrorDisplay";
 import { queryClient } from "../utils/http";
 
 function ManageProducts() {
+  const pageRef = useRef<number>(1);
+  const [productsState, setProductsState] = useState<{
+    products: Product[];
+    args: string;
+  }>({
+    products: [],
+    args: "",
+  });
   const inputRef = useRef<HTMLInputElement>(null);
   const dispatch = useDispatch();
 
-  const queriesResults = useQueries({
-    queries: [
-      {
-        queryKey: ["products", inputRef.current?.value || ""],
-        queryFn: () =>
-          fetchProduct({ productId: inputRef.current?.value || "" }),
-        staleTime: Infinity,
-        enabled: Boolean(inputRef.current?.value), // Conditionally enabled
-      },
-      {
-        queryKey: ["products-count"],
-        queryFn: fetchProductsCount,
-      },
-    ],
+  const {
+    isFetching: isProductsLoading,
+    isError: hasProductsError,
+    data: productsData,
+    error: productsErrors,
+  } = useQuery({
+    queryKey: ["products", productsState.args],
+    queryFn: () =>
+      fetchProducts({
+        page: pageRef.current ?? 1,
+        search: inputRef?.current?.value,
+      }),
+    staleTime: Infinity,
   });
+  const isLoading = isProductsLoading;
+  const hasError = hasProductsError;
+  useEffect(() => {
+    if (productsData?.success && productsData.data.products) {
+      setProductsState((prevState) => {
+        const currentArgs = inputRef.current?.value ?? "";
+        const prevArgs = prevState.args;
 
-  const [
-    {
-      isFetching: isProductsLoading,
-      isError: hasProductsError,
-      data: productsData,
-      error: productsErrors,
-    },
-    {
-      isFetching: isCountLoading,
-      isError: hasCountError,
-      data: productsCountData,
-      error: countErrors,
-    },
-  ] = queriesResults;
+        const prevProducts = prevState.products;
+        const newProducts = (productsData.data.products as Product[]).filter(
+          (product) => !prevProducts.some((pro) => pro._id === product._id)
+        );
 
-  const isLoading = isProductsLoading || isCountLoading;
-  const hasError = hasProductsError || hasCountError;
+        const updatedProducts =
+          prevArgs === currentArgs
+            ? [...prevProducts, ...newProducts]
+            : newProducts;
 
-  const handleDeleteButton = (product: Product) => {
+        updatedProducts.sort(
+          (a, b) =>
+            new Date(b.releaseDate).getTime() -
+            new Date(a.releaseDate).getTime()
+        );
+        pageRef.current = prevArgs === currentArgs ? pageRef.current : 1;
+        return {
+          products: updatedProducts,
+          args: currentArgs,
+        };
+      });
+    }
+  }, [productsData]);
+  const handleDeleteProduct = (product: Product) => {
     dispatch(openModal({ type: ModalType.DELETE_PRODUCT, data: product }));
   };
-
   const handleInputChange = debounce(() => {
-    queryClient.invalidateQueries({ queryKey: ["products"] });
+    queryClient.invalidateQueries({
+      queryKey: ["products", productsState.args],
+    });
   }, 300);
-
   const renderTableOrMessage = (): ReactNode => {
     if (isLoading) {
       return (
@@ -78,136 +92,67 @@ function ManageProducts() {
     }
 
     if (hasError) {
-      const errors: ErrorResponse[] = [];
-      if (hasProductsError) {
-        errors.push(productsErrors as unknown as ErrorResponse);
-      }
-      if (hasCountError) {
-        errors.push(countErrors as unknown as ErrorResponse);
-      }
+      const errors: ErrorResponse = productsErrors as unknown as ErrorResponse;
 
       return (
         <div className="space-y-4">
-          {errors.map((error, index) => (
-            <ErrorDisplay key={index} error={error} />
-          ))}
+          <ErrorDisplay error={errors} />
         </div>
       );
     }
-
     if (
       !productsData ||
-      (productsData?.success &&
-        (productsData as SuccessResponse).data.products.length === 0)
+      (productsData.success && productsData.data.products?.length === 0)
     ) {
       return (
         <div className="flex items-center justify-center w-full py-10">
-          <h2 className="text-gray-600 font-semibold">
-          No Products Found
-          </h2>
+          <h2 className="text-gray-600 font-semibold">No Products Found</h2>
         </div>
       );
     }
-
+    function handleShowMoreItems() {
+      const totalPages = productsData?.data.totalPages;
+      const currentPage = productsData?.data.currentPage;
+      if (totalPages && currentPage && totalPages > currentPage) {
+        pageRef.current++;
+        setProductsState((prevState) => ({
+          ...prevState,
+        }));
+        queryClient.invalidateQueries({
+          queryKey: ["products", inputRef.current?.value || ""],
+        });
+      }
+    }
+    const isShowMoreVisible = productsData?.data.totalProducts
+      ? productsData.data.totalProducts > productsState.products.length
+      : 0;
     return (
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead>
-          <tr>
-            {[
-              "Product",
-              "Price",
-              "Availability",
-              "Colors",
-              "Unisex",
-              "Release Date",
-              "",
-            ].map((header, index) => (
-              <th
-                key={index}
-                scope="col"
-                className="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase"
-              >
-                {header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200">
-          {(productsData as SuccessResponse).data.products.map(
-            (product: Product) => {
-              const {
-                _id,
-                productName,
-                price,
-                availability,
-                isUnisex,
-                releaseDate,
-                colors,
-              } = product;
-              const formattedDate = new Date(releaseDate).toLocaleDateString(
-                "en-US",
-                {
-                  day: "numeric",
-                  weekday: "short",
-                  month: "long",
-                  year: "numeric",
-                }
-              );
-
-              return (
-                <tr key={_id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
-                    {productName}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium">
-                    {price.toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium">
-                    <StyledAvailability status={availability as Availability} />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium">
-                    {colors.map((color) => color.name).join(", ")}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium">
-                    {isUnisex ? "Yes" : "No"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium">
-                    {formattedDate}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium">
-                    <DropdownMenu
-                      position="top-1 right-1"
-                      label={
-                        <EllipsisHorizontalIcon className="h-5 w-5 text-gray-600 hover:text-gray-800" />
-                      }
-                      content={
-                        <div>
-                          <Link
-                            to={`/products/${_id}/edit`}
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                          >
-                            Edit Product
-                          </Link>
-                          <button
-                            onClick={() => handleDeleteButton(product)}
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 w-full text-left"
-                          >
-                            Delete Product
-                          </button>
-                        </div>
-                      }
-                    />
-                  </td>
-                </tr>
-              );
-            }
-          )}
-        </tbody>
-      </table>
+      <div>
+        <ProductTable
+          products={productsState.products}
+          onDeleteProduct={handleDeleteProduct}
+        />
+        {isShowMoreVisible ? (
+          <div className="mt-4 text-center">
+            <button
+              onClick={handleShowMoreItems}
+              className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md shadow hover:bg-blue-700 transition-colors"
+            >
+              Show More
+            </button>
+          </div>
+        ) : (
+          <div className="mt-4 text-center">
+            <h2 className="text-gray-600 font-semibold text-sm">
+              End Of Results
+            </h2>
+          </div>
+        )}
+      </div>
     );
   };
 
-  const totalProductsCount = productsCountData?.data?.count ?? 0;
+  const totalProductsCount = productsData?.data?.totalProducts ?? 0;
 
   return (
     <PageTemplate title="All Products">
@@ -239,3 +184,76 @@ function ManageProducts() {
 }
 
 export default ManageProducts;
+
+function ProductTable({
+  products,
+  onDeleteProduct,
+}: {
+  products: Product[];
+  onDeleteProduct: (product: Product) => void;
+}) {
+  return (
+    <table className="min-w-full divide-y divide-gray-200 bg-white rounded-lg shadow-md">
+      <thead className="bg-gray-50">
+        <tr>
+          {["Product Name", "Price", "Availability", "Colors", "Actions"].map(
+            (header, index) => (
+              <th
+                key={index}
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+              >
+                {header}
+              </th>
+            )
+          )}
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-200">
+        {products.map((product) => {
+          const { _id, productName, price, availability, colors } = product;
+          return (
+            <tr key={_id} className="hover:bg-gray-50 transition-colors">
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
+                {productName}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                ${price.toFixed(2)}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                <StyledAvailability status={availability as Availability} />
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                {colors.map((color) => color.name).join(", ")}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                <DropdownMenu
+                  position="top-1 right-1"
+                  label={
+                    <EllipsisHorizontalIcon className="h-5 w-5 text-gray-600 hover:text-gray-800 transition-colors" />
+                  }
+                  content={
+                    <div>
+                      <Link
+                        to={`/products/${_id}/edit`}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                      >
+                        Edit Product
+                      </Link>
+                      <button
+                        onClick={() => onDeleteProduct(product)}
+                        className="block px-4 py-2 text-sm text-red-600 hover:bg-red-100 hover:text-red-800 w-full text-left"
+                      >
+                        Delete Product
+                      </button>
+                    </div>
+                  }
+                />
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  );
+}

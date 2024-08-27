@@ -1,32 +1,48 @@
 import { useSelector, useDispatch } from "react-redux";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import { closeModal } from "../features/modal";
-import React from "react";
-import { ConfirmationModalContent, ConfirmProductDeletionModal, LogoutModalContent, SuccessModalContent } from "./modal-contents";
+import React, { ReactNode } from "react";
+import {
+  ConfirmationModalContent,
+  ConfirmProductDeletionModal,
+  FieldsError,
+  LogoutModalContent,
+  SuccessModalContent,
+} from "./modal-contents";
 import { ModalType } from "../types/modal.types";
-
+interface IModalContent {
+  title: string;
+  bodyContent: ReactNode;
+  actionsButtons: ReactNode[];
+}
 function Modal() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { isOpen, type } = useSelector((state: any) => state.modal);
   const dispatch = useDispatch();
   const MODAL_CONTENTS = {
     [ModalType.LOGOUT]: LogoutModalContent(),
+    [ModalType.FIELDSERROR]: FieldsError(),
     [ModalType.CONFIRMATION]: ConfirmationModalContent(),
     [ModalType.DELETE_PRODUCT]: ConfirmProductDeletionModal(),
-    [ModalType.PRODUCT_ADDED_SUCCESS]: SuccessModalContent("This product has been added successfully."),
-    [ModalType.PRODUCT_DELETED_SUCCESS]: SuccessModalContent("This product has been deleted successfully."),
-    [ModalType.PRODUCT_UPDATED_SUCCESS]: SuccessModalContent("This product has been updated successfully."),
+    [ModalType.PRODUCT_ADDED_SUCCESS]: SuccessModalContent(
+      "This product has been added successfully."
+    ),
+    [ModalType.PRODUCT_DELETED_SUCCESS]: SuccessModalContent(
+      "This product has been deleted successfully."
+    ),
+    [ModalType.PRODUCT_UPDATED_SUCCESS]: SuccessModalContent(
+      "This product has been updated successfully."
+    ),
   };
   if (!isOpen) {
     return null;
   }
 
-
   const modalContent = MODAL_CONTENTS[type as ModalType];
   if (!modalContent) {
     return null;
   }
-  const { title, bodyContent, actionsButtons } = modalContent;
+  const { title, bodyContent, actionsButtons } = modalContent as IModalContent;
 
   return (
     <dialog
