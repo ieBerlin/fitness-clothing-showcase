@@ -1,30 +1,44 @@
-import { useRouteError } from 'react-router-dom';
-import { IErrorResponse } from '../types/auth.types';
-import NotFoundPage from './NotFoundPage';
-import ForbiddenPage from './ForbiddenPage';
+import { useRouteError } from "react-router-dom";
+import NotFoundPage from "./NotFoundPage";
+import ForbiddenPage from "./ForbiddenPage";
+import { ErrorResponse } from "../types/product.types";
 
 function GlobalError() {
-  const error = useRouteError();
-  const errorResponse = error as IErrorResponse;
+  const error = useRouteError() as ErrorResponse | unknown;
+  
+  const isErrorResponse = (error: unknown): error is ErrorResponse => {
+    return (error as ErrorResponse).statusCode !== undefined;
+  };
 
-  const hasStatus = errorResponse && typeof errorResponse.status === 'number';
-
-  if (hasStatus) {
-    switch (errorResponse.status) {
+  if (isErrorResponse(error)) {
+    switch (error.statusCode) {
       case 403:
         return <ForbiddenPage />;
       case 404:
         return <NotFoundPage />;
-      default:
+      default: {
+        const errorMessage = error.message || "An unexpected error occurred.";
         return (
           <div>
-            <h1>Error {errorResponse.status}</h1>
-            <p>An unexpected error occurred with status code {errorResponse.status}.</p>
+            <h1>Error {error.statusCode}</h1>
+            <p>{errorMessage}</p>
+            {error.errors.length > 0 && (
+              <ul>
+                {error.errors.map((err, index) => (
+                  <li key={index}>
+                    <strong>{err.field}</strong>: {err.message} (
+                    {err.code || "Unknown Code"})
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         );
+      }
     }
   }
 
+  // Fallback error rendering
   return (
     <div>
       <h1>Something went wrong!</h1>

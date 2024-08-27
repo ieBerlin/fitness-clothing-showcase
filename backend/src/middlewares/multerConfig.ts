@@ -1,9 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import multer, { MulterError } from "multer";
 import path from "path";
+import { ErrorResponse } from "../utils/responseInterfaces";
+import { ErrorCode, ErrorSeverity } from "../utils/ValidationError";
 
 interface CustomRequest extends Request {
   imageFolder?: string;
+  imageName?: string;
 }
 
 const storage = (imageFolder: string) => multer.diskStorage({
@@ -37,10 +40,18 @@ function storeImage(req: CustomRequest, res: Response, next: NextFunction) {
   const match = urlPath.match(regex);
 
   if (!match || !["product", "admin"].includes(match[1])) {
-    return res.status(400).json({
+    const errorResponse: ErrorResponse = {
       success: false,
-      error: "Invalid URL path or no matching type found.",
-    });
+      errors: [
+        {
+          field: "urlPath",
+          message: "Invalid URL path or no matching type found.",
+          code: ErrorCode.ValidationError,
+          severity: ErrorSeverity.Medium,
+        },
+      ],
+    };
+    return res.status(400).json(errorResponse);
   }
 
   const imageFolder = match[1];
@@ -50,17 +61,50 @@ function storeImage(req: CustomRequest, res: Response, next: NextFunction) {
 
   uploadMiddleware.single("image")(req, res, (err: any) => {
     if (err instanceof MulterError) {
-      return res.status(400).json({ success: false, error: "Multer error occurred." });
+      const errorResponse: ErrorResponse = {
+        success: false,
+        errors: [
+          {
+            field: "file",
+            message: "Multer error occurred during file upload.",
+            code: ErrorCode.ServerError,
+            severity: ErrorSeverity.Medium,
+          },
+        ],
+      };
+      return res.status(400).json(errorResponse);
     } else if (err) {
       console.error("Upload error:", err);
-      return res.status(500).json({ success: false, error: "Unknown error occurred." });
+      const errorResponse: ErrorResponse = {
+        success: false,
+        errors: [
+          {
+            field: "file",
+            message: "Unknown error occurred during file upload.",
+            code: ErrorCode.ServerError,
+            severity: ErrorSeverity.Critical,
+          },
+        ],
+      };
+      return res.status(500).json(errorResponse);
     }
 
     if (!req.file) {
-      return res.status(400).json({ success: false, error: "No file uploaded." });
+      const errorResponse: ErrorResponse = {
+        success: false,
+        errors: [
+          {
+            field: "file",
+            message: "No file uploaded.",
+            code: ErrorCode.ValidationError,
+            severity: ErrorSeverity.Medium,
+          },
+        ],
+      };
+      return res.status(400).json(errorResponse);
     }
 
-    (req as any).imageName = req.file.filename;
+    req.imageName = req.file.filename;
     next();
   });
 }

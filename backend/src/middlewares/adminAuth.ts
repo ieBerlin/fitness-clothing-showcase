@@ -1,21 +1,30 @@
 import { Request, Response, NextFunction } from "express";
 import Admin from "../models/Admin";
-
+import { ErrorResponse } from "../utils/responseInterfaces";
 const adminAuth = async (_: Request, res: Response, next: NextFunction) => {
   const adminId = res.locals.admin.id;
+
   try {
     const adminExist = await Admin.findById(adminId);
+
     if (!adminExist) {
-      return res
-        .status(403)
-        .json({ success: false, message: "Unauthorized Admin Access!" });
+      const errorResponse: ErrorResponse = {
+        success: false,
+        errors: [
+          { field: "authorization", message: "Unauthorized Admin Access!" },
+        ],
+      };
+      return res.status(403).json(errorResponse);
     }
+
     next();
   } catch (error) {
-    // console.error("Error checking admin access:", error);
-    return res
-      .status(500)
-      .json({ success: false, message: "An error occurred." });
+    console.error("Error checking admin access:", error);
+    const errorResponse: ErrorResponse = {
+      success: false,
+      errors: [{ field: "server", message: "An error occurred." }],
+    };
+    return res.status(500).json(errorResponse);
   }
 };
 

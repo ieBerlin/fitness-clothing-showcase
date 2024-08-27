@@ -2,23 +2,24 @@ import { FC, FormEvent, useState } from "react";
 import PageTemplate from "../components/PageTemplate";
 import {
   Availability,
+  ErrorResponse,
   Product,
-  ProductResponse,
   Season,
+  SuccessResponse,
 } from "../types/product.types";
 import { useMutation } from "@tanstack/react-query";
 import ProductForm from "../components/ProductForm";
-import { createProduct } from "../utils/http";
 import { useNavigate } from "react-router-dom";
-import { ValidationError } from "../types/validation-error.types";
 import { steps } from "../types/component.types";
+import { createProduct } from "../utils/authUtils";
+import ErrorDisplay from "../components/ErrorDisplay";
 
 const AddProductPage: FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<Partial<Product>>({});
-  const { mutate, isPending } = useMutation<
-    ProductResponse,
-    ValidationError[],
+  const { mutate, isPending, isError, error } = useMutation<
+    SuccessResponse,
+    ErrorResponse,
     Product
   >({
     mutationKey: ["product"],
@@ -26,8 +27,10 @@ const AddProductPage: FC = () => {
     onError: (errors) => {
       console.log(errors);
     },
-    onSuccess: (data) => {
-      return navigate(`/products/${data.product._id}/edit`, {
+    onSuccess: (response) => {
+      console.log(response);
+      const productId = (response.data.product as Product)._id;
+      return navigate(`/products/${productId}/edit`, {
         state: { step: steps[1] },
       });
     },
@@ -52,6 +55,13 @@ const AddProductPage: FC = () => {
     setFormData(updatedProductData);
     mutate(updatedProductData as Product);
   };
+  if (isError) {
+    return (
+      <div className="space-y-4">
+        <ErrorDisplay error={error} />
+      </div>
+    );
+  }
   return (
     <PageTemplate title="Add Product Details">
       <ProductForm

@@ -1,28 +1,67 @@
 import { Request, Response } from "express";
 import Section from "../../models/Section";
+import { SuccessResponse } from "../../utils/SuccessResponse";
+import { ErrorResponse } from "../../utils/responseInterfaces";
+import { ErrorCode, ErrorSeverity } from "../../utils/ValidationError";
 
 const getSection = async (req: Request, res: Response) => {
   try {
     const { sectionId } = req.params;
 
     if (!sectionId) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Section ID is required" });
+      const errorResponse: ErrorResponse = {
+        success: false,
+        errors: [
+          {
+            field: "sectionId",
+            message: "Section ID is required",
+            code: ErrorCode.ValidationError,
+            severity: ErrorSeverity.Medium,
+          },
+        ],
+      };
+      return res.status(400).json(errorResponse);
     }
 
-    const section = await Section.find({ sectionId });
+    const section = await Section.findById(sectionId);
 
-    if (section.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Section not found" });
+    if (!section) {
+      const notFoundResponse: ErrorResponse = {
+        success: false,
+        errors: [
+          {
+            field: "sectionId",
+            message: "Section not found",
+            code: ErrorCode.NotFound,
+            severity: ErrorSeverity.Medium,
+          },
+        ],
+      };
+      return res.status(404).json(notFoundResponse);
     }
 
-    res.status(200).json({ success: true, section });
+    const successResponse: SuccessResponse<{ section: typeof section }> = {
+      success: true,
+      data: { section },
+    };
+
+    return res.status(200).json(successResponse);
   } catch (error) {
     console.error("Error fetching section:", error);
-    res.status(500).json({ success: false, message: "Error fetching section" });
+
+    const errorResponse: ErrorResponse = {
+      success: false,
+      errors: [
+        {
+          field: "server",
+          message: "Error fetching section",
+          code: ErrorCode.ServerError,
+          severity: ErrorSeverity.Critical,
+        },
+      ],
+    };
+
+    return res.status(500).json(errorResponse);
   }
 };
 

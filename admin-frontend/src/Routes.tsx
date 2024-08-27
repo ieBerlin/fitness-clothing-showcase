@@ -19,8 +19,8 @@ import UpdateProfilePicturePage from "./pages/UpdateProfilePicturePage";
 import ViewProfilePage from "./pages/ViewProfilePage";
 import AdminProfile from "./pages/AdminProfile";
 import AdminDetails from "./pages/AdminDetails";
-import { authenticatedLoader } from "./utils/http";
 import RootLayout from "./components/RootLayout";
+import { authenticatedLoader } from "./utils/authUtils";
 
 const routes = createBrowserRouter([
   {

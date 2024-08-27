@@ -1,13 +1,14 @@
 import { Request, Response } from "express";
 import Product from "../../models/Product";
-import ValidationError from "../../utils/ValidationError";
 import {
   Availability,
   Color,
   genderSizes,
   Season,
 } from "../../config/product-attributes";
-
+import { SuccessResponse } from "../../utils/SuccessResponse";
+import { ErrorResponse } from "../../utils/responseInterfaces";
+import { ValidationError } from "./../../utils/ValidationError";
 const updateProduct = async (req: Request, res: Response) => {
   try {
     const {
@@ -157,14 +158,20 @@ const updateProduct = async (req: Request, res: Response) => {
     }
 
     if (errors.length > 0) {
-      return res.status(400).json({ success: false, errors });
+      const errorResponse: ErrorResponse = {
+        success: false,
+        errors,
+      };
+      return res.status(400).json(errorResponse);
     }
 
     const product = await Product.findById(productId);
     if (!product) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Product not found" });
+      const notFoundResponse: ErrorResponse = {
+        success: false,
+        errors: [{ field: "productId", message: "Product not found" }],
+      };
+      return res.status(404).json(notFoundResponse);
     }
 
     // Update product fields only if they are provided
@@ -176,16 +183,24 @@ const updateProduct = async (req: Request, res: Response) => {
     product.woolPercentage = woolPercentage ?? product.woolPercentage;
     product.price = price ?? product.price;
     product.releaseDate = releaseDate ?? product.releaseDate;
-    product.images = product.images;
     product.availability = availability ?? product.availability;
     product.colors = colors ?? product.colors;
 
     const updatedProduct = await product.save();
 
-    res.status(200).json({ success: true, product: updatedProduct });
+    const successResponse: SuccessResponse = {
+      success: true,
+      data: { product: updatedProduct },
+    };
+
+    res.status(200).json(successResponse);
   } catch (error) {
     console.error("Error updating product:", error);
-    res.status(500).json({ success: false, message: "Error updating product" });
+    const errorResponse: ErrorResponse = {
+      success: false,
+      errors: [{ field: "server", message: "Error updating product" }],
+    };
+    res.status(500).json(errorResponse);
   }
 };
 

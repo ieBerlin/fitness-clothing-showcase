@@ -1,6 +1,6 @@
 import { Document, Schema, model } from "mongoose";
 
-type Angle = "back" | "front" | "side" | "top" | "bottom";
+export type Angle = "back" | "front" | "side" | "top" | "bottom";
 
 export interface IImage extends Document {
   pathname: string;

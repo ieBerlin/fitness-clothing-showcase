@@ -2,72 +2,128 @@ import { Request, Response } from "express";
 import Section from "../../models/Section";
 import Product from "../../models/Product";
 import mongoose from "mongoose";
+import { SuccessResponse } from "../../utils/SuccessResponse";
+import { ErrorResponse } from "../../utils/responseInterfaces";
+import { ErrorCode, ErrorSeverity } from "../../utils/ValidationError";
 
 const updateSectionItems = async (req: Request, res: Response) => {
   const { sectionId } = req.params;
   const { items } = req.body;
 
-  // Validate the items array
   if (!Array.isArray(items) || items.length === 0) {
-    return res.status(400).json({
+    const errorResponse: ErrorResponse = {
       success: false,
-      message: "Invalid items array. Ensure it is a non-empty array.",
-    });
+      errors: [
+        {
+          field: "items",
+          message: "Invalid items array. Ensure it is a non-empty array.",
+          code: ErrorCode.ValidationError,
+          severity: ErrorSeverity.Medium,
+        },
+      ],
+    };
+    return res.status(400).json(errorResponse);
   }
 
   try {
-    const section = await Section.findOne({ sectionId });
+    const section = await Section.findById(sectionId);
     if (!section) {
-      return res.status(404).json({
+      const notFoundResponse: ErrorResponse = {
         success: false,
-        message: "Section not found.",
-      });
+        errors: [
+          {
+            field: "sectionId",
+            message: "Section not found.",
+            code: ErrorCode.NotFound,
+            severity: ErrorSeverity.Medium,
+          },
+        ],
+      };
+      return res.status(404).json(notFoundResponse);
     }
 
     for (const item of items) {
       // Ensure item._id is a valid ObjectId
       if (!item._id || !mongoose.Types.ObjectId.isValid(item._id)) {
-        return res.status(400).json({
+        const invalidIdResponse: ErrorResponse = {
           success: false,
-          message: `Invalid ObjectId for item: ${JSON.stringify(item)}`,
-        });
+          errors: [
+            {
+              field: "items",
+              message: `Invalid ObjectId for item: ${JSON.stringify(item)}`,
+              code: ErrorCode.ValidationError,
+              severity: ErrorSeverity.Medium,
+            },
+          ],
+        };
+        return res.status(400).json(invalidIdResponse);
       }
       const productExists = await Product.findById(
         item._id as mongoose.Types.ObjectId
       );
 
       if (!productExists) {
-        return res.status(404).json({
+        const productNotFoundResponse: ErrorResponse = {
           success: false,
-          message: `Product with ID ${item._id} not found.`,
-        });
+          errors: [
+            {
+              field: "items",
+              message: `Product with ID ${item._id} not found.`,
+              code: ErrorCode.NotFound,
+              severity: ErrorSeverity.Medium,
+            },
+          ],
+        };
+        return res.status(404).json(productNotFoundResponse);
       }
     }
 
-    const updatedSection = await Section.findOneAndUpdate(
-      { sectionId },
+    const updatedSection = await Section.findByIdAndUpdate(
+      sectionId,
       { items },
       { new: true, runValidators: true }
     );
 
     if (!updatedSection) {
-      return res.status(404).json({
+      const sectionNotFoundResponse: ErrorResponse = {
         success: false,
-        message: "Section not found.",
-      });
+        errors: [
+          {
+            field: "sectionId",
+            message: "Section not found.",
+            code: ErrorCode.NotFound,
+            severity: ErrorSeverity.Medium,
+          },
+        ],
+      };
+      return res.status(404).json(sectionNotFoundResponse);
     }
 
-    res.status(200).json({
+    const successResponse: SuccessResponse = {
       success: true,
-      message: "Section items updated successfully.",
-      data: updatedSection,
-    });
+      data: {
+        message: "Section items updated successfully.",
+        section: updatedSection,
+      },
+    };
+
+    res.status(200).json(successResponse);
   } catch (error) {
     console.error("Error updating section items:", error);
-    res.status(500).json({
+
+    const errorResponse: ErrorResponse = {
       success: false,
-      message: "Error updating section items.",
-    });
+      errors: [
+        {
+          field: "server",
+          message: "Error updating section items.",
+          code: ErrorCode.ServerError,
+          severity: ErrorSeverity.Critical,
+        },
+      ],
+    };
+
+    res.status(500).json(errorResponse);
   }
 };
 

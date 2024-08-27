@@ -4,19 +4,20 @@ import {
   Availability,
   Color,
   ColorOption,
+  ErrorResponse,
   Image,
   Product,
-  ProductResponse,
   Season,
+  SuccessResponse,
 } from "../types/product.types";
 import { useLocation, useParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { editProduct, fetchProduct } from "../utils/http";
 import ProductForm from "../components/ProductForm";
 import { Step, steps } from "../types/component.types";
 import { Size } from "../types/product.types";
-import { ValidationError } from "../types/validation-error.types";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { editProduct, fetchProduct } from "../utils/authUtils";
+import ErrorDisplay from "../components/ErrorDisplay";
 
 const EditProductPage: React.FC = () => {
   const location = useLocation();
@@ -24,39 +25,39 @@ const EditProductPage: React.FC = () => {
   const [activeStep, setActiveStep] = useState<Step>(step);
   const { productId } = useParams<{ productId: string }>();
   const [formData, setFormData] = useState<Partial<Product>>({});
-  const { isFetching, data: fetchedProductData } = useQuery<
-    ProductResponse,
-    ValidationError[]
-  >({
+  const {
+    isFetching,
+    data: productData,
+    isError,
+    error,
+  } = useQuery<SuccessResponse, ErrorResponse>({
     queryKey: ["product", productId],
     queryFn: () => fetchProduct({ productId: productId as string }),
   });
-
   const { mutate, isPending } = useMutation<
-    ProductResponse,
-    ValidationError[],
+    SuccessResponse,
+    ErrorResponse,
     Product
   >({
     mutationKey: ["product"],
     mutationFn: editProduct,
-    onError: (errors) => {
-      console.log(errors);
-    },
-    onSuccess: () => {
+
+    onSuccess: (data) => {
       const currentStepIndex = steps.findIndex(
         (step) => step.id === activeStep.id
       );
       if (currentStepIndex < steps.length - 1) {
         setActiveStep(steps[currentStepIndex + 1]);
       }
+      return data.data;
     },
   });
   const isLoading = isFetching || isPending;
   useEffect(() => {
-    if (fetchedProductData && fetchedProductData.success) {
-      setFormData(fetchedProductData.product);
+    if (productData && productData.success) {
+      setFormData(productData.data.product);
     }
-  }, [fetchedProductData]);
+  }, [productData]);
   const handleNextStep = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.target as HTMLFormElement);
@@ -73,8 +74,8 @@ const EditProductPage: React.FC = () => {
       season: (fd.getAll("product-season") as string[]).map(
         (season) => season.toUpperCase() as Season
       ),
-      colors: fetchedProductData?.product.colors as ColorOption[],
-      images: fetchedProductData?.product.images as Image[],
+      colors: productData?.data.product.colors as ColorOption[],
+      images: productData?.data.product.images as Image[],
     };
 
     if (activeStep.id === "basic-info") {
@@ -137,11 +138,19 @@ const EditProductPage: React.FC = () => {
       setActiveStep(steps[currentStepIndex - 1]);
     }
   };
+
   if (isFetching) {
     return (
       <div className="flex items-center justify-center w-full py-10 flex-col gap-2">
         <LoadingSpinner fill="blue-600" text="gray-400" dimension="w-16 h-16" />
         <h2 className="text-gray-500 font-semibold">Loading...</h2>
+      </div>
+    );
+  }
+  if (isError) {
+    return (
+      <div className="space-y-4">
+        <ErrorDisplay error={error} />
       </div>
     );
   }

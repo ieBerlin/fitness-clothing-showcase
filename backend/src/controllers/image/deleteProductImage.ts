@@ -1,29 +1,42 @@
-// src/controllers/deleteProductImage.ts
-
 import { Request, Response } from "express";
 import path from "path";
 import fs from "fs/promises";
 import Product from "../../models/Product";
 import { IImage } from "../../models/Image";
+import { ErrorCode, ErrorSeverity, ValidationError } from "../../utils/ValidationError";
+import { SuccessResponse } from "../../utils/SuccessResponse";
 
 const deleteProductImage = async (req: Request, res: Response) => {
   const { imageId } = req.params;
 
   try {
-    // Find the product with the specific image pathname
     const product = await Product.findOne({ "images.pathname": imageId });
     if (!product) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Product not found." });
+      return res.status(404).json({
+        success: false,
+        errors: [
+          {
+            field: "imageId",
+            message: "Product not found.",
+            code: ErrorCode.NotFound,
+            severity: ErrorSeverity.High,
+          },
+        ],
+      });
     }
-
-    // Find the specific image within the product
     const image = product.images.find((img: IImage) => img.pathname === imageId);
     if (!image) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Image not found." });
+      return res.status(404).json({
+        success: false,
+        errors: [
+          {
+            field: "imageId",
+            message: "Image not found.",
+            code: ErrorCode.NotFound,
+            severity: ErrorSeverity.High,
+          },
+        ],
+      });
     }
 
     const imagePath = path.join(
@@ -34,27 +47,47 @@ const deleteProductImage = async (req: Request, res: Response) => {
 
     try {
       await fs.unlink(imagePath);
-
-      // Remove the image from the images array
-      product.images = product.images.filter((img: IImage) => img.pathname !== imageId);
-
-      await product.save();
-
-      res.status(200).json({
-        success: true,
-        message: "Product image deleted successfully.",
-      });
     } catch (fileError) {
       console.error("Error deleting image file:", fileError);
-      res
-        .status(500)
-        .json({ success: false, message: "Failed to delete image file." });
+      return res.status(500).json({
+        success: false,
+        errors: [
+          {
+            field: "file",
+            message: "Failed to delete image file.",
+            code: ErrorCode.ServerError,
+            severity: ErrorSeverity.Critical,
+          },
+        ],
+      });
     }
+
+    // Remove the image from the product's images array
+    product.images = product.images.filter((img: IImage) => img.pathname !== imageId);
+
+    // Save the updated product document
+    await product.save();
+
+    // Respond with success
+    const successResponse: SuccessResponse<{ message: string }> = {
+      success: true,
+      data: { message: "Product image deleted successfully." },
+    };
+
+    return res.status(200).json(successResponse);
   } catch (dbError) {
     console.error("Error deleting product image:", dbError);
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to delete product image." });
+    return res.status(500).json({
+      success: false,
+      errors: [
+        {
+          field: "server",
+          message: "Failed to delete product image.",
+          code: ErrorCode.ServerError,
+          severity: ErrorSeverity.Critical,
+        },
+      ],
+    });
   }
 };
 

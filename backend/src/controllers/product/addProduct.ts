@@ -1,12 +1,14 @@
 import { Request, Response } from "express";
 import Product from "../../models/Product";
-import ValidationError from "../../utils/ValidationError";
 import {
   Availability,
   Color,
   genderSizes,
   Season,
 } from "../../config/product-attributes";
+import { SuccessResponse } from "../../utils/SuccessResponse";
+import { ErrorResponse } from "../../utils/responseInterfaces";
+import { ValidationError } from "../../utils/ValidationError";
 
 const addProduct = async (req: Request, res: Response) => {
   try {
@@ -47,15 +49,18 @@ const addProduct = async (req: Request, res: Response) => {
           "Product description is required and must be a non-empty string",
       });
     }
+
     if (typeof isUnisex !== "boolean") {
       errors.push({
         field: "isUnisex",
         message: "isUnisex must be a boolean value",
       });
     }
+
     const expectedSizes = isUnisex
       ? [...genderSizes.men, ...genderSizes.women]
       : genderSizes.men;
+
     if (!Array.isArray(colors)) {
       errors.push({ field: "colors", message: "Colors must be an array" });
     } else {
@@ -75,7 +80,7 @@ const addProduct = async (req: Request, res: Response) => {
         if (!Array.isArray(availableSizes)) {
           errors.push({
             field: `colors[${colorIndex}].availableSizes`,
-            message: `available sizes for color ${colorName} must be an array`,
+            message: `Available sizes for color ${colorName} must be an array`,
           });
           return;
         }
@@ -105,13 +110,14 @@ const addProduct = async (req: Request, res: Response) => {
           // Validate sizeAvailability enum
           if (!Object.values(Availability).includes(sizeAvailability)) {
             errors.push({
-              field: `colors[${colorIndex}].availableSizes[${sizeIndex}].`,
+              field: `colors[${colorIndex}].availableSizes[${sizeIndex}].sizeAvailability`,
               message: `Invalid sizeAvailability for size ${sizeName} in color ${colorName}: ${sizeAvailability}`,
             });
           }
         });
       });
     }
+
     if (!Array.isArray(season) || season.length === 0) {
       errors.push({
         field: "season",
@@ -130,9 +136,10 @@ const addProduct = async (req: Request, res: Response) => {
         message: "Price must be a positive number",
       });
     }
+
     if (typeof woolPercentage !== "number" || woolPercentage <= 0) {
       errors.push({
-        field: "Wool Percentage",
+        field: "woolPercentage",
         message: "Wool Percentage must be a positive number",
       });
     }
@@ -144,14 +151,20 @@ const addProduct = async (req: Request, res: Response) => {
     if (image && typeof image !== "string") {
       errors.push({ field: "image", message: "Image URL must be a string" });
     }
+
     if (!Object.values(Availability).includes(availability)) {
       errors.push({
         field: "availability",
         message: "Invalid availability value",
       });
     }
+
     if (errors.length > 0) {
-      return res.status(400).json({ success: false, errors });
+      const errorResponse: ErrorResponse = {
+        success: false,
+        errors,
+      };
+      return res.status(400).json(errorResponse);
     }
 
     const newProduct = await Product.create({
@@ -167,10 +180,19 @@ const addProduct = async (req: Request, res: Response) => {
       availability,
     });
 
-    res.status(201).json({ success: true, product: newProduct });
+    const successResponse: SuccessResponse = {
+      success: true,
+      data: { product: newProduct },
+    };
+
+    res.status(201).json(successResponse);
   } catch (error) {
     console.error("Error adding product:", error);
-    res.status(500).json({ success: false, message: "Error adding product" });
+    const errorResponse: ErrorResponse = {
+      success: false,
+      errors: [{ field: "server", message: "Error adding product" }],
+    };
+    res.status(500).json(errorResponse);
   }
 };
 

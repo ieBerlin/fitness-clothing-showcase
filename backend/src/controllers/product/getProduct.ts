@@ -1,23 +1,29 @@
 import { Request, Response } from "express";
 import Product from "../../models/Product";
 import { Availability } from "../../config/product-attributes";
+import { SuccessResponse } from "../../utils/SuccessResponse";
+import { ErrorResponse } from "../../utils/responseInterfaces";
 
 const getProduct = async (req: Request, res: Response) => {
   try {
     const { productId } = req.params;
 
     if (!productId) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Product ID is required" });
+      const errorResponse: ErrorResponse = {
+        success: false,
+        errors: [{ field: "productId", message: "Product ID is required" }],
+      };
+      return res.status(400).json(errorResponse);
     }
 
     const product = await Product.findById(productId);
 
     if (!product) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Product not found" });
+      const errorResponse: ErrorResponse = {
+        success: false,
+        errors: [{ field: "productId", message: "Product not found" }],
+      };
+      return res.status(404).json(errorResponse);
     }
 
     // Check product availability and update size availability accordingly
@@ -52,10 +58,21 @@ const getProduct = async (req: Request, res: Response) => {
       });
     }
 
-    res.status(200).json({ success: true, product });
+    const successResponse: SuccessResponse = {
+      success: true,
+      data: { product },
+    };
+
+    res.status(200).json(successResponse);
   } catch (error) {
     console.error("Error fetching product:", error);
-    res.status(500).json({ success: false, message: "Error fetching product" });
+
+    const errorResponse: ErrorResponse = {
+      success: false,
+      errors: [{ field: "server", message: "Error fetching product" }],
+    };
+
+    res.status(500).json(errorResponse);
   }
 };
 

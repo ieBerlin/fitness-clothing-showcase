@@ -75,10 +75,42 @@ export enum Availability {
 
 export interface ProductsResponse {
   success: boolean;
-  products: Product[];
+  products?: Product[];
+  count?: number;
 }
 export interface ProductResponse {
   success: boolean;
   product: Product;
 }
 export const allSizes = ["XS", "S", "M", "L", "XL", "2XL"];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface SuccessResponse<T = any> {
+  success: true;
+  data: T;
+}
+export interface ErrorResponse {
+  success: boolean;
+  errors: ValidationError[];
+  statusCode?: number;
+  message?: string;
+}
+export enum ErrorSeverity {
+  Low = "Low",
+  Medium = "Medium",
+  High = "High",
+  Critical = "Critical",
+}
+export enum ErrorCode {
+  InvalidToken = "INVALID_TOKEN",
+  NotFound = "NOT_FOUND",
+  ValidationError = "VALIDATION_ERROR",
+  ServerError = "SERVER_ERROR",
+  NetworkError = "NETWORK_ERROR",
+  UnknownError = "UNKNOWN_ERROR",
+}
+export type ValidationError = {
+  field: string;
+  message: string;
+  code?: ErrorCode;
+  severity?: ErrorSeverity;
+};

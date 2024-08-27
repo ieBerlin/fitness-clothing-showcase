@@ -5,16 +5,28 @@ import getProduct from "../controllers/product/getProduct";
 import adminAuth from "../middlewares/adminAuth";
 import deleteProduct from "./../controllers/product/deleteProduct";
 import updateProduct from "./../controllers/product/updateProduct";
+import getTotalProductsCount from "./../controllers/product/getTotalProductsCount";
 import updateProductPrice from "./../controllers/product/updateProductPrice";
 import deserializeAdmin from "../middlewares/deserializeAdmin";
 
 const router = Router();
 
 router.get("/", getAllProducts);
+router.get(
+  "/count-products",
+  deserializeAdmin,
+  adminAuth,
+  getTotalProductsCount
+);
 router.get("/:productId", getProduct);
 router.post("/", deserializeAdmin, adminAuth, addProduct);
 router.put("/:productId", deserializeAdmin, adminAuth, updateProduct);
-router.put("/update-price/:productId", deserializeAdmin, adminAuth, updateProductPrice);
+router.put(
+  "/update-price/:productId",
+  deserializeAdmin,
+  adminAuth,
+  updateProductPrice
+);
 router.delete("/:productId", deserializeAdmin, adminAuth, deleteProduct);
 
 export default router;

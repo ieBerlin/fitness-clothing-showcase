@@ -2,8 +2,10 @@ import { Request, Response } from "express";
 import { emailValidator, passwordValidator } from "../../utils/validators";
 import bcrypt from "bcrypt";
 import { signJwt } from "../../utils/jwt.utils";
-import ValidationError from "../../utils/ValidationError";
 import Admin from "../../models/Admin";
+import { SuccessResponse } from "../../utils/SuccessResponse";
+import { ErrorResponse } from "../../utils/responseInterfaces";
+import { ValidationError } from "../../utils/ValidationError";
 
 export default async function login(req: Request, res: Response) {
   const { email, password } = req.body;
@@ -12,6 +14,7 @@ export default async function login(req: Request, res: Response) {
   if (!email || typeof email !== "string" || !emailValidator(email)) {
     errors.push({ field: "email", message: "Valid email is required!" });
   }
+
   if (
     !password ||
     typeof password !== "string" ||
@@ -22,30 +25,49 @@ export default async function login(req: Request, res: Response) {
       message: "Password must be at least 6 characters long!",
     });
   }
-  if (Object.keys(errors).length > 0) {
-    return res.status(400).json({ success: false, errors });
+
+  if (errors.length > 0) {
+    const errorResponse: ErrorResponse = {
+      success: false,
+      errors,
+    };
+    return res.status(400).json(errorResponse);
   }
 
   try {
     const admin = await Admin.findOne({ adminEmail: email });
+
     if (!admin) {
-      return res
-        .status(403)
-        .json({ success: false, message: "Unauthorized Request!" });
+      const errorResponse: ErrorResponse = {
+        success: false,
+        errors: [{ field: "authentication", message: "Unauthorized Request!" }],
+      };
+      return res.status(403).json(errorResponse);
     }
 
     const isPasswordValid = await bcrypt.compare(password, admin.adminPassword);
+
     if (!isPasswordValid) {
-      return res
-        .status(403)
-        .json({ success: false, message: "Unauthorized Request!" });
+      const errorResponse: ErrorResponse = {
+        success: false,
+        errors: [{ field: "authentication", message: "Unauthorized Request!" }],
+      };
+      return res.status(403).json(errorResponse);
     }
+
     const token = signJwt(email);
-    return res.status(200).json({ success: true, token });
+    const successResponse: SuccessResponse = {
+      success: true,
+      data: { token },
+    };
+
+    return res.status(200).json(successResponse);
   } catch (error) {
     console.error("Error logging in:", error);
-    return res
-      .status(500)
-      .json({ success: false, message: "An error occurred." });
+    const errorResponse: ErrorResponse = {
+      success: false,
+      errors: [{ field: "server", message: "An error occurred." }],
+    };
+    return res.status(500).json(errorResponse);
   }
 }

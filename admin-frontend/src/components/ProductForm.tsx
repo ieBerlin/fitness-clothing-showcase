@@ -153,7 +153,6 @@ const ProductForm: FC<ProductFormProps> = ({
         const imageMap = new Map<Angle, Image>(
           (productData.images || []).map((image) => [image.angle, image])
         );
-
         return (
           <Form onSubmit={onStepNext}>
             {angles.map((angle) => {
@@ -167,6 +166,15 @@ const ProductForm: FC<ProductFormProps> = ({
                 />
               );
             })}
+            <div className="flex w-full justify-between mt-4">
+              <button
+                onClick={onStepPrevious}
+                type="button"
+                className="bg-gray-900 px-3 py-2 rounded-md text-white hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous Step
+              </button>
+            </div>
           </Form>
         );
       }
