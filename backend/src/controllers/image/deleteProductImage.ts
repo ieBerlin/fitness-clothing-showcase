@@ -4,7 +4,7 @@ import fs from "fs/promises";
 import Product from "../../models/Product";
 import { IImage } from "../../models/Image";
 import { ErrorCode, ErrorSeverity, ValidationError } from "../../utils/ValidationError";
-import { SuccessResponse } from "../../utils/SuccessResponse";
+import { SuccessResponse } from './../../utils/responseInterfaces';
 
 const deleteProductImage = async (req: Request, res: Response) => {
   const { imageId } = req.params;
@@ -71,7 +71,6 @@ const deleteProductImage = async (req: Request, res: Response) => {
     // Respond with success
     const successResponse: SuccessResponse<{ message: string }> = {
       success: true,
-      data: { message: "Product image deleted successfully." },
     };
 
     return res.status(200).json(successResponse);

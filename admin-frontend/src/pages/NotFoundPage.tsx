@@ -1,15 +1,14 @@
 import { Link } from "react-router-dom";
 import BrokenLink from "/broken-link-svgrepo-com.svg";
-
-import { ErrorDetails } from "../types/auth.types";
+import { ErrorDetails } from "../types/validation-error.types";
 
 export default function NotFoundPage() {
-  const errorDetails = new ErrorDetails(
-    404,
-    "Not Found",
-    "Sorry, the page you're looking for does not exist.",
-    "Back to Home Page"
-  );
+  const errorDetails: ErrorDetails = {
+    status: 404,
+    title: "Not Found",
+    message: "Sorry, the page you're looking for does not exist.",
+    buttonLabel: "Back to Home Page",
+  };
 
   return (
     <div className="min-h-screen w-full flex bg-gray-100 items-center justify-center flex-col md:flex-row text-center gap-6 p-4">

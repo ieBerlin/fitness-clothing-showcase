@@ -1,16 +1,13 @@
 import { FC, FormEvent } from "react";
 import { Form } from "react-router-dom";
 import ProductColors from "../components/ProductColors";
-import {
-  Angle,
-  Availability,
-  Image,
-  Product,
-  Season,
-  ValidationError,
-} from "../types/product.types";
 import BasicInformationProductForm from "./BasicInformationProductForm";
 import ImagePicker from "./ImagePicker";
+import { ValidationError } from "../types/validation-error.types";
+import Product from "../models/Product";
+import Availability from "../enums/Availability";
+import Season from "../enums/Season";
+import Image, { Angle } from "../models/Image";
 
 interface ProductFormProps {
   validationErrors?: ValidationError[];
@@ -155,7 +152,10 @@ const ProductForm: FC<ProductFormProps> = ({
       case "image-upload": {
         const angles: Angle[] = ["back", "front", "side", "top", "bottom"];
         const imageMap = new Map<Angle, Image>(
-          (productData.images || []).map((image) => [image.angle, image])
+          (productData.images || []).map((image) => [
+            image.angle as Angle,
+            image,
+          ])
         );
         return (
           <Form onSubmit={onStepNext}>

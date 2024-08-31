@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
-import Section from "../../models/Section";
-import { SuccessResponse } from "../../utils/SuccessResponse";
-import { ErrorResponse } from "../../utils/responseInterfaces";
+import Section, { ISection } from "../../models/Section";
+import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
 import { ErrorCode, ErrorSeverity } from "../../utils/ValidationError";
+import mongoose from "mongoose";
 
 const getSection = async (req: Request, res: Response) => {
   try {
     const { sectionId } = req.params;
 
-    if (!sectionId) {
+    if (sectionId || !mongoose.Types.ObjectId.isValid(sectionId)) {
       const errorResponse: ErrorResponse = {
         success: false,
         errors: [
@@ -40,9 +40,9 @@ const getSection = async (req: Request, res: Response) => {
       return res.status(404).json(notFoundResponse);
     }
 
-    const successResponse: SuccessResponse<{ section: typeof section }> = {
+    const successResponse: SuccessResponse<ISection> = {
       success: true,
-      data: { section },
+      data: section,
     };
 
     return res.status(200).json(successResponse);

@@ -1,72 +1,107 @@
-export const currentMonthSections = [
+// import Section from "../models/Section";
+import { sampleProducts } from "./products";
+
+import Section from "../models/Section";
+
+export const staticSections: Partial<Section>[] = [
   {
-    sectionId: "section1",
-    name: "popular-products",
-    description: "Top-selling products this month.",
-    items: 250,
-    createdAt: "2024-08-01T00:00:00Z",
-    updatedAt: "2024-08-28T23:59:59Z",
+    name: "Popular Products",
+    description: "The most popular products among our customers.",
   },
   {
-    sectionId: "section2",
-    name: "new-arrivals",
-    description: "Fresh new products added this month.",
-    items: 300,
-    createdAt: "2024-08-01T00:00:00Z",
-    updatedAt: "2024-08-28T23:59:59Z",
+    name: "New Arrivals",
+    description: "The latest additions to our product range.",
   },
   {
-    sectionId: "section3",
-    name: "trending-now",
-    description: "Products gaining popularity this month.",
-    items: 180,
-    createdAt: "2024-08-01T00:00:00Z",
-    updatedAt: "2024-08-28T23:59:59Z",
+    name: "Trending Now",
+    description: "Products that are currently trending.",
   },
   {
-    sectionId: "section4",
-    name: "on-sale",
-    description: "Discounted products available this month.",
-    items: 170,
-    createdAt: "2024-08-01T00:00:00Z",
-    updatedAt: "2024-08-28T23:59:59Z",
+    name: "On Sale",
+    description: "Products currently available at a discounted price.",
   },
 ];
 
-export const previousMonthSections = [
+const addStaticSectionDetails = (sections: Section[]): Section[] => {
+  return sections.map((section) => {
+    const staticSection = staticSections.find((s) => s._id === section.name);
+    return {
+      ...section,
+      name: staticSection?.name || section.name,
+      description: staticSection?.description || section.description,
+    };
+  });
+};
+
+export const currentMonthSections: Section[] = addStaticSectionDetails([
   {
-    sectionId: "section1",
+    _id: "section1",
+    name: "popular-products",
+    description: "Top-selling products this month.",
+    items: sampleProducts.map((item) => item._id),
+    createdAt: new Date("2024-08-01"),
+    updatedAt: new Date("2024-08-28"),
+  },
+  {
+    _id: "section2",
+    name: "new-arrivals",
+    description: "Fresh new products added this month.",
+    items: sampleProducts.map((item) => item._id),
+    createdAt: new Date("2024-08-01"),
+    updatedAt: new Date("2024-08-28"),
+  },
+  {
+    _id: "section3",
+    name: "trending-now",
+    description: "Products gaining popularity this month.",
+    items: sampleProducts.map((item) => item._id),
+    createdAt: new Date("2024-08-01"),
+    updatedAt: new Date("2024-08-28"),
+  },
+  {
+    _id: "section4",
+    name: "on-sale",
+    description: "Discounted products available this month.",
+    items: sampleProducts.map((item) => item._id),
+    createdAt: new Date("2024-08-01"),
+    updatedAt: new Date("2024-08-28"),
+  },
+]);
+
+export const previousMonthSections: Section[] = addStaticSectionDetails([
+  {
+    _id: "section1",
     name: "popular-products",
     description: "Top-selling products last month.",
-    items: 200,
-    createdAt: "2024-07-01T00:00:00Z",
-    updatedAt: "2024-07-31T23:59:59Z",
+    items: sampleProducts.map((item) => item._id),
+    createdAt: new Date("2024-07-01"),
+    updatedAt: new Date("2024-07-31"),
   },
   {
-    sectionId: "section2",
+    _id: "section2",
     name: "new-arrivals",
     description: "Fresh new products added last month.",
-    items: 280,
-    createdAt: "2024-07-01T00:00:00Z",
-    updatedAt: "2024-07-31T23:59:59Z",
+    items: sampleProducts.map((item) => item._id),
+    createdAt: new Date("2024-07-01"),
+    updatedAt: new Date("2024-07-31"),
   },
   {
-    sectionId: "section3",
+    _id: "section3",
     name: "trending-now",
     description: "Products gaining popularity last month.",
-    items: 150,
-    createdAt: "2024-07-01T00:00:00Z",
-    updatedAt: "2024-07-31T23:59:59Z",
+    items: sampleProducts.map((item) => item._id),
+    createdAt: new Date("2024-07-01"),
+    updatedAt: new Date("2024-07-31"),
   },
   {
-    sectionId: "section4",
+    _id: "section4",
     name: "on-sale",
     description: "Discounted products available last month.",
-    items: 180,
-    createdAt: "2024-07-01T00:00:00Z",
-    updatedAt: "2024-07-31T23:59:59Z",
+    items: sampleProducts.map((item) => item._id),
+    createdAt: new Date("2024-07-01"),
+    updatedAt: new Date("2024-07-31"),
   },
-];
+]);
 
 export const systemActivities = [
   {

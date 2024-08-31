@@ -2,13 +2,13 @@ import { Document, Schema, model } from "mongoose";
 import { Color, Season, Availability } from "../config/product-attributes";
 import { IImage } from "./Image";
 
-interface Size {
+export interface Size {
   name: string;
   quantity: number;
   sizeAvailability: Availability;
 }
 
-interface ColorOption {
+export interface ColorOption {
   name: Color;
   availableSizes: Size[];
 }

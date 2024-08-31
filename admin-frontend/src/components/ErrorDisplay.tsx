@@ -1,6 +1,6 @@
 import { isArray } from "lodash";
 import { FC } from "react";
-import { ErrorResponse } from "../types/product.types";
+import { ErrorResponse } from "../types/response";
 
 const ErrorDisplay: FC<{
   error: ErrorResponse;

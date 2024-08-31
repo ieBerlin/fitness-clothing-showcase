@@ -70,7 +70,6 @@ const updateAdminImage = async (req: MulterRequest, res: Response) => {
 
     const successResponse: SuccessResponse<{ message: string }> = {
       success: true,
-      data: { message: "Admin image updated successfully" },
     };
 
     res.status(200).json(successResponse);

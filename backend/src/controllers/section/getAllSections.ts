@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import Section from "../../models/Section";
-import { SuccessResponse } from "../../utils/SuccessResponse";
-import { ErrorResponse } from "../../utils/responseInterfaces";
+import Section, { ISection } from "../../models/Section";
+import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
 import { ErrorCode, ErrorSeverity } from "../../utils/ValidationError";
+import Product, { IProduct } from "../../models/Product";
 
 const getAllSections = async (req: Request, res: Response) => {
   try {
@@ -22,10 +22,34 @@ const getAllSections = async (req: Request, res: Response) => {
       };
       return res.status(404).json(notFoundResponse);
     }
+    let sectionsData: {
+      section: ISection;
+      products: IProduct[];
+    }[] = [];
 
-    const successResponse: SuccessResponse<{ sections: any[] }> = {
+    await Promise.all(
+      sections.map(async (section) => {
+        const products: IProduct[] = await Product.find({
+          _id: { $in: section.items },
+        });
+
+        // Convert the Mongoose document to a plain object with type ISection
+        const sectionObject = section.toObject() as ISection;
+        sectionsData.push({
+          section: sectionObject,
+          products,
+        });
+      })
+    );
+
+    const successResponse: SuccessResponse<
+      {
+        section: ISection;
+        products: IProduct[];
+      }[]
+    > = {
       success: true,
-      data: { sections },
+      data: sectionsData,
     };
 
     return res.status(200).json(successResponse);

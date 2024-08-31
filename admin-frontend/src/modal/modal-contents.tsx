@@ -2,16 +2,25 @@ import { useSelector, useDispatch } from "react-redux";
 import { ActionButton, CancelButton } from "./ActionsButtons";
 import { closeModal, openConfirmationModal } from "../features/modal";
 import { RootState } from "../store/store";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  addItemsToSection,
+  deleteProduct,
+  fetchProducts,
+} from "../utils/authUtils";
+import { queryClient } from "../utils/http";
+import { debounce, isArray } from "lodash";
+import { ReactNode, useEffect, useRef, useState } from "react";
+import ErrorDisplay from "../components/ErrorDisplay";
+import LoadingSpinner from "../components/LoadingSpinner";
+import SearchInput from "../components/SearchInput";
+import Product from "../models/Product";
 import {
   ErrorResponse,
-  Product,
-  SuccessResponse,
-  ValidationError,
-} from "../types/product.types";
-import { useMutation } from "@tanstack/react-query";
-import { deleteProduct } from "../utils/authUtils";
-import { queryClient } from "../utils/http";
-import { isArray } from "lodash";
+  ProductsResponse,
+  SectionResponse,
+} from "../types/response";
+import { ValidationError } from "../types/validation-error.types";
 interface ModalContentProps {
   title?: string;
   bodyContent: React.ReactNode;
@@ -93,11 +102,7 @@ export function ConfirmProductDeletionModal(): ModalContentProps {
   const { data } = useSelector((state: RootState) => state.modal);
   const product = data as Product;
 
-  const { isPending, mutate } = useMutation<
-    SuccessResponse,
-    ErrorResponse,
-    string
-  >({
+  const { isPending, mutate } = useMutation<null, ErrorResponse, string>({
     mutationKey: [product?._id],
     mutationFn: deleteProduct,
     onSuccess: () => {
@@ -186,6 +191,156 @@ export function FieldsError(): ModalContentProps {
       <ActionButton
         key="success-ok"
         label="OK"
+        onConfirm={() => dispatch(closeModal())}
+      />,
+    ],
+  };
+}
+
+export function AddProductToSectionModal(): ModalContentProps {
+  const searchRef = useRef<HTMLInputElement>(null);
+  const dispatch = useDispatch();
+  const { type, data: modalData } = useSelector(
+    (state: RootState) => state.modal
+  );
+  const data = modalData as { sectionId: string; items: Product[] };
+  const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
+  const {
+    mutate,
+    error: mutationError,
+    isError: hasMutationError,
+    isPending: isMutating,
+  } = useMutation<
+    SectionResponse,
+    ErrorResponse,
+    { sectionId: string; items: Product[] }
+  >({
+    mutationKey: ["sections-products"],
+    mutationFn: addItemsToSection,
+    onSuccess: () => {
+      dispatch(closeModal());
+      queryClient.invalidateQueries({
+        queryKey: ["sections-products", "sections"],
+      }); // Ensure the data is updated
+    },
+    onError: (error) => {
+      console.error("Failed to add products to section:", error);
+    },
+  });
+
+  const {
+    isFetching,
+    isError: hasQueryErrors,
+    error: queryError,
+    data: fetchedProducts,
+  } = useQuery<ProductsResponse, ErrorResponse>({
+    queryKey: ["products-sections"],
+    queryFn: () => fetchProducts({ page: 1, search: searchRef.current?.value }),
+    enabled: type === "add-product-to-section",
+  });
+  useEffect(() => {
+    if (data && data.items && !isFetching) {
+      setSelectedProducts(data.items);
+    }
+  }, [data, isFetching]);
+  // Consolidate errors into a single array
+  const errors: ErrorResponse[] = [];
+  if (hasQueryErrors && queryError) {
+    errors.push(queryError);
+  }
+  if (hasMutationError && mutationError) {
+    errors.push(mutationError);
+  }
+
+  // Handle product selection toggle
+  const handleItemAddOrRemove = (item: Product) => {
+    setSelectedProducts((prevProducts) =>
+      prevProducts.find((product) => product._id === item._id)
+        ? prevProducts.filter((product) => product._id !== item._id)
+        : [...prevProducts, item]
+    );
+  };
+
+  // Debounced search input change handler
+  const handleInputChange = debounce(() => {
+    queryClient.invalidateQueries({
+      queryKey: ["products-sections"],
+    });
+  }, 300);
+
+  let content: ReactNode;
+  if (!data || !data.sectionId) {
+    content = EmptyStateModal().bodyContent;
+  } else if (isFetching) {
+    content = (
+      <div className="flex items-center justify-center w-full py-10 flex-col gap-4">
+        <LoadingSpinner fill="blue-600" text="gray-400" dimension="16" />
+        <h2 className="text-gray-500 font-semibold">Loading products...</h2>
+      </div>
+    );
+  } else if (errors.length > 0) {
+    content = (
+      <div className="space-y-4">
+        {errors.map((error) => (
+          <ErrorDisplay key={error.statusCode} error={error} />
+        ))}
+      </div>
+    );
+  } else if (fetchedProducts?.products && fetchedProducts.products.length > 0) {
+    content = (
+      <div>
+        <h3 className="text-lg font-semibold">Available Products:</h3>
+        <ul className="space-y-2">
+          {fetchedProducts.products.map((product) => (
+            <li
+              key={product._id}
+              className={`p-3 border border-gray-300 rounded cursor-pointer ${
+                selectedProducts.find((p) => p._id === product._id)
+                  ? "bg-blue-100 border-blue-500"
+                  : "hover:bg-blue-50"
+              } transition-all`}
+              onClick={() => handleItemAddOrRemove(product)}
+            >
+              {product.productName}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  } else {
+    content = (
+      <div className="text-gray-700">
+        {searchRef?.current?.value
+          ? `No products found for "${searchRef.current.value}".`
+          : "No products available."}
+      </div>
+    );
+  }
+  return {
+    title: "Add Product to Section",
+    bodyContent: (
+      <div className="p-4">
+        <div className="mb-4">
+          <SearchInput onChange={handleInputChange} ref={searchRef} />
+        </div>
+        {content}
+      </div>
+    ),
+    actionsButtons: [
+      <ActionButton
+        key="confirm"
+        label={isMutating ? "Adding..." : "Add Product"}
+        onConfirm={() => {
+          mutate({
+            sectionId: data.sectionId,
+            items: selectedProducts,
+          });
+        }}
+        // disabled={selectedProducts.length === 0 || isMutating}
+      />,
+      <ActionButton
+        key="cancel"
+        label="Cancel"
         onConfirm={() => dispatch(closeModal())}
       />,
     ],

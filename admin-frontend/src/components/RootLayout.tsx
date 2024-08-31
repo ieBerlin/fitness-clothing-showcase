@@ -1,11 +1,11 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
+import { verifyToken } from "../services/admin.service";
 
 function RootLayout() {
   return (
     <div className="flex flex-row min-h-screen bg-gray-50 text-gray-200">
-
       {/* Sidebar */}
       <Sidebar />
 
@@ -22,3 +22,7 @@ function RootLayout() {
 }
 
 export default RootLayout;
+export async function loader() {
+  await verifyToken();
+  return null;
+}

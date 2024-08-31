@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import Product from "../../models/Product";
-import { ErrorResponse } from "../../utils/responseInterfaces";
-import { SuccessResponse } from "../../utils/SuccessResponse";
+import { ErrorResponse,SuccessResponse } from "../../utils/responseInterfaces";
 
 const getAllProducts = async (req: Request, res: Response) => {
   try {

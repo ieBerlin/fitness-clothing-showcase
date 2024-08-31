@@ -1,14 +1,13 @@
 import { Request, Response } from "express";
 import Product from "../../models/Product";
-import { SuccessResponse } from "../../utils/SuccessResponse";
-import { ErrorResponse } from "../../utils/responseInterfaces";
+import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
 
 const getTotalProductsCount = async (req: Request, res: Response) => {
   try {
     const totalProductsCount = await Product.countDocuments();
-    const successResponse: SuccessResponse = {
+    const successResponse: SuccessResponse<number> = {
       success: true,
-      data: { count: totalProductsCount },
+      data: totalProductsCount,
     };
 
     res.status(200).json(successResponse);

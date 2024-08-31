@@ -3,8 +3,7 @@ import path from "path";
 import fs from "fs/promises";
 import Admin from "../../models/Admin";
 import { ErrorCode, ErrorSeverity } from "../../utils/ValidationError";
-import { SuccessResponse } from "../../utils/SuccessResponse";
-
+import { SuccessResponse } from "../../utils/responseInterfaces";
 const deleteAdminImage = async (req: Request, res: Response) => {
   const { adminId } = req.params;
 
@@ -50,10 +49,9 @@ const deleteAdminImage = async (req: Request, res: Response) => {
 
     admin.adminImage = "";
     await admin.save();
-    
+
     const successResponse: SuccessResponse<{ message: string }> = {
       success: true,
-      data: { message: "Admin image deleted successfully." },
     };
 
     return res.status(200).json(successResponse);

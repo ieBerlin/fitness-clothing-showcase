@@ -3,8 +3,7 @@ import { emailValidator, passwordValidator } from "../../utils/validators";
 import bcrypt from "bcrypt";
 import { signJwt } from "../../utils/jwt.utils";
 import Admin from "../../models/Admin";
-import { SuccessResponse } from "../../utils/SuccessResponse";
-import { ErrorResponse } from "../../utils/responseInterfaces";
+import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
 import { ValidationError } from "../../utils/ValidationError";
 
 export default async function login(req: Request, res: Response) {
@@ -58,7 +57,7 @@ export default async function login(req: Request, res: Response) {
     const token = signJwt(email);
     const successResponse: SuccessResponse = {
       success: true,
-      data: { token },
+      data: token,
     };
     return res.status(200).json(successResponse);
   } catch (error) {

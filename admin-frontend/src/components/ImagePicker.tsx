@@ -1,12 +1,15 @@
 import { FC, useRef, useState } from "react";
-import { ImagePickerProps } from "../types/component.types";
 import { useMutation } from "@tanstack/react-query";
 import { SERVER_URL, queryClient } from "../utils/http";
-import { storeImage } from "../utils/authUtils";
 import { ErrorResponse } from "react-router-dom";
-import { SuccessResponse } from "../types/product.types";
 import LoadingSpinner from "./LoadingSpinner";
-
+import Image from "../models/Image";
+import { storeImage } from "../utils/authUtils";
+export interface ImagePickerProps {
+  productId: string;
+  angle: string;
+  image?: Image;
+}
 const ImagePicker: FC<ImagePickerProps> = ({ productId, angle, image }) => {
   const imageRef = useRef<HTMLInputElement>(null);
   const [avatar, setAvatar] = useState<string | ArrayBuffer | null>(
@@ -18,7 +21,7 @@ const ImagePicker: FC<ImagePickerProps> = ({ productId, angle, image }) => {
   const [isUploading, setIsUploading] = useState<boolean>(false);
 
   const { mutate, isPending } = useMutation<
-    SuccessResponse,
+    null,
     ErrorResponse,
     FormData
   >({

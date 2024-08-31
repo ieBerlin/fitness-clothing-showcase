@@ -1,10 +1,9 @@
 import { Request, Response } from "express";
-import { SuccessResponse } from "../../utils/SuccessResponse";
+import { SuccessResponse } from './../../utils/responseInterfaces';
 
 const allowAccess = (_: Request, res: Response) => {
   const successResponse: SuccessResponse = {
     success: true,
-    data: { valid: true },
   };
 
   return res.status(200).json(successResponse);

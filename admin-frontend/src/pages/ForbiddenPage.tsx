@@ -1,14 +1,13 @@
 import { Link } from "react-router-dom";
-import { ErrorDetails } from "../types/auth.types";
+import { ErrorDetails } from "../types/validation-error.types";
 
 export default function ForbiddenPage() {
-  const errorDetails = new ErrorDetails(
-    403,
-    "Forbidden",
-    "Access to this resource on the server is denied!",
-    "Log In to Continue"
-  );
-
+  const errorDetails: ErrorDetails = {
+    status: 403,
+    title: "Forbidden",
+    message: "Access to this resource on the server is denied!",
+    buttonLabel: "Log In to Continue",
+  };
   return (
     <div className="min-h-screen w-full flex bg-gray-100 items-center justify-center flex-col text-center gap-2">
       <h1 className="text-[100px] font-bold text-red-600">

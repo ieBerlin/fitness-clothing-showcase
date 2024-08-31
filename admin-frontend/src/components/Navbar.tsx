@@ -3,6 +3,7 @@ import DropdownMenu from "./DropdownMenu";
 import notifications from "../dummy-data/notifications";
 import { Link } from "react-router-dom";
 import DropdownItem from "./DropdownItem";
+import { currentDate } from "../utils/date";
 const adminDetails = {
   firstName: "ieBerlin",
   lastName: "Schizo",
@@ -10,12 +11,6 @@ const adminDetails = {
 };
 
 // Format the current date
-const currentDate = new Date().toLocaleDateString("en-US", {
-  day: "2-digit",
-  month: "long",
-  year: "numeric",
-  weekday: "long",
-});
 
 const hasNewNotifications = false;
 

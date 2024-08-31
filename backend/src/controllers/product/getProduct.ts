@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
-import Product from "../../models/Product";
+import Product, { IProduct } from "../../models/Product";
 import { Availability } from "../../config/product-attributes";
-import { SuccessResponse } from "../../utils/SuccessResponse";
-import { ErrorResponse } from "../../utils/responseInterfaces";
+import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
 
 const getProduct = async (req: Request, res: Response) => {
   try {
@@ -58,9 +57,9 @@ const getProduct = async (req: Request, res: Response) => {
       });
     }
 
-    const successResponse: SuccessResponse = {
+    const successResponse: SuccessResponse<IProduct> = {
       success: true,
-      data: { product },
+      data: product,
     };
 
     res.status(200).json(successResponse);

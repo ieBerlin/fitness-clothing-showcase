@@ -1,12 +1,6 @@
-import { IAdmin, IAuthResponse, IErrorResponse } from "../types/auth.types";
-import { API_URL } from "../utils/http";
+import { API_URL, getData } from "../utils/http";
 import { authHeader } from "./auth-header.service";
-import {
-  ErrorCode,
-  ErrorSeverity,
-  SuccessResponse,
-} from "../types/product.types";
-import { createErrorResponse } from "../utils/authUtils";
+import { IAdmin, IAuthResponse, IErrorResponse } from "../types/response";
 
 export async function register(
   data: IAdmin
@@ -50,71 +44,16 @@ function handleError(error: unknown): IErrorResponse {
   };
 }
 
-export async function login(
-  data: IAdmin
-): Promise<SuccessResponse<IAuthResponse>> {
-  try {
-    const response = await fetch(`${API_URL}auth/login`, {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+export const login = async (data: IAdmin) =>
+  getData<string>({
+    url: new URL(`${API_URL}auth/login`).toString(),
+    method: "POST",
+    body: JSON.stringify(data),
+    isTokenRequired: false,
+  });
 
-    const result = await response.json();
-    console.log(result)
-    if (result.success) {
-      return result as SuccessResponse;
-    }
-    switch (response.status) {
-      case 400:
-        throw createErrorResponse(
-          "Bad request",
-          400,
-          "Request",
-          ErrorCode.ValidationError,
-          ErrorSeverity.Medium,
-          result.errors
-        );
-
-      case 403:
-        throw createErrorResponse(
-          "Invalid token provided",
-          403,
-          "Token",
-          ErrorCode.InvalidToken,
-          ErrorSeverity.Critical
-        );
-
-      case 404:
-        throw createErrorResponse(
-          "Product not found",
-          404,
-          "Product",
-          ErrorCode.NotFound,
-          ErrorSeverity.High
-        );
-
-      case 500:
-        throw createErrorResponse(
-          "Server error occurred while fetching the product",
-          500,
-          "Server",
-          ErrorCode.ServerError,
-          ErrorSeverity.Critical
-        );
-
-      default:
-        throw createErrorResponse(
-          `Unexpected error: ${response.status}`,
-          response.status,
-          "Unknown",
-          ErrorCode.UnknownError,
-          ErrorSeverity.Critical
-        );
-    }
-  } catch (error) {
-    throw handleError(error);
-  }
-}
+export const verifyToken = async () =>
+  getData<null>({
+    url: new URL(`${API_URL}auth/check-token`).toString(),
+    method: "POST",
+  });

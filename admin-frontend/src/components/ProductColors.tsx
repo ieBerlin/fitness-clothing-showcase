@@ -1,70 +1,27 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { FC, useState } from "react";
-import {
-  allSizes,
-  Availability,
-  Color,
-  ColorOption,
-  genderSizes,
-  Size,
-} from "../types/product.types";
+
 import NumberInput from "./NumberInput";
 import SelectInput from "./SelectInput";
-import { ColorItemProps, SizesProps } from "../types/component.types";
-
-const defaultSizes = (): Partial<Size>[] => {
-  return allSizes.map((size) => ({
-    name: size,
-    quantity: 0,
-    sizeAvailability: Availability.IN_STOCK,
-  }));
-};
+import Size, { defaultSizes, genderSizes } from "../models/Size";
+import ColorOption from "../models/Color";
+import Availability from "../enums/Availability";
+import Color from "../enums/Color";
 
 interface ProductColorsProps {
   productColors?: ColorOption[];
   isUnisex: boolean;
 }
-
-const ProductColors: FC<ProductColorsProps> = ({
-  productColors = [],
-  isUnisex,
-}) => {
-  const colors = productColors;
-  const unselectedColors: ColorOption[] = Object.entries(Color)
-    .map(([key]) => {
-      const isSelected = colors.some((item) => item.name.toUpperCase() === key);
-      if (!isSelected) {
-        return {
-          name: key as Color,
-          availableSizes: defaultSizes(),
-        } as ColorOption;
-      }
-      return null;
-    })
-    .filter((color): color is ColorOption => color !== null);
-
-  const allColors = [...colors, ...unselectedColors];
-
-  return (
-    <div>
-      <ul className="px-3 py-2 flex flex-col gap-4 text-gray-800">
-        {allColors.map((colorOption) => (
-          <ColorItem
-            key={colorOption.name}
-            colorOption={colorOption}
-            isSelected={productColors.some(
-              (selected) => selected.name === colorOption.name
-            )}
-            isUnisex={isUnisex}
-          />
-        ))}
-      </ul>
-    </div>
-  );
-};
-
-export default ProductColors;
-
+interface ColorItemProps {
+  colorOption: ColorOption;
+  isSelected: boolean;
+  isUnisex: boolean;
+}
+interface SizesProps {
+  isUnisex: boolean;
+  availableSizes: Size[];
+  visibility: boolean;
+}
 const ColorItem: FC<ColorItemProps> = ({
   colorOption,
   isSelected,
@@ -138,7 +95,6 @@ const ColorItem: FC<ColorItemProps> = ({
     </li>
   );
 };
-
 const Sizes: FC<SizesProps> = ({ visibility, isUnisex, availableSizes }) => {
   const displaySizes = isUnisex
     ? availableSizes
@@ -188,3 +144,42 @@ const Sizes: FC<SizesProps> = ({ visibility, isUnisex, availableSizes }) => {
     </div>
   );
 };
+const ProductColors: FC<ProductColorsProps> = ({
+  productColors = [],
+  isUnisex,
+}) => {
+  const colors = productColors;
+  const unselectedColors: ColorOption[] = Object.entries(Color)
+    .map(([key]) => {
+      const isSelected = colors.some((item) => item.name.toUpperCase() === key);
+      if (!isSelected) {
+        return {
+          name: key as Color,
+          availableSizes: defaultSizes(),
+        } as ColorOption;
+      }
+      return null;
+    })
+    .filter((color): color is ColorOption => color !== null);
+
+  const allColors = [...colors, ...unselectedColors];
+
+  return (
+    <div>
+      <ul className="px-3 py-2 flex flex-col gap-4 text-gray-800">
+        {allColors.map((colorOption) => (
+          <ColorItem
+            key={colorOption.name}
+            colorOption={colorOption}
+            isSelected={productColors.some(
+              (selected) => selected.name === colorOption.name
+            )}
+            isUnisex={isUnisex}
+          />
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default ProductColors;

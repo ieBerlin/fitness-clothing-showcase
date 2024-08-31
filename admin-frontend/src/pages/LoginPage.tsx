@@ -2,12 +2,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { FormEvent, useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { useLoaderData, useNavigate } from "react-router-dom";
-import { IAdmin } from "../types/auth.types";
-import { login } from "../services/admin.service";
-import { verifyToken } from "../utils/authUtils";
-import { ErrorResponse, SuccessResponse } from "../types/product.types";
-
+import { ErrorResponse, useLoaderData, useNavigate } from "react-router-dom";
+import { login, verifyToken } from "../services/admin.service";
+import { IAdmin } from "../types/response";
 function LoginPage() {
   const [inputBorder, setInputBorder] = useState<string>("border-transparent");
   const [isErrorShown, setIsErrorShown] = useState<boolean>(false);
@@ -17,22 +14,19 @@ function LoginPage() {
   const isAdminAlreadyAuthenticated = useLoaderData();
   const navigate = useNavigate();
 
-  const { mutate, isPending } = useMutation<
-    SuccessResponse,
-    ErrorResponse,
-    IAdmin
-  >({
+  const { mutate, isPending } = useMutation<string, ErrorResponse, IAdmin>({
     mutationKey: ["admin"],
-    mutationFn: async (data) => {
-      const result = await login(data);
-      localStorage.setItem("token", result.data.token);
+    mutationFn: async (token) => {
+      const result = await login(token);
+      localStorage.setItem("token", result);
       return result;
     },
     onError: (error) => {
+      console.log(error);
       setInputBorder("border-red-500");
       setIsErrorShown(true);
       setErrorMessage(
-        error.statusCode === 400
+        error.status === 400
           ? "Unmatched admin credentials"
           : "An unexpected error occurred"
       );
@@ -158,7 +152,11 @@ export default LoginPage;
 export async function loader(): Promise<boolean> {
   try {
     const tokenResponse = await verifyToken();
-    return tokenResponse.success;
+    if (tokenResponse) {
+      return true;
+    }
+
+    return false;
   } catch (_) {
     return false;
   }

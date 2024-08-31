@@ -1,13 +1,12 @@
 import { Request, Response } from "express";
-import Product from "../../models/Product";
+import Product, { ColorOption, IProduct, Size } from "../../models/Product";
 import {
   Availability,
   Color,
   genderSizes,
   Season,
 } from "../../config/product-attributes";
-import { SuccessResponse } from "../../utils/SuccessResponse";
-import { ErrorResponse } from "../../utils/responseInterfaces";
+import { ErrorResponse,SuccessResponse } from "../../utils/responseInterfaces";
 import { ValidationError } from "../../utils/ValidationError";
 
 const addProduct = async (req: Request, res: Response) => {
@@ -20,7 +19,7 @@ const addProduct = async (req: Request, res: Response) => {
       woolPercentage,
       price,
       releaseDate,
-      image,
+      images,
       availability,
       colors,
     } = req.body;
@@ -64,7 +63,7 @@ const addProduct = async (req: Request, res: Response) => {
     if (!Array.isArray(colors)) {
       errors.push({ field: "colors", message: "Colors must be an array" });
     } else {
-      colors.forEach((colorOption: any, colorIndex: number) => {
+      colors.forEach((colorOption: ColorOption, colorIndex: number) => {
         const { name: colorName, availableSizes } = colorOption;
 
         // Validate color name
@@ -85,7 +84,7 @@ const addProduct = async (req: Request, res: Response) => {
           return;
         }
 
-        const sizeNames = availableSizes.map((size: any) => size.name);
+        const sizeNames = availableSizes.map((size: Size) => size.name);
         expectedSizes.forEach((expectedSize) => {
           if (!sizeNames.includes(expectedSize)) {
             errors.push({
@@ -96,7 +95,7 @@ const addProduct = async (req: Request, res: Response) => {
         });
 
         // Validate each size in availableSizes
-        availableSizes.forEach((size: any, sizeIndex: number) => {
+        availableSizes.forEach((size: Size, sizeIndex: number) => {
           const { name: sizeName, quantity, sizeAvailability } = size;
 
           // Validate quantity
@@ -148,8 +147,8 @@ const addProduct = async (req: Request, res: Response) => {
       errors.push({ field: "releaseDate", message: "Invalid release date" });
     }
 
-    if (image && typeof image !== "string") {
-      errors.push({ field: "image", message: "Image URL must be a string" });
+    if (images && !Array.isArray(images)) {
+      errors.push({ field: "image", message: "Image URL must be an array" });
     }
 
     if (!Object.values(Availability).includes(availability)) {
@@ -176,13 +175,13 @@ const addProduct = async (req: Request, res: Response) => {
       woolPercentage,
       price,
       releaseDate,
-      image,
+      images,
       availability,
     });
 
-    const successResponse: SuccessResponse = {
+    const successResponse: SuccessResponse<IProduct> = {
       success: true,
-      data: { product: newProduct },
+      data: newProduct,
     };
 
     res.status(201).json(successResponse);

@@ -4,14 +4,13 @@ import {
   ErrorSeverity,
   ValidationError,
 } from "../../utils/ValidationError";
-import { SuccessResponse } from "../../utils/SuccessResponse";
 import { emailValidator, passwordValidator } from "../../utils/validators";
+import { SuccessResponse } from "./../../utils/responseInterfaces";
 import {
   createAdmin as addAdmin,
   AdminData,
   doesAdminExist,
 } from "../../services/adminService";
-
 const createAdmin = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
@@ -71,7 +70,6 @@ const createAdmin = async (req: Request, res: Response) => {
     // Respond with success
     const successResponse: SuccessResponse<{ message: string }> = {
       success: true,
-      data: { message: "Admin created successfully" },
     };
 
     return res.status(201).json(successResponse);

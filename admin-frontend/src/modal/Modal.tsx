@@ -3,13 +3,14 @@ import { XMarkIcon } from "@heroicons/react/24/solid";
 import { closeModal } from "../features/modal";
 import React, { ReactNode } from "react";
 import {
+  AddProductToSectionModal,
   ConfirmationModalContent,
   ConfirmProductDeletionModal,
   FieldsError,
   LogoutModalContent,
   SuccessModalContent,
 } from "./modal-contents";
-import { ModalType } from "../types/modal.types";
+import { ModalType } from "../enums/ModalType";
 interface IModalContent {
   title: string;
   bodyContent: ReactNode;
@@ -24,6 +25,7 @@ function Modal() {
     [ModalType.FIELDSERROR]: FieldsError(),
     [ModalType.CONFIRMATION]: ConfirmationModalContent(),
     [ModalType.DELETE_PRODUCT]: ConfirmProductDeletionModal(),
+    [ModalType.ADD_PRODUCT_TO_SECTION]: AddProductToSectionModal(),
     [ModalType.PRODUCT_ADDED_SUCCESS]: SuccessModalContent(
       "This product has been added successfully."
     ),

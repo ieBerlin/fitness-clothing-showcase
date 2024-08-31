@@ -1,13 +1,12 @@
 import { Request, Response } from "express";
-import Product from "../../models/Product";
+import Product, { IProduct } from "../../models/Product";
 import {
   Availability,
   Color,
   genderSizes,
   Season,
 } from "../../config/product-attributes";
-import { SuccessResponse } from "../../utils/SuccessResponse";
-import { ErrorResponse } from "../../utils/responseInterfaces";
+import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
 import { ValidationError } from "./../../utils/ValidationError";
 const updateProduct = async (req: Request, res: Response) => {
   try {
@@ -188,9 +187,9 @@ const updateProduct = async (req: Request, res: Response) => {
 
     const updatedProduct = await product.save();
 
-    const successResponse: SuccessResponse = {
+    const successResponse: SuccessResponse<IProduct> = {
       success: true,
-      data: { product: updatedProduct },
+      data: updatedProduct,
     };
 
     res.status(200).json(successResponse);

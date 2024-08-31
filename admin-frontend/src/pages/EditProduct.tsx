@@ -1,29 +1,31 @@
 import React, { FormEvent, useEffect, useState } from "react";
 import PageTemplate from "../components/PageTemplate";
-import {
-  Availability,
-  Color,
-  ColorOption,
-  ErrorResponse,
-  Image,
-  Product,
-  Season,
-  SuccessResponse,
-} from "../types/product.types";
 import { useLocation, useParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import ProductForm from "../components/ProductForm";
-import { Step, steps } from "../types/component.types";
-import { Size } from "../types/product.types";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { editProduct, fetchProduct } from "../utils/authUtils";
 import ErrorDisplay from "../components/ErrorDisplay";
-import { useDispatch } from "react-redux";
-import { openModal } from "../features/modal";
+import Product from "../models/Product";
+import { ErrorResponse, ProductResponse } from "../types/response";
+import ColorOption from "../models/Color";
+import Season from "../enums/Season";
+import Availability from "../enums/Availability";
+import Image from "../models/Image";
+import Size from "../models/Size";
+import Color from "../enums/Color";
+interface Step {
+  id: string;
+  label: string;
+}
 
+const steps: Step[] = [
+  { id: "basic-info", label: "Basic Product Information" },
+  { id: "color-selection", label: "Chosen Colors" },
+  { id: "image-upload", label: "Images" },
+];
 const EditProductPage: React.FC = () => {
   const location = useLocation();
-  const dispatch = useDispatch();
   const step: Step = location.state?.step || steps[0];
   const [activeStep, setActiveStep] = useState<Step>(step);
   const { productId } = useParams<{ productId: string }>();
@@ -33,35 +35,32 @@ const EditProductPage: React.FC = () => {
     data: productData,
     isError,
     error,
-  } = useQuery<SuccessResponse, ErrorResponse>({
+  } = useQuery<ProductResponse, ErrorResponse>({
     queryKey: ["product", productId],
-    queryFn: () => fetchProduct({ productId: productId as string }),
+    queryFn: () => fetchProduct(productId ?? ""),
   });
   const {
     mutate,
     isPending,
     error: mutationErrors,
     isError: isMutationError,
-  } = useMutation<SuccessResponse, ErrorResponse, Product>({
+  } = useMutation<ProductResponse, ErrorResponse, Product>({
     mutationKey: ["product"],
     mutationFn: editProduct,
-    onSuccess: (data) => {
+    onSuccess: (product) => {
       const currentStepIndex = steps.findIndex(
         (step) => step.id === activeStep.id
       );
       if (currentStepIndex < steps.length - 1) {
         setActiveStep(steps[currentStepIndex + 1]);
       }
-      return data.data;
-    },
-    onError: (errors) => {
-      // dispatch(openModal({ type: "fields-error", data: errors }));
+      return product;
     },
   });
   const isLoading = isFetching || isPending;
   useEffect(() => {
-    if (productData && productData.success) {
-      setFormData(productData.data.product);
+    if (productData) {
+      setFormData(productData);
     }
   }, [productData]);
   const handleNextStep = (e: FormEvent<HTMLFormElement>) => {
@@ -80,8 +79,8 @@ const EditProductPage: React.FC = () => {
       season: (fd.getAll("product-season") as string[]).map(
         (season) => season.toUpperCase() as Season
       ),
-      colors: productData?.data.product.colors as ColorOption[],
-      images: productData?.data.product.images as Image[],
+      colors: productData?.colors as ColorOption[],
+      images: productData?.images as Image[],
     };
 
     if (activeStep.id === "basic-info") {

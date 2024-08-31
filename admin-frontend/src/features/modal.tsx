@@ -1,16 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ModalType } from "../types/modal.types";
+import { ModalType } from "../enums/ModalType";
 
-// Define the shape of the modal state
 export interface ModalState {
   isOpen: boolean;
   type?: ModalType;
   message?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data?: any;
 }
 
-// Define the initial state of the modal slice
 const initialState: ModalState = {
   isOpen: false,
   type: undefined,
@@ -21,7 +19,6 @@ const modalSlice = createSlice({
   name: "modal",
   initialState,
   reducers: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     openModal: (state, action: PayloadAction<{ type: string; data?: any }>) => {
       const { type, data } = action.payload;
       state.isOpen = true;

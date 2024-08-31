@@ -1,4 +1,4 @@
-import { FC } from "react"
+import { FC } from "react";
 import {
   CalendarIcon,
   CheckIcon,
@@ -7,7 +7,7 @@ import {
   NoSymbolIcon,
   TagIcon,
 } from "@heroicons/react/24/solid";
-import { Availability } from "../types/product.types";
+import Availability from "../enums/Availability";
 const StyledAvailability: FC<{ status: Availability }> = ({ status }) => {
   switch (status) {
     case Availability.IN_STOCK:

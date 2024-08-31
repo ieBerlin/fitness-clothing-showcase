@@ -5,13 +5,12 @@ import RadioGroup from "./RadioGroup";
 import CheckboxGroup from "./CheckboxGroup";
 import NumberInput from "./NumberInput";
 import DateInput from "./DateInput";
-import {
-  Availability,
-  Product,
-  Season,
-  ValidationError,
-} from "../types/product.types";
+
 import { availabilityOptions, seasonOptions } from "../utils/func";
+import { ValidationError } from "../types/validation-error.types";
+import Product from "../models/Product";
+import Season from "../enums/Season";
+import Availability from "../enums/Availability";
 
 interface BasicInformationProductFormProps {
   errors?: ValidationError[];

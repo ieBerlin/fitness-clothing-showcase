@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
-import Product from "../../models/Product";
-import { SuccessResponse } from "../../utils/SuccessResponse";
-import { ErrorResponse } from "../../utils/responseInterfaces";
+import Product, { IProduct } from "../../models/Product";
+import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
 
 const updateProductPrice = async (req: Request, res: Response) => {
   try {
@@ -40,12 +39,9 @@ const updateProductPrice = async (req: Request, res: Response) => {
       return res.status(404).json(notFoundResponse);
     }
 
-    const successResponse: SuccessResponse = {
+    const successResponse: SuccessResponse<IProduct> = {
       success: true,
-      data: {
-        message: "Product price updated successfully.",
-        product: updatedProduct,
-      },
+      data: updatedProduct,
     };
 
     res.status(200).json(successResponse);

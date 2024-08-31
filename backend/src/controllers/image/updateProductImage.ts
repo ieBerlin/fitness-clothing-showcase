@@ -2,9 +2,8 @@ import { Request, Response } from "express";
 import Product from "../../models/Product";
 import { Angle, IImage } from "../../models/Image";
 import mongoose from "mongoose";
-import { ErrorResponse } from "../../utils/responseInterfaces";
+import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
 import { ErrorCode, ErrorSeverity } from "../../utils/ValidationError";
-import { SuccessResponse } from "../../utils/SuccessResponse";
 
 interface MulterRequest extends Request {
   imageName?: string;
@@ -109,9 +108,6 @@ const updateProductImage = async (req: MulterRequest, res: Response) => {
 
     const successResponse: SuccessResponse = {
       success: true,
-      data: {
-        message: "Product image updated successfully",
-      },
     };
 
     res.status(200).json(successResponse);

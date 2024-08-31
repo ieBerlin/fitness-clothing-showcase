@@ -1,15 +1,13 @@
 import { Request, Response } from "express";
-import Section from "../../models/Section";
+import Section, { ISection } from "../../models/Section";
 import Product from "../../models/Product";
 import mongoose from "mongoose";
-import { SuccessResponse } from "../../utils/SuccessResponse";
-import { ErrorResponse } from "../../utils/responseInterfaces";
+import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
 import { ErrorCode, ErrorSeverity } from "../../utils/ValidationError";
 
 const updateSectionItems = async (req: Request, res: Response) => {
   const { sectionId } = req.params;
   const { items } = req.body;
-
   if (!Array.isArray(items) || items.length === 0) {
     const errorResponse: ErrorResponse = {
       success: false,
@@ -23,6 +21,20 @@ const updateSectionItems = async (req: Request, res: Response) => {
       ],
     };
     return res.status(400).json(errorResponse);
+  }
+  if (!sectionId || !mongoose.Types.ObjectId.isValid(sectionId)) {
+    const invalidIdResponse: ErrorResponse = {
+      success: false,
+      errors: [
+        {
+          field: "sectionId",
+          message: "Invalid ObjectId for sectionId.",
+          code: ErrorCode.ValidationError,
+          severity: ErrorSeverity.Medium,
+        },
+      ],
+    };
+    return res.status(400).json(invalidIdResponse);
   }
 
   try {
@@ -43,7 +55,6 @@ const updateSectionItems = async (req: Request, res: Response) => {
     }
 
     for (const item of items) {
-      // Ensure item._id is a valid ObjectId
       if (!item._id || !mongoose.Types.ObjectId.isValid(item._id)) {
         const invalidIdResponse: ErrorResponse = {
           success: false,
@@ -77,7 +88,6 @@ const updateSectionItems = async (req: Request, res: Response) => {
         return res.status(404).json(productNotFoundResponse);
       }
     }
-
     const updatedSection = await Section.findByIdAndUpdate(
       sectionId,
       { items },
@@ -99,12 +109,9 @@ const updateSectionItems = async (req: Request, res: Response) => {
       return res.status(404).json(sectionNotFoundResponse);
     }
 
-    const successResponse: SuccessResponse = {
+    const successResponse: SuccessResponse<ISection> = {
       success: true,
-      data: {
-        message: "Section items updated successfully.",
-        section: updatedSection,
-      },
+      data: updatedSection,
     };
 
     res.status(200).json(successResponse);

@@ -17,15 +17,15 @@ const SectionStatistic: FC<{ sectionId: string; name: string }> = ({
   name,
 }) => {
   const currentSection = currentMonthSections.find(
-    (section) => section.sectionId === sectionId
+    (section) => section._id === sectionId
   );
   const previousSection = previousMonthSections.find(
-    (section) => section.sectionId === sectionId
+    (section) => section._id === sectionId
   );
 
   if (!currentSection || !previousSection) return null;
 
-  const difference = currentSection.items - previousSection.items;
+  const difference = currentSection.items.length - previousSection.items.length;
   const differenceColor = difference > 0 ? "text-emerald-600" : "text-red-600";
   const differenceBackgroundColor =
     difference > 0 ? "bg-emerald-100" : "bg-red-100";
@@ -35,7 +35,7 @@ const SectionStatistic: FC<{ sectionId: string; name: string }> = ({
       <div>
         <p className="text-gray-700 font-medium">{name}</p>
         <h2 className="text-gray-900 text-3xl font-bold">
-          {currentSection.items}
+          {currentSection.items.length}
         </h2>
         <h3 className="text-sm font-normal text-gray-600 mt-1">
           {`Compared to last month, ${

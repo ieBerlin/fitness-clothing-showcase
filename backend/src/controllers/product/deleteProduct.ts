@@ -2,8 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import Product from "../../models/Product";
 import Section from "../../models/Section";
-import { SuccessResponse } from "../../utils/SuccessResponse";
-import { ErrorResponse } from "../../utils/responseInterfaces";
+import { SuccessResponse, ErrorResponse } from "../../utils/responseInterfaces";
 import { ErrorCode, ErrorSeverity } from "../../utils/ValidationError";
 
 const deleteProduct = async (req: Request, res: Response) => {
@@ -53,7 +52,6 @@ const deleteProduct = async (req: Request, res: Response) => {
 
     const successResponse: SuccessResponse<{ message: string }> = {
       success: true,
-      data: { message: "Product deleted successfully" },
     };
 
     return res.status(200).json(successResponse);
