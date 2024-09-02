@@ -1,6 +1,6 @@
 import { FC, InputHTMLAttributes } from "react";
 
-interface CheckboxOption {
+export interface CheckboxOption {
   value: string;
   label: string;
 }
@@ -13,6 +13,7 @@ interface CheckboxGroupProps extends InputHTMLAttributes<HTMLInputElement> {
   onChangeValues: (selectedValues: string[]) => void;
   isError?: boolean;
   errorMessage?: string;
+  classes?: string;
 }
 
 const CheckboxGroup: FC<CheckboxGroupProps> = ({
@@ -23,6 +24,7 @@ const CheckboxGroup: FC<CheckboxGroupProps> = ({
   onChangeValues,
   isError = false,
   errorMessage,
+  classes = "flex-row",
 }) => {
   const handleCheckboxChange = (value: string) => {
     const newCheckedValues = checkedValues.includes(value)
@@ -36,14 +38,14 @@ const CheckboxGroup: FC<CheckboxGroupProps> = ({
         {label}
       </label>
       <div
-        className={`flex flex-row gap-y-2 w-full justify-around ${
+        className={`flex ${classes} gap-y-2 w-full justify-around ${
           isError ? "border-red-500" : ""
         }`}
       >
         {options.map((option) => {
           const isChecked = checkedValues.includes(option.value.toLowerCase());
           return (
-            <div key={option.value} className="flex items-center">
+            <li key={option.value} className={"flex items-center"}>
               <input
                 type="checkbox"
                 id={option.value}
@@ -63,7 +65,7 @@ const CheckboxGroup: FC<CheckboxGroupProps> = ({
               >
                 {option.label}
               </label>
-            </div>
+            </li>
           );
         })}
       </div>

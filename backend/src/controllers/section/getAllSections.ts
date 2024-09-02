@@ -6,6 +6,8 @@ import Product, { IProduct } from "../../models/Product";
 
 const getAllSections = async (req: Request, res: Response) => {
   try {
+    const { search, availability, color, page = 1, limit = 10 } = req.query;
+
     const sections = await Section.find();
 
     if (sections.length === 0) {
@@ -29,19 +31,34 @@ const getAllSections = async (req: Request, res: Response) => {
 
     await Promise.all(
       sections.map(async (section) => {
-        const products: IProduct[] = await Product.find({
+        const productFilter: any = {
           _id: { $in: section.items },
-        });
+        };
+        if (search) {
+          productFilter.productName = { $regex: search, $options: "i" };
+        }
+        if (availability) {
+          productFilter.availability = availability;
+        }
 
-        // Convert the Mongoose document to a plain object with type ISection
+        if (color) {
+          productFilter.colors = { $elemMatch: { name: color } };
+        }
+
+        const skip = (Number(page) - 1) * Number(limit);
+
+        const products: IProduct[] = await Product.find(productFilter)
+          .skip(skip)
+          .limit(Number(limit));
+
         const sectionObject = section.toObject() as ISection;
+
         sectionsData.push({
           section: sectionObject,
           products,
         });
       })
     );
-
     const successResponse: SuccessResponse<
       {
         section: ISection;

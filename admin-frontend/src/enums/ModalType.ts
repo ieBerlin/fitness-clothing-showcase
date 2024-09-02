@@ -7,4 +7,5 @@ export enum ModalType {
   PRODUCT_DELETED_SUCCESS = "product-deleted-success",
   DELETE_PRODUCT = "delete-product",
   ADD_PRODUCT_TO_SECTION = "add-product-to-section",
+  REMOVE_PRODUCT_TO_SECTION = "remove-product-to-section",
 }

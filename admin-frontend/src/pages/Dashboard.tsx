@@ -8,9 +8,98 @@ import {
 import {
   currentMonthSections,
   previousMonthSections,
-  systemActivities,
 } from "../dummy-data/sections";
-import { FC } from "react";
+import { FC, ReactNode } from "react";
+import { useQueries, useQuery } from "@tanstack/react-query";
+import LoadingSpinner from "../components/LoadingSpinner";
+import ErrorDisplay from "../components/ErrorDisplay";
+import { ErrorResponse } from "../types/response";
+import {
+  fetchActivities,
+  fetchAdmin,
+  fetchStatistics,
+} from "../utils/authUtils";
+import Activity from "../models/Activity";
+import Admin from "../models/Admin";
+import { Link } from "react-router-dom";
+interface ActivityItemProps {
+  activity: Activity;
+}
+
+const ActivityItem: FC<ActivityItemProps> = ({ activity }) => {
+  const {
+    isError,
+    error,
+    isFetching,
+    data: adminData,
+  } = useQuery<Admin, ErrorResponse>({
+    queryKey: [`admin-${activity.adminId}`],
+    queryFn: () => fetchAdmin(activity.adminId),
+    staleTime: Infinity,
+  });
+
+  const formattedDate = new Date(activity.timestamp).toLocaleString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+
+  let content: ReactNode;
+  if (isFetching) {
+    content = (
+      <div className="flex flex-col items-center justify-center w-full py-2 space-y-1">
+        <LoadingSpinner fill="blue-600" text="gray-400" dimension="12" />
+        <h2 className="text-gray-600 font-medium text-sm">
+          Loading activity...
+        </h2>
+      </div>
+    );
+  } else if (isError) {
+    content = (
+      <div className="w-full py-10">
+        <ErrorDisplay error={error} />
+      </div>
+    );
+  } else {
+    content = (
+      <div className="flex flex-row w-full justify-between">
+        <div className="flex flex-col">
+          <p className="text-gray-800 font-semibold">
+            {activity.activityType
+              .split("_")
+              .map((item) => item.charAt(0).toUpperCase() + item.slice(1))
+              .join(" ")}
+          </p>
+          <p className="text-sm text-gray-600 mt-1">
+            {activity.entityType} by{" "}
+            <Link to={`/admin/${activity.adminId}`}>
+              <span className="font-medium text-gray-800">
+                {adminData?.adminEmail}
+              </span>
+            </Link>
+          </p>
+        </div>
+        <div className="flex items-center justify-center flex-col gap-2">
+          <p className="text-gray-500 text-sm font-semibold">{formattedDate}</p>
+          <Link
+            to={`/activity/${activity._id}`}
+            className="text-blue-600 hover:text-blue-800 font-medium"
+          >
+            View Details
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <li className="flex items-center justify-between p-4 bg-white rounded-md shadow-md border border-gray-200 hover:bg-gray-50 transition duration-200 ease-in-out">
+      {content}
+    </li>
+  );
+};
 
 const SectionStatistic: FC<{ sectionId: string; name: string }> = ({
   sectionId,
@@ -56,6 +145,46 @@ const SectionStatistic: FC<{ sectionId: string; name: string }> = ({
 };
 
 function Dashboard() {
+  const results = useQueries({
+    queries: [
+      {
+        queryKey: ["sections"],
+        queryFn: fetchActivities,
+        staleTime: Infinity,
+      },
+      {
+        queryKey: ["statistics"],
+        queryFn: fetchStatistics,
+        staleTime: Infinity,
+      },
+    ],
+  });
+
+  const isFetching = results.some((query) => query.isFetching);
+  const isError = results.some((result) => result.isError);
+  const error = results.map(
+    (result) => result.error as unknown as ErrorResponse
+  );
+  const activities = results[0]?.data?.activities || [];
+  const statistics = results[1].data;
+  if (isFetching) {
+    return (
+      <div className="flex items-center justify-center w-full py-10 flex-col gap-2">
+        <LoadingSpinner fill="blue-600" text="gray-400" dimension="16" />
+        <h2 className="text-gray-500 font-semibold">Loading sections...</h2>
+      </div>
+    );
+  }
+  if (isError) {
+    return (
+      <div className="space-y-4">
+        {error.map((item) => (
+          <ErrorDisplay error={item} />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <PageTemplate title="Dashboard">
       <div className="py-4">
@@ -70,7 +199,9 @@ function Dashboard() {
         >
           <li className="bg-blue-50 rounded-lg flex items-center justify-between p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 ease-in-out">
             <div>
-              <h2 className="text-blue-900 font-extrabold text-3xl">3,000</h2>
+              <h2 className="text-blue-900 font-extrabold text-3xl">
+                {statistics?.totalAdmins ?? 0}
+              </h2>
               <p className="text-blue-700 text-sm font-medium mt-1">
                 Total Admins
               </p>
@@ -80,7 +211,7 @@ function Dashboard() {
           <li className="bg-emerald-50 rounded-lg flex items-center justify-between p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 ease-in-out">
             <div>
               <h2 className="text-emerald-900 font-extrabold text-3xl">
-                3,000
+                {statistics?.totalProducts ?? 0}
               </h2>
               <p className="text-emerald-700 text-sm font-medium mt-1">
                 Total Products
@@ -90,7 +221,10 @@ function Dashboard() {
           </li>
           <li className="bg-red-50 rounded-lg flex items-center justify-between p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 ease-in-out">
             <div>
-              <h2 className="text-red-800 font-extrabold text-3xl">3,000</h2>
+              <h2 className="text-red-800 font-extrabold text-3xl">
+                {" "}
+                {statistics?.totalTraffic ?? 0}
+              </h2>
               <p className="text-red-700 text-sm font-medium mt-1">
                 Site Traffic
               </p>
@@ -124,27 +258,17 @@ function Dashboard() {
             Last 3 Days' Activities
           </h2>
         </div>
-        <ul className="space-y-3">
-          {systemActivities.map((activity, index) => (
-            <li
-              key={index}
-              className="flex items-center justify-between p-4 bg-gray-50 rounded-md shadow-sm border border-gray-200"
-            >
-              <div className="text-gray-800">
-                <p className="font-medium">{activity.productName}</p>
-                <p className="text-sm text-gray-600">
-                  {activity.action} by{" "}
-                  <span className="font-medium text-gray-800">
-                    {activity.user}
-                  </span>
-                </p>
-              </div>
-              <p className="text-gray-500 text-sm font-semibold">
-                {activity.date}
-              </p>
-            </li>
-          ))}
-        </ul>
+        {activities.length > 0 ? (
+          activities.map((activity) => (
+            <ul className="space-y-3">
+              <ActivityItem key={activity._id} activity={activity} />
+            </ul>
+          ))
+        ) : (
+          <h2 className="text-gray-500 text-center font-medium text-lg p-4 border border-gray-300 rounded-md bg-gray-100 shadow-sm">
+            No recent activities
+          </h2>
+        )}
       </div>
     </PageTemplate>
   );

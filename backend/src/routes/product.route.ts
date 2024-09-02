@@ -6,6 +6,7 @@ import adminAuth from "../middlewares/adminAuth";
 import deleteProduct from "./../controllers/product/deleteProduct";
 import updateProduct from "./../controllers/product/updateProduct";
 import getTotalProductsCount from "./../controllers/product/getTotalProductsCount";
+import getMonthlyStatistics from "./../controllers/product/getMonthlyStatistics";
 import updateProductPrice from "./../controllers/product/updateProductPrice";
 import deserializeAdmin from "../middlewares/deserializeAdmin";
 
@@ -17,6 +18,12 @@ router.get(
   deserializeAdmin,
   adminAuth,
   getTotalProductsCount
+);
+router.get(
+  "/monthly-statistics",
+  deserializeAdmin,
+  adminAuth,
+  getMonthlyStatistics
 );
 router.get("/:productId", getProduct);
 router.post("/", deserializeAdmin, adminAuth, addProduct);

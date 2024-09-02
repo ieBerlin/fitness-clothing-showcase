@@ -11,10 +11,9 @@ import mongoose from "mongoose";
 
 const removeProductFromSection = async (req: Request, res: Response) => {
   const { sectionId, productId } = req.params;
-
   let errors: ValidationError[] = [];
 
-  if (sectionId || !mongoose.Types.ObjectId.isValid(sectionId)) {
+  if (!sectionId || !mongoose.Types.ObjectId.isValid(sectionId)) {
     errors.push({
       field: "sectionId",
       message: "Invalid or missing section ID.",

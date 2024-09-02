@@ -1,5 +1,7 @@
 import ErrorCode from "../enums/ErrorCode";
 import { ErrorSeverity } from "../enums/ErrorSeverity";
+import Activity from "../models/Activity";
+import Admin from "../models/Admin";
 import Product from "../models/Product";
 import Section from "../models/Section";
 import { ValidationError } from "./validation-error.types";
@@ -27,11 +29,23 @@ export interface SectionResponseItem {
   section: Section;
   products: Product[];
 }
-
+export interface ActivitiesResponse {
+  activities: Activity[];
+  totalActivities: number;
+  currentPage: number;
+  totalPages: number;
+}
+export interface StatisticsResponse {
+  totalAdmins: number;
+  totalProducts: number;
+  totalTraffic: number;
+}
+export type AdminResponse = Admin;
 export type SectionsResponse = SectionResponseItem[];
 export type SectionResponse = Section;
 export type ProductResponse = Product;
-export type ProductsCountResponse = number 
+export type ProductsCountResponse = number;
+
 //
 
 export interface IAdmin {
