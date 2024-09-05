@@ -3,7 +3,8 @@ import mongoose from "mongoose";
 import Product from "../../models/Product";
 import Section from "../../models/Section";
 import { SuccessResponse, ErrorResponse } from "../../utils/responseInterfaces";
-import { ErrorCode, ErrorSeverity } from "../../utils/ValidationError";
+import ErrorCode from './../../enums/ErrorCode';
+import ErrorSeverity from './../../enums/ErrorSeverity';
 
 const deleteProduct = async (req: Request, res: Response) => {
   try {

@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import Section, { ISection } from "../../models/Section";
 import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
-import { ErrorCode, ErrorSeverity } from "../../utils/ValidationError";
 import mongoose from "mongoose";
+import ErrorSeverity from './../../enums/ErrorSeverity';
+import ErrorCode from './../../enums/ErrorCode';
 
 const getSection = async (req: Request, res: Response) => {
   try {

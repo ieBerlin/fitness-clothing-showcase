@@ -3,8 +3,9 @@ import path from "path";
 import fs from "fs/promises";
 import Product from "../../models/Product";
 import { IImage } from "../../models/Image";
-import { ErrorCode, ErrorSeverity, ValidationError } from "../../utils/ValidationError";
 import { SuccessResponse } from './../../utils/responseInterfaces';
+import ErrorSeverity from './../../enums/ErrorSeverity';
+import ErrorCode from './../../enums/ErrorCode';
 
 const deleteProductImage = async (req: Request, res: Response) => {
   const { imageId } = req.params;

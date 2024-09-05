@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import Admin from "../../models/Admin";
-import { ErrorCode, ErrorSeverity } from "../../utils/ValidationError";
 import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
 import mongoose from "mongoose";
+import ErrorSeverity from './../../enums/ErrorSeverity';
+import ErrorCode from './../../enums/ErrorCode';
 
 interface MulterRequest extends Request {
   imageName?: string;

@@ -3,7 +3,8 @@ import Product from "../../models/Product";
 import { Angle, IImage } from "../../models/Image";
 import mongoose from "mongoose";
 import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
-import { ErrorCode, ErrorSeverity } from "../../utils/ValidationError";
+import ErrorSeverity from './../../enums/ErrorSeverity';
+import ErrorCode from './../../enums/ErrorCode';
 
 interface MulterRequest extends Request {
   imageName?: string;

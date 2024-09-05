@@ -1,16 +1,14 @@
 import { Request, Response } from "express";
-import {
-  ErrorCode,
-  ErrorSeverity,
-  ValidationError,
-} from "../../utils/ValidationError";
 import { emailValidator, passwordValidator } from "../../utils/validators";
 import { SuccessResponse } from "./../../utils/responseInterfaces";
+import ErrorSeverity from "../../enums/ErrorSeverity";
+import ErrorCode from "../../enums/ErrorCode";
 import {
   createAdmin as addAdmin,
   AdminData,
   doesAdminExist,
 } from "../../services/adminService";
+import { ValidationError } from "../../utils/ValidationError";
 const createAdmin = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;

@@ -1,15 +1,15 @@
 import { Request, Response } from "express";
-import {
-  ErrorCode,
-  ErrorSeverity,
-  ValidationError,
-} from "../../utils/ValidationError";
+import { ValidationError } from "../../utils/ValidationError";
 import { SuccessResponse } from "../../utils/responseInterfaces";
-import Activity, { ActivityType, EntityType } from "../../models/Activity";
+import Activity from "../../models/Activity";
 import Product from "../../models/Product";
 import Section from "../../models/Section";
 import Admin from "../../models/Admin";
 import { Types } from "mongoose";
+import ActivityType from "../../enums/ActivityType";
+import ErrorCode from "../../enums/ErrorCode";
+import ErrorSeverity from "../../enums/ErrorSeverity";
+import EntityType from "../../enums/EntityType";
 
 const createActivity = async (req: Request, res: Response) => {
   try {

@@ -1,6 +1,8 @@
 import { Document, Schema, model } from "mongoose";
-import { Color, Season, Availability } from "../config/product-attributes";
 import { IImage } from "./Image";
+import Availability from './../enums/Availability';
+import Season from './../enums/Season';
+import Color from './../enums/Color';
 
 export interface Size {
   name: string;

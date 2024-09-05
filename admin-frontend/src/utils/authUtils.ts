@@ -9,7 +9,6 @@ import {
 } from "../types/response";
 import Product from "../models/Product";
 import Section from "../models/Section";
-import Availability from "../enums/Availability";
 export interface FetchProductParams {
   productId: string;
 }
@@ -24,8 +23,8 @@ export const fetchProducts = async <ProductsResponse>({
   page?: number;
   limit?: number;
   search?: string;
-  availability: Availability[];
-  price?: string[];
+  availability?: string[];
+  price?: string;
 }) => {
   const url = new URL(`${API_URL}product`);
   if (page !== undefined) {
@@ -40,10 +39,9 @@ export const fetchProducts = async <ProductsResponse>({
   if (availability !== undefined && availability.length > 0) {
     url.searchParams.append("availability", JSON.stringify(availability));
   }
-  if (price !== undefined && price.length > 0) {
-    url.searchParams.append("price", JSON.stringify(price));
+  if (price !== undefined) {
+    url.searchParams.append("price", price);
   }
-  console.log(url.search);
   return getData<ProductsResponse>({
     url: url.toString(),
   });
@@ -78,10 +76,14 @@ export const fetchSections = async ({
   page = 1,
   limit,
   search,
+  availability,
+  price,
 }: {
   page?: number;
   limit?: number;
   search?: string;
+  availability?: string[];
+  price?: string;
 }) => {
   const url = new URL(`${API_URL}section`);
   if (page !== undefined) {
@@ -92,6 +94,12 @@ export const fetchSections = async ({
   }
   if (search !== undefined && search !== "" && search?.trim() !== "") {
     url.searchParams.append("search", search.trim());
+  }
+  if (availability !== undefined && availability.length > 0) {
+    url.searchParams.append("availability", JSON.stringify(availability));
+  }
+  if (price !== undefined) {
+    url.searchParams.append("price", price);
   }
   return getData<SectionsResponse>({
     url: url.toString(),

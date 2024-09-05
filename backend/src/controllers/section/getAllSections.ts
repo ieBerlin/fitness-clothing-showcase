@@ -1,13 +1,46 @@
 import { Request, Response } from "express";
 import Section, { ISection } from "../../models/Section";
-import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
-import { ErrorCode, ErrorSeverity } from "../../utils/ValidationError";
 import Product, { IProduct } from "../../models/Product";
+import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
+import ErrorSeverity from "../../enums/ErrorSeverity";
+import ErrorCode from "../../enums/ErrorCode";
+import PriceOptions from "../../enums/PriceOptions";
+import Availability from "../../enums/Availability";
 
 const getAllSections = async (req: Request, res: Response) => {
   try {
-    const { search, availability, color, page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10 } = req.query;
+    const availability: Availability[] = req.query.availability
+      ? (JSON.parse(req.query.availability as string) as Availability[])
+      : [];
+    const price: PriceOptions =
+      (req.query.price as PriceOptions) || PriceOptions.ALL;
 
+    const filter: {
+      productName?: { $regex: string; $options: string };
+      availability?: { $in: Availability[] };
+      price?: { $lt?: number; $gte?: number };
+    } = {};
+
+    if (availability.length > 0) {
+      filter.availability = { $in: availability };
+    }
+
+    if (price !== PriceOptions.ALL) {
+      switch (price) {
+        case PriceOptions.LESS_THAN_5000:
+          filter.price = { $lt: 5000 };
+          break;
+        case PriceOptions.BETWEEN_5000_AND_10000:
+          filter.price = { $gte: 5000, $lt: 10000 };
+          break;
+        case PriceOptions.OVER_10000:
+          filter.price = { $gte: 10000 };
+          break;
+      }
+    }
+
+    // Fetch sections
     const sections = await Section.find();
 
     if (sections.length === 0) {
@@ -24,27 +57,30 @@ const getAllSections = async (req: Request, res: Response) => {
       };
       return res.status(404).json(notFoundResponse);
     }
-    let sectionsData: {
+    if (availability.length === 0) {
+      const successResponse: SuccessResponse<
+        {
+          section: ISection;
+          products: IProduct[];
+        }[]
+      > = {
+        success: true,
+        data: sections.map((section) => ({
+          section: section.toObject() as ISection,
+          products: [],
+        })),
+      };
+      return res.status(200).json(successResponse);
+    }
+    // Fetch products for each section
+    const sectionsData: {
       section: ISection;
       products: IProduct[];
-    }[] = [];
-
-    await Promise.all(
+    }[] = await Promise.all(
       sections.map(async (section) => {
-        const productFilter: any = {
-          _id: { $in: section.items },
-        };
-        if (search) {
-          productFilter.productName = { $regex: search, $options: "i" };
-        }
-        if (availability) {
-          productFilter.availability = availability;
-        }
+        const productFilter: any = { _id: { $in: section.items }, ...filter };
 
-        if (color) {
-          productFilter.colors = { $elemMatch: { name: color } };
-        }
-
+        // Pagination
         const skip = (Number(page) - 1) * Number(limit);
 
         const products: IProduct[] = await Product.find(productFilter)
@@ -53,12 +89,14 @@ const getAllSections = async (req: Request, res: Response) => {
 
         const sectionObject = section.toObject() as ISection;
 
-        sectionsData.push({
+        return {
           section: sectionObject,
           products,
-        });
+        };
       })
     );
+
+    // Prepare success response
     const successResponse: SuccessResponse<
       {
         section: ISection;

@@ -2,8 +2,9 @@ import { Request, Response } from "express";
 import path from "path";
 import fs from "fs/promises";
 import Admin from "../../models/Admin";
-import { ErrorCode, ErrorSeverity } from "../../utils/ValidationError";
 import { SuccessResponse } from "../../utils/responseInterfaces";
+import ErrorSeverity from './../../enums/ErrorSeverity';
+import ErrorCode from './../../enums/ErrorCode';
 const deleteAdminImage = async (req: Request, res: Response) => {
   const { adminId } = req.params;
 

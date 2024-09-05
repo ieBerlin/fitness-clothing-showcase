@@ -2,7 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import multer, { MulterError } from "multer";
 import path from "path";
 import { ErrorResponse } from "../utils/responseInterfaces";
-import { ErrorCode, ErrorSeverity } from "../utils/ValidationError";
+import ErrorSeverity from './../enums/ErrorSeverity';
+import ErrorCode from './../enums/ErrorCode';
 
 interface CustomRequest extends Request {
   imageFolder?: string;

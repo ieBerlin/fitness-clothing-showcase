@@ -7,6 +7,7 @@ interface RadioOption {
 
 interface RadioInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
+  classes?: string;
   label: string;
   options: RadioOption[];
   selectedValue?: string;
@@ -16,6 +17,7 @@ interface RadioInputProps
 }
 
 const RadioGroup: FC<RadioInputProps> = ({
+  classes = "flex-wrap",
   name,
   label,
   options = [],
@@ -26,10 +28,12 @@ const RadioGroup: FC<RadioInputProps> = ({
 }) => {
   return (
     <div className="flex flex-col">
-      <label className="block my-2 font-semibold text-sm text-gray-700">
+      <label className="block font-semibold text-sm text-gray-700">
         {label}
       </label>
-      <div className="flex flex-wrap gap-x-6 gap-y-2 border-gray-200 border-2 p-2 rounded-lg justify-center">
+      <div
+        className={`flex ${classes} gap-x-6 gap-y-2 border-gray-200 border-2 p-2 rounded-lg justify-center`}
+      >
         {options.map((option) => {
           const isChecked: boolean =
             selectedValue?.toLowerCase() === option.value;

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Product, { IProduct } from "../../models/Product";
-import { Availability } from "../../config/product-attributes";
 import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
+import Availability from './../../enums/Availability';
 
 const getProduct = async (req: Request, res: Response) => {
   try {

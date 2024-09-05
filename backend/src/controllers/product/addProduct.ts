@@ -1,13 +1,11 @@
 import { Request, Response } from "express";
 import Product, { ColorOption, IProduct, Size } from "../../models/Product";
-import {
-  Availability,
-  Color,
-  genderSizes,
-  Season,
-} from "../../config/product-attributes";
-import { ErrorResponse,SuccessResponse } from "../../utils/responseInterfaces";
+import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
 import { ValidationError } from "../../utils/ValidationError";
+import Availability from "./../../enums/Availability";
+import Color from "../../enums/Color";
+import { genderSizes } from "../../enums/Size";
+import Season from "../../enums/Season";
 
 const addProduct = async (req: Request, res: Response) => {
   try {

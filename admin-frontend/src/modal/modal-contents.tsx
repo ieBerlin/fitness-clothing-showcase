@@ -23,6 +23,8 @@ import {
 } from "../types/response";
 import { ValidationError } from "../types/validation-error.types";
 import Section from "../models/Section";
+import Availability from "../enums/Availability";
+import PriceOptions from "../enums/PriceOptions";
 interface ModalContentProps {
   title?: string;
   bodyContent: React.ReactNode;
@@ -311,6 +313,8 @@ export function AddProductToSectionModal(): ModalContentProps {
     queryKey: ["products-sections"],
     queryFn: () =>
       fetchProducts({
+        price: PriceOptions.ALL,
+        availability: Object.values(Availability) as Availability[],
         page: pageRef.current ?? 1,
         search: searchRef.current?.value,
       }),

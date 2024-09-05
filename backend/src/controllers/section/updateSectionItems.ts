@@ -3,7 +3,8 @@ import Section, { ISection } from "../../models/Section";
 import Product from "../../models/Product";
 import mongoose from "mongoose";
 import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
-import { ErrorCode, ErrorSeverity } from "../../utils/ValidationError";
+import ErrorSeverity from './../../enums/ErrorSeverity';
+import ErrorCode from './../../enums/ErrorCode';
 
 const updateSectionItems = async (req: Request, res: Response) => {
   const { sectionId } = req.params;

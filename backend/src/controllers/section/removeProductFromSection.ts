@@ -1,13 +1,10 @@
 import { Request, Response } from "express";
 import Section, { ISection } from "../../models/Section";
-import Product from "../../models/Product";
 import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
-import {
-  ErrorCode,
-  ErrorSeverity,
-  ValidationError,
-} from "../../utils/ValidationError";
+import { ValidationError } from "../../utils/ValidationError";
 import mongoose from "mongoose";
+import ErrorCode from "../../enums/ErrorCode";
+import ErrorSeverity from "../../enums/ErrorSeverity";
 
 const removeProductFromSection = async (req: Request, res: Response) => {
   const { sectionId, productId } = req.params;
