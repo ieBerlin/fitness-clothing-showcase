@@ -18,17 +18,22 @@ export default function ProductTable({
     <table className="min-w-full divide-y divide-gray-200 bg-white">
       <thead className="bg-gray-50">
         <tr>
-          {["count","Product Name", "Price", "Availability", "Quantity", "Actions"].map(
-            (header, index) => (
-              <th
-                key={index}
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
-              >
-                {header}
-              </th>
-            )
-          )}
+          {[
+            "count",
+            "Product Name",
+            "Price",
+            "Availability",
+            "Quantity",
+            "Actions",
+          ].map((header, index) => (
+            <th
+              key={index}
+              scope="col"
+              className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+            >
+              {header}
+            </th>
+          ))}
         </tr>
       </thead>
       <tbody className="divide-y divide-gray-200">
@@ -63,7 +68,7 @@ export default function ProductTable({
               </div>
             </td>
           </tr>
-        ) : products.length > 0 ? (
+        ) : (
           products.map((product, index) => {
             const { _id, productName, price, availability } = product;
             return (
@@ -95,15 +100,6 @@ export default function ProductTable({
               </tr>
             );
           })
-        ) : (
-          <tr>
-            <td
-              colSpan={5}
-              className="px-6 py-4 text-center text-sm font-medium text-gray-600"
-            >
-              No products available.
-            </td>
-          </tr>
         )}
       </tbody>
     </table>

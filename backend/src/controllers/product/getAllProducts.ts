@@ -1,8 +1,12 @@
 import { Request, Response } from "express";
-import Product from "../../models/Product";
-import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
+import Product, { IProduct } from "../../models/Product";
+import {
+  ErrorResponse,
+  ItemsResponse,
+  SuccessResponse,
+} from "../../utils/responseInterfaces";
 import PriceOptions from "../../enums/PriceOptions";
-import Availability from './../../enums/Availability';
+import Availability from "./../../enums/Availability";
 
 const getAllProducts = async (req: Request, res: Response) => {
   try {
@@ -15,11 +19,11 @@ const getAllProducts = async (req: Request, res: Response) => {
     const priceOption: PriceOptions =
       (req.query.price as PriceOptions) || PriceOptions.ALL;
     if (availability.length === 0) {
-      const successResponse: SuccessResponse = {
+      const successResponse: SuccessResponse<ItemsResponse<IProduct>> = {
         success: true,
         data: {
-          products: [],
-          totalProducts: 0,
+          items: [],
+          totalItems: 0,
           currentPage: Number(page),
           totalPages: 0,
         },
@@ -59,11 +63,11 @@ const getAllProducts = async (req: Request, res: Response) => {
     const products = await Product.find(filter).skip(skip).limit(Number(limit));
     const totalProducts = await Product.countDocuments(filter);
 
-    const successResponse: SuccessResponse = {
+    const successResponse: SuccessResponse<ItemsResponse<IProduct>> = {
       success: true,
       data: {
-        products,
-        totalProducts,
+        items: products,
+        totalItems: totalProducts,
         currentPage: Number(page),
         totalPages: Math.ceil(totalProducts / Number(limit)),
       },

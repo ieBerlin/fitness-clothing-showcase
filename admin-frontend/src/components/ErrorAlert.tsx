@@ -2,7 +2,7 @@ import { isArray } from "lodash";
 import { FC } from "react";
 import { ErrorResponse } from "../types/response";
 
-const ErrorDisplay: FC<{
+const ErrorAlert: FC<{
   error: ErrorResponse;
 }> = ({ error }) => {
   if (!error) return null;
@@ -15,11 +15,11 @@ const ErrorDisplay: FC<{
       </h2>
       {errorMessages.map((err, index) => (
         <p key={index} className="text-red-500 font-medium text-base">
-          {err.message}
+          {err.toString()}
         </p>
       ))}
     </div>
   );
 };
 
-export default ErrorDisplay;
+export default ErrorAlert;

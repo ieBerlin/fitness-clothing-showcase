@@ -1,41 +1,41 @@
 import { Notification } from "../types/notification.types";
 
 const notifications: Notification[] = [
-  new Notification(
-    "1", // Unique identifier
-    "System Update",
-    "Your system will be updated tonight at 11 PM. Please save your work.",
-    new Date("2024-08-18T10:00:00Z"),
-    false
-  ),
-  new Notification(
-    "2",
-    "New Comment",
-    "John Doe commented on your post.",
-    new Date("2024-08-17T08:30:00Z"),
-    true
-  ),
-  new Notification(
-    "3",
-    "Password Change",
-    "Your password was changed successfully.",
-    new Date("2024-08-16T14:45:00Z"),
-    true
-  ),
-  new Notification(
-    "4",
-    "New Follower",
-    "Jane Smith started following you.",
-    new Date("2024-08-15T12:00:00Z"),
-    false
-  ),
-  new Notification(
-    "5",
-    "Monthly Report",
-    "Your monthly activity report is ready to view.",
-    new Date("2024-08-14T09:15:00Z"),
-    false
-  ),
+  {
+    id: "1",
+    title: "System Update",
+    description: "Your system will be updated tonight at 11 PM. Please save your work.",
+    date: new Date("2024-08-18T10:00:00Z"),
+    isRead: false,
+  },
+  {
+    id: "2",
+    title: "New Comment",
+    description: "John Doe commented on your post.",
+    date: new Date("2024-08-17T08:30:00Z"),
+    isRead: true,
+  },
+  {
+    id: "3",
+    title: "Password Change",
+    description: "Your password was changed successfully.",
+    date: new Date("2024-08-16T14:45:00Z"),
+    isRead: true,
+  },
+  {
+    id: "4",
+    title: "New Follower",
+    description: "Jane Smith started following you.",
+    date: new Date("2024-08-15T12:00:00Z"),
+    isRead: false,
+  },
+  {
+    id: "5",
+    title: "Monthly Report",
+    description: "Your monthly activity report is ready to view.",
+    date: new Date("2024-08-14T09:15:00Z"),
+    isRead: false,
+  },
 ];
 
 export default notifications;

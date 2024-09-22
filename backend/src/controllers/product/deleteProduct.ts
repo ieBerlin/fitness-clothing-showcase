@@ -51,7 +51,7 @@ const deleteProduct = async (req: Request, res: Response) => {
       await section.save(); // Save the updated section
     }
 
-    const successResponse: SuccessResponse<{ message: string }> = {
+    const successResponse: SuccessResponse = {
       success: true,
     };
 

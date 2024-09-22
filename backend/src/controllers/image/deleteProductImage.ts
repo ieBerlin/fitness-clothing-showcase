@@ -70,7 +70,7 @@ const deleteProductImage = async (req: Request, res: Response) => {
     await product.save();
 
     // Respond with success
-    const successResponse: SuccessResponse<{ message: string }> = {
+    const successResponse: SuccessResponse = {
       success: true,
     };
 

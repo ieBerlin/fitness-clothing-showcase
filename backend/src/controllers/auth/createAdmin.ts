@@ -66,7 +66,7 @@ const createAdmin = async (req: Request, res: Response) => {
     await addAdmin(data);
 
     // Respond with success
-    const successResponse: SuccessResponse<{ message: string }> = {
+    const successResponse: SuccessResponse = {
       success: true,
     };
 

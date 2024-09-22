@@ -12,7 +12,7 @@ import {
 import { FC, ReactNode } from "react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "../components/LoadingSpinner";
-import ErrorDisplay from "../components/ErrorDisplay";
+import ErrorAlert from "../components/ErrorAlert";
 import { ErrorResponse } from "../types/response";
 import {
   fetchActivities,
@@ -26,7 +26,7 @@ interface ActivityItemProps {
   activity: Activity;
 }
 
-const ActivityItem: FC<ActivityItemProps> = ({ activity }) => {
+export const ActivityItem: FC<ActivityItemProps> = ({ activity }) => {
   const {
     isError,
     error,
@@ -59,7 +59,7 @@ const ActivityItem: FC<ActivityItemProps> = ({ activity }) => {
   } else if (isError) {
     content = (
       <div className="w-full py-10">
-        <ErrorDisplay error={error} />
+        <ErrorAlert error={error} />
       </div>
     );
   } else {
@@ -179,7 +179,7 @@ function Dashboard() {
     return (
       <div className="space-y-4">
         {error.map((item) => (
-          <ErrorDisplay error={item} />
+          <ErrorAlert error={item} />
         ))}
       </div>
     );

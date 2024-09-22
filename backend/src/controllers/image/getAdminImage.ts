@@ -1,45 +1,33 @@
 import { Request, Response } from "express";
 import Admin from "../../models/Admin";
 import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
-import ErrorSeverity from "./../../enums/ErrorSeverity";
-import ErrorCode from "./../../enums/ErrorCode";
+import ErrorSeverity from "../../enums/ErrorSeverity";
+import ErrorCode from "../../enums/ErrorCode";
 
-interface MulterRequest extends Request {
-  imageName?: string;
-}
-
-const updateAdminImage = async (req: MulterRequest, res: Response) => {
+const getAdminImage = async (_: Request, res: Response) => {
   try {
-    const imagePath = req.imageName;
     const adminEmail = res.locals.admin.email;
 
     const admin = await Admin.findOne({ adminEmail });
     if (!admin) {
-      const errorResponse: ErrorResponse = {
+      return res.status(404).json({
         success: false,
         errors: [
           {
-            field: "adminId",
+            field: "admin",
             message: "Admin not found",
             code: ErrorCode.NotFound,
             severity: ErrorSeverity.High,
           },
         ],
-      };
-      return res.status(404).json(errorResponse);
+      });
     }
-
-    // Update the admin's image
-    await Admin.findByIdAndUpdate(
-      admin._id,
-      { $set: { adminImage: imagePath } },
-      { new: true }
-    );
-    const successResponse: SuccessResponse = {
+    const successResponse: SuccessResponse<string> = {
       success: true,
+      data: admin.adminImage,
     };
 
-    res.status(200).json(successResponse);
+    return res.status(200).json(successResponse);
   } catch (error) {
     console.error("Error updating admin image:", error);
 
@@ -59,4 +47,4 @@ const updateAdminImage = async (req: MulterRequest, res: Response) => {
   }
 };
 
-export default updateAdminImage;
+export default getAdminImage;

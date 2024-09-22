@@ -1,59 +1,205 @@
-import React, { useState } from 'react';
-import { CameraIcon } from '@heroicons/react/24/outline';
-
+import React, { useEffect, useState } from "react";
+import { CameraIcon, XCircleIcon } from "@heroicons/react/24/outline";
+import PageTemplate from "../components/PageTemplate";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  deleteAdminPicture,
+  getAdminPicture,
+  storeAdminPicture,
+} from "../utils/authUtils";
+import { ErrorResponse } from "../types/response";
+import LoadingSpinner from "../components/LoadingSpinner";
+import ErrorAlert from "../components/ErrorAlert";
+import { useDispatch } from "react-redux";
+import { openConfirmationModal } from "../features/modal";
+import { ModalType } from "../enums/ModalType";
+import { queryClient, SERVER_URL } from "../utils/http";
 const UpdateProfilePicturePage: React.FC = () => {
-    const [profilePicture, setProfilePicture] = useState<string | ArrayBuffer | null>(null);
+  const dispatch = useDispatch();
+  const {
+    data: adminProfilePicture,
+    isFetching: isFetchingProfilePicture,
+    isError: hasFetchError,
+    error: fetchError,
+  } = useQuery<string, ErrorResponse>({
+    queryKey: ["admin-profile-picture"],
+    queryFn: getAdminPicture,
+  });
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setProfilePicture(reader.result);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
+  const { isPending: isUploadingPicture, mutate: uploadPictureMutation } =
+    useMutation<null, ErrorResponse, FormData>({
+      mutationKey: ["admin-profile-picture"],
+      mutationFn: storeAdminPicture,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["admin-profile-picture"] });
+        dispatch(
+          openConfirmationModal({
+            type: ModalType.CONFIRMATION,
+            message: "Your profile picture has been updated successfully!",
+          })
+        );
+      },
+      onError: () => {
+        dispatch(
+          openConfirmationModal({
+            type: ModalType.CONFIRMATION,
+            message: "Failed to update your profile picture!",
+          })
+        );
+      },
+    });
+  const { isPending: isDeletingPicture, mutate: deletePictureMutation } =
+    useMutation<null, ErrorResponse, null>({
+      mutationKey: ["admin-profile-picture"],
+      mutationFn: deleteAdminPicture,
+      onSuccess: () => {
+        setProfilePicture(null);
+        queryClient.invalidateQueries({ queryKey: ["admin-profile-picture"] });
+        dispatch(
+          openConfirmationModal({
+            type: ModalType.CONFIRMATION,
+            message: "Your profile picture has been deleted successfully!",
+          })
+        );
+      },
+      onError: () => {
+        dispatch(
+          openConfirmationModal({
+            type: ModalType.CONFIRMATION,
+            message: "Failed to delete your profile picture!",
+          })
+        );
+      },
+    });
+  const isProcessing = isDeletingPicture || isUploadingPicture;
 
-    const handleSubmit = (event: React.FormEvent) => {
-        event.preventDefault();
-        // Implement upload logic here
-        console.log('Profile picture uploaded');
-    };
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [profilePicture, setProfilePicture] = useState<
+    string | ArrayBuffer | null
+  >(null);
+  useEffect(() => {
+    if (adminProfilePicture) {
+      setProfilePicture(
+        `${SERVER_URL}/public/uploads/admin/${adminProfilePicture}`
+      );
+    }
+  }, [adminProfilePicture]);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePicture(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
+  const handleUploadSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (selectedFile) {
+      const fd = new FormData();
+      fd.append("image", selectedFile);
+      uploadPictureMutation(fd);
+    }
+  };
+  // handleDeletePicture
+  const handleDeleteSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (adminProfilePicture) {
+      deletePictureMutation(null);
+    }
+  };
+
+  const handleImageRemoval = () => {
+    setProfilePicture(null);
+    setSelectedFile(null);
+  };
+  if (isFetchingProfilePicture) {
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
-            <div className="bg-white rounded-lg shadow-lg border border-gray-300 p-8 w-full max-w-md">
-                <h1 className="text-2xl font-semibold mb-4">Update Profile Picture</h1>
-                <form onSubmit={handleSubmit} className="flex flex-col items-center">
-                    <div className="relative w-32 h-32 mb-4">
-                        <img
-                            src={profilePicture || '/images/default-profile.png'}
-                            alt="Profile"
-                            className="w-full h-full rounded-full border-4 border-gray-300 object-cover"
-                        />
-                        <label className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer shadow-lg hover:bg-blue-700 transition-colors">
-                            <CameraIcon className="w-6 h-6" />
-                            <input
-                                type="file"
-                                id="profilePicture"
-                                name="profilePicture"
-                                accept="image/*"
-                                className="absolute inset-0 opacity-0 cursor-pointer"
-                                onChange={handleFileChange}
-                            />
-                        </label>
-                    </div>
-                    <button
-                        type="submit"
-                        className="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 transition-colors"
-                    >
-                        Upload
-                    </button>
-                </form>
-            </div>
-        </div>
+      <div className="flex items-center justify-center w-full py-10 flex-col gap-2">
+        <LoadingSpinner fill="blue-600" text="gray-400" dimension="16" />
+        <h2 className="text-gray-500 font-semibold">Loading...</h2>
+      </div>
     );
+  }
+  if (hasFetchError && fetchError.statusCode === 500) {
+    return (
+      <div className="flex items-center justify-center w-full py-10 flex-col gap-2">
+        <h1 className="text-4xl font-bold mb-4">Server Error</h1>
+        <p className="text-lg mb-4">Failed to fetch admin picture</p>
+        <ErrorAlert error={fetchError} />
+      </div>
+    );
+  }
+  return (
+    <PageTemplate title="Update Profile Picture">
+      <div className="flex justify-center items-center py-10">
+        <div className="bg-white rounded-lg shadow-lg border border-gray-300 p-8 w-full max-w-md">
+          <form
+            onSubmit={handleUploadSubmit}
+            className="flex flex-col items-center"
+          >
+            <div className="relative w-32 h-32 mb-4">
+              <img
+                src={(profilePicture as string) || "/default-profile.jpg"}
+                alt="Profile"
+                className="w-full h-full rounded-full border-4 border-gray-300 object-cover"
+              />
+              {profilePicture && !isProcessing && (
+                <button
+                  type="button"
+                  className="absolute top-0 right-0 bg-red-600 text-white p-1 rounded-full cursor-pointer hover:bg-red-700 transition-colors"
+                  onClick={handleImageRemoval}
+                >
+                  <XCircleIcon className="w-6 h-6" />
+                </button>
+              )}
+              {!isProcessing && (
+                <label className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer shadow-lg hover:bg-blue-700 transition-colors">
+                  <CameraIcon className="w-6 h-6" />
+                  <input
+                    type="file"
+                    id="profilePicture"
+                    name="profilePicture"
+                    accept="image/*"
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    onChange={handleFileChange}
+                  />
+                </label>
+              )}
+            </div>
+            <div className="flex flex-row gap-2 items-center justify-center w-full">
+              <button
+                type="submit"
+                className={`w-full py-2 px-4 text-white font-semibold rounded-md shadow-md transition-colors ${
+                  isProcessing
+                    ? "bg-gray-500 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700"
+                }`}
+                disabled={isProcessing}
+              >
+                {isProcessing ? "Uploading..." : "Upload"}
+              </button>
+              {!isProcessing && adminProfilePicture && (
+                <button
+                  onClick={handleDeleteSubmit}
+                  type="button"
+                  className={
+                    "w-full py-2 px-4 text-white font-semibold rounded-md shadow-md transition-colors bg-red-600 hover:bg-red-700"
+                  }
+                  disabled={isProcessing}
+                >
+                  Delete
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+      </div>
+    </PageTemplate>
+  );
 };
 
 export default UpdateProfilePicturePage;

@@ -2,37 +2,39 @@ import { Request, Response, NextFunction } from "express";
 import multer, { MulterError } from "multer";
 import path from "path";
 import { ErrorResponse } from "../utils/responseInterfaces";
-import ErrorSeverity from './../enums/ErrorSeverity';
-import ErrorCode from './../enums/ErrorCode';
+import ErrorSeverity from "./../enums/ErrorSeverity";
+import ErrorCode from "./../enums/ErrorCode";
 
 interface CustomRequest extends Request {
   imageFolder?: string;
   imageName?: string;
 }
 
-const storage = (imageFolder: string) => multer.diskStorage({
-  filename: (
-    _req: Request,
-    file: Express.Multer.File,
-    cb: (error: Error | null, filename: string) => void
-  ) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const fileExtension = path.extname(file.originalname);
-    cb(null, `${uniqueSuffix}${fileExtension}`);
-  },
+const storage = (imageFolder: string) =>
+  multer.diskStorage({
+    filename: (
+      _req: Request,
+      file: Express.Multer.File,
+      cb: (error: Error | null, filename: string) => void
+    ) => {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      const fileExtension = path.extname(file.originalname);
+      cb(null, `${uniqueSuffix}${fileExtension}`);
+    },
 
-  destination: (
-    _req: Request,
-    _file: Express.Multer.File,
-    cb: (error: Error | null, destination: string) => void
-  ) => {
-    cb(null, `public/uploads/${imageFolder}`);
-  },
-});
+    destination: (
+      _req: Request,
+      _file: Express.Multer.File,
+      cb: (error: Error | null, destination: string) => void
+    ) => {
+      cb(null, `public/uploads/${imageFolder}`);
+    },
+  });
 
-const upload = (imageFolder: string) => multer({
-  storage: storage(imageFolder),
-});
+const upload = (imageFolder: string) =>
+  multer({
+    storage: storage(imageFolder),
+  });
 
 function storeImage(req: CustomRequest, res: Response, next: NextFunction) {
   const urlPath = req.url;

@@ -12,6 +12,7 @@ export interface ModalState {
 const initialState: ModalState = {
   isOpen: false,
   type: undefined,
+  message: undefined,
   data: undefined,
 };
 
@@ -32,7 +33,13 @@ const modalSlice = createSlice({
       state.data = undefined;
     },
 
-    openConfirmationModal: (state, action) => {
+    openConfirmationModal: (
+      state,
+      action: PayloadAction<{
+        message?: string;
+        data?: any;
+      }>
+    ) => {
       state.isOpen = true;
       state.type = ModalType.CONFIRMATION;
       state.message = action.payload.message;

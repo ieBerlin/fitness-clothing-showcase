@@ -1,40 +1,46 @@
-import { API_URL, getData } from "./http";
+import { API_URL, getData, ExtendedFilterParams } from "./http";
 import {
-  ActivitiesResponse,
+  AdminProfileResponse,
   AdminResponse,
+  DataResponse,
   ProductResponse,
   SectionResponse,
-  SectionsResponse,
   StatisticsResponse,
 } from "../types/response";
 import Product from "../models/Product";
 import Section from "../models/Section";
+import Activity from "../models/Activity";
+import { ActivityFilterParams } from "../pages/AdminActivity";
 export interface FetchProductParams {
   productId: string;
 }
 
-export const fetchProducts = async <ProductsResponse>({
-  page = 1,
-  limit,
-  search,
-  availability,
-  price,
-}: {
-  page?: number;
-  limit?: number;
-  search?: string;
+export const fetchProducts = async <ItemsResponse>(params: {
+  currentPage?: number;
+  itemLimit?: number;
+  searchTerm?: string;
   availability?: string[];
   price?: string;
 }) => {
+  const {
+    currentPage = 1,
+    itemLimit,
+    searchTerm,
+    availability,
+    price,
+  } = params;
   const url = new URL(`${API_URL}product`);
-  if (page !== undefined) {
-    url.searchParams.append("page", page.toString());
+  url.searchParams.append("page", currentPage.toString());
+  if (itemLimit !== undefined) {
+    url.searchParams.append("limit", itemLimit.toString());
   }
-  if (limit !== undefined) {
-    url.searchParams.append("limit", limit.toString());
-  }
-  if (search !== undefined && search !== "" && search?.trim() !== "") {
-    url.searchParams.append("search", search.trim());
+
+  if (
+    searchTerm !== undefined &&
+    searchTerm !== "" &&
+    searchTerm?.trim() !== ""
+  ) {
+    url.searchParams.append("search", searchTerm.trim());
   }
   if (availability !== undefined && availability.length > 0) {
     url.searchParams.append("availability", JSON.stringify(availability));
@@ -42,7 +48,8 @@ export const fetchProducts = async <ProductsResponse>({
   if (price !== undefined) {
     url.searchParams.append("price", price);
   }
-  return getData<ProductsResponse>({
+  // console.log(Object.fromEntries(url.searchParams.entries()));
+  return getData<ItemsResponse>({
     url: url.toString(),
   });
 };
@@ -72,28 +79,32 @@ export const fetchProductsCount = async () =>
     url: new URL(`${API_URL}product/count-products`).toString(),
     method: "DELETE",
   });
-export const fetchSections = async ({
-  page = 1,
-  limit,
-  search,
+export const fetchSections = async <ItemsResponse>({
+  currentPage = 1,
+  itemLimit,
+  searchTerm,
   availability,
   price,
 }: {
-  page?: number;
-  limit?: number;
-  search?: string;
+  currentPage?: number;
+  itemLimit?: number;
+  searchTerm?: string;
   availability?: string[];
   price?: string;
 }) => {
   const url = new URL(`${API_URL}section`);
-  if (page !== undefined) {
-    url.searchParams.append("page", page.toString());
+  if (currentPage !== undefined) {
+    url.searchParams.append("page", currentPage.toString());
   }
-  if (limit !== undefined) {
-    url.searchParams.append("limit", limit.toString());
+  if (itemLimit !== undefined) {
+    url.searchParams.append("limit", itemLimit.toString());
   }
-  if (search !== undefined && search !== "" && search?.trim() !== "") {
-    url.searchParams.append("search", search.trim());
+  if (
+    searchTerm !== undefined &&
+    searchTerm !== "" &&
+    searchTerm?.trim() !== ""
+  ) {
+    url.searchParams.append("search", searchTerm.trim());
   }
   if (availability !== undefined && availability.length > 0) {
     url.searchParams.append("availability", JSON.stringify(availability));
@@ -101,7 +112,7 @@ export const fetchSections = async ({
   if (price !== undefined) {
     url.searchParams.append("price", price);
   }
-  return getData<SectionsResponse>({
+  return getData<ItemsResponse>({
     url: url.toString(),
     method: "GET",
   });
@@ -131,13 +142,92 @@ export const createProduct = async (product: Product) =>
     method: "POST",
     body: JSON.stringify(product),
   });
-export const fetchActivities = async () =>
-  getData<ActivitiesResponse>({
-    url: new URL(`${API_URL}activity`).toString(),
+export const fetchActivities = async <ItemsResponse>(
+  params: ExtendedFilterParams<ActivityFilterParams>
+) => {
+  const {
+    adminId,
+    activityType,
+    entityType,
+    startDate,
+    endDate,
+    currentPage = 1,
+    itemLimit = 10,
+    searchTerm,
+  } = params;
+  const urlParams = new URLSearchParams();
+  if (adminId) {
+    urlParams.append("adminId", adminId);
+  }
+  if (
+    searchTerm !== undefined &&
+    searchTerm !== "" &&
+    searchTerm?.trim() !== ""
+  ) {
+    urlParams.append("search", searchTerm.trim());
+  }
+  if (activityType && activityType.length > 0) {
+    activityType.forEach((type) => urlParams.append("activityType", type));
+  }
+  if (entityType && entityType.length > 0) {
+    entityType.forEach((type) => urlParams.append("entityType", type));
+  }
+  if (startDate) {
+    const start = new Date(startDate);
+    if (!isNaN(start.getTime())) {
+      urlParams.append("startDate", start.toISOString());
+    }
+  }
+
+  if (endDate) {
+    const end = new Date(endDate);
+    if (!isNaN(end.getTime())) {
+      urlParams.append("endDate", end.toISOString());
+    }
+  }
+
+  urlParams.append("page", currentPage.toString());
+  urlParams.append("limit", itemLimit.toString());
+
+  const url = new URL(`${API_URL}activity`);
+  url.search = urlParams.toString();
+  return getData<ItemsResponse>({
+    url: url.toString(),
   });
+};
+export const fetchMyActivities = async ({
+  currentPage = 1,
+  itemLimit = 10,
+}: {
+  currentPage?: number;
+  itemLimit?: number;
+}) => {
+  const params = new URLSearchParams();
+
+  params.append("page", currentPage.toString());
+  params.append("limit", itemLimit.toString());
+
+  const url = new URL(`${API_URL}activity/my-activities`);
+  url.search = params.toString();
+
+  return getData<DataResponse<Activity>>({
+    url: url.toString(),
+  });
+};
+export const fetchMyBasicInformations = async () => {
+  const url = new URL(`${API_URL}activity/my-activities`);
+
+  return getData<DataResponse<Activity>>({
+    url: url.toString(),
+  });
+};
 export const fetchStatistics = async () =>
   getData<StatisticsResponse>({
     url: new URL(`${API_URL}statistics`).toString(),
+  });
+export const fetchMyProfile = async () =>
+  getData<AdminProfileResponse>({
+    url: new URL(`${API_URL}auth/my-profile`).toString(),
   });
 export const fetchAdmin = async (adminId: string) =>
   getData<AdminResponse>({
@@ -152,4 +242,32 @@ export const storeImage = async (formData: FormData) =>
     ).toString(),
     method: "POST",
     body: formData,
+  });
+export const storeAdminPicture = async (formData: FormData) =>
+  getData<null>({
+    url: new URL(`${API_URL}image/upload/admin`).toString(),
+    method: "POST",
+    body: formData,
+  });
+export const deleteAdminPicture = async () =>
+  getData<null>({
+    url: new URL(`${API_URL}image/upload/admin`).toString(),
+    method: "DELETE",
+  });
+export const updatePassword = async (data: {
+  oldPassword: string;
+  newPassword: string;
+}) =>
+  getData<null>({
+    url: new URL(`${API_URL}auth/update-password`).toString(),
+    method: "PUT",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+export const getAdminPicture = async () =>
+  getData<string>({
+    url: new URL(`${API_URL}image`).toString(),
+    method: "GET",
   });

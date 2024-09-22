@@ -5,7 +5,6 @@ import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
 const getSingleAdmin = async (req: Request, res: Response) => {
   try {
     const { adminId } = req.params;
-    console.log(adminId);
     if (!adminId) {
       const errorResponse: ErrorResponse = {
         success: false,

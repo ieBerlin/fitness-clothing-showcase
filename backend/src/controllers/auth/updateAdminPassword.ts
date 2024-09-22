@@ -6,15 +6,8 @@ import { ValidationError } from "../../utils/ValidationError";
 import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
 
 export default async function updateAdminPassword(req: Request, res: Response) {
-  const { email, oldPassword, newPassword } = req.body;
+  const { oldPassword, newPassword } = req.body;
   const errors: ValidationError[] = [];
-
-  if (!email || typeof email !== "string") {
-    errors.push({
-      field: "email",
-      message: "Email is required and must be a string.",
-    });
-  }
 
   if (!oldPassword || typeof oldPassword !== "string") {
     errors.push({
@@ -43,7 +36,7 @@ export default async function updateAdminPassword(req: Request, res: Response) {
   }
 
   try {
-    const admin = await Admin.findOne({ adminEmail: email });
+    const admin = await Admin.findOne({ adminEmail: res.locals.admin.email });
 
     if (!admin) {
       const errorResponse: ErrorResponse = {
@@ -65,7 +58,7 @@ export default async function updateAdminPassword(req: Request, res: Response) {
           { field: "oldPassword", message: "Old password is incorrect." },
         ],
       };
-      return res.status(403).json(errorResponse);
+      return res.status(400).json(errorResponse);
     }
 
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);

@@ -1,11 +1,20 @@
-import { ChangeEventHandler, forwardRef } from "react";
+import { debounce } from "lodash";
+import { ChangeEvent, ChangeEventHandler, forwardRef } from "react";
 
 type SearchInputProps = {
+  debouncingDuration?: number;
   onChange: ChangeEventHandler<HTMLInputElement>;
 };
 
-const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
-  ({ onChange }, ref) => {
+const SearchBar = forwardRef<HTMLInputElement, SearchInputProps>(
+  ({ onChange, debouncingDuration = 600 }, ref) => {
+    const handleSearchDebounce = debounce(
+      (event: ChangeEvent<HTMLInputElement>) => {
+        onChange(event);
+      },
+      debouncingDuration
+    );
+
     return (
       <div className="relative w-full">
         <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -26,7 +35,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
           </svg>
         </div>
         <input
-          onChange={onChange}
+          onChange={handleSearchDebounce}
           ref={ref}
           type="search"
           className="block w-full px-4 py-3 ps-10 text-sm text-gray-900 border border-gray-500 rounded-lg bg-gray-100 focus:border-blue-600"
@@ -38,4 +47,4 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
   }
 );
 
-export default SearchInput;
+export default SearchBar;

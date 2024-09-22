@@ -13,7 +13,6 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
   content,
   position = "right-0",
   closeOnContentClick = true,
-  onSubmit,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownMenuRef = useRef<HTMLDivElement | null>(null);
@@ -27,9 +26,6 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
         buttonRef.current &&
         !buttonRef.current.contains(event.target as Node)
       ) {
-        if (onSubmit) {
-          onSubmit();
-        }
         setIsOpen(false);
       }
     }

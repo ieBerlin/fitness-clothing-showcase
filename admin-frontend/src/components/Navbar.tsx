@@ -4,23 +4,35 @@ import notifications from "../dummy-data/notifications";
 import { Link } from "react-router-dom";
 import DropdownItem from "./DropdownItem";
 import { currentDate } from "../utils/date";
-const adminDetails = {
-  firstName: "ieBerlin",
-  lastName: "Schizo",
-  email: "aeourmassi@gmail.com",
-};
-
-// Format the current date
+import { fetchMyProfile } from "../utils/authUtils";
+import { useQuery } from "@tanstack/react-query";
 
 const hasNewNotifications = false;
 
 function Navbar() {
+  const {
+    isFetching: isFetchingProfile,
+    data: profile,
+    isError: isErrorProfile,
+  } = useQuery({
+    queryKey: ["basic-informations"],
+    queryFn: fetchMyProfile,
+    staleTime: Infinity,
+  });
   return (
     <nav className="bg-gray-700 px-6 py-2 flex justify-between items-center">
       <div>
-        <h1 className="text-white text-xl font-bold">
-          Welcome back, {adminDetails.firstName}!
-        </h1>
+        {isFetchingProfile ? (
+          <div className="text-white text-xl font-bold">Loading...</div>
+        ) : isErrorProfile ? (
+          <div className="text-red-500 text-xl font-bold">
+            Error loading profile
+          </div>
+        ) : (
+          <h1 className="text-white text-xl font-bold">
+            Welcome back, {profile?.adminEmail.split("@")[0]}
+          </h1>
+        )}
         <h2 className="text-gray-300 text-md">{currentDate}</h2>
       </div>
       <div className="relative flex flex-row items-center gap-6 justify-center">

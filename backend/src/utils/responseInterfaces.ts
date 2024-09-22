@@ -10,3 +10,10 @@ export interface ErrorResponse {
   statusCode?: number;
   message?: string;
 }
+export interface ItemsResponse<T> {
+  items?: T[];
+  count?: number;
+  totalPages?: number;
+  currentPage?: number;
+  totalItems?: number;
+}

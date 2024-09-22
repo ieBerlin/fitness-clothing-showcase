@@ -7,21 +7,38 @@ import {
   StarIcon,
 } from "@heroicons/react/24/solid";
 import SidebarItem from "./SidebarItem";
-const adminDetails = {
-  firstName: "ieBerlin",
-  lastName: "Schizo",
-  email: "aeourmassi@gmail.com",
-};
+import { useQuery } from "@tanstack/react-query";
+import { fetchMyProfile } from "../utils/authUtils";
+import LoadingSpinner from "./LoadingSpinner";
 
 function Sidebar() {
+  const {
+    isFetching: isFetchingProfile,
+    data: profile,
+    isError: isErrorProfile,
+  } = useQuery({
+    queryKey: ["basic-informations"],
+    queryFn: fetchMyProfile,
+    staleTime: Infinity,
+  });
   return (
     <aside className="bg-gray-800 p-6">
       <div className="flex items-center gap-3 mb-6">
         <div className="text-center mx-auto">
-          <h2 className="text-white text-lg font-semibold">
-            {adminDetails.firstName} {adminDetails.lastName}
-          </h2>
-          <h3 className="text-gray-300 text-sm">{adminDetails.email}</h3>
+          {isFetchingProfile ? (
+            <div className="flex items-center justify-center w-full py-4 flex-col gap-2">
+              <LoadingSpinner fill="blue-600" text="gray-400" dimension="8" />
+              <h2 className="text-gray-500 font-semibold">
+                Loading profile...
+              </h2>
+            </div>
+          ) : isErrorProfile ? (
+            <h2 className="text-red-500 font-semibold">
+              Error loading profile
+            </h2>
+          ) : (
+            <h3 className="text-gray-300 text-sm">{profile?.adminEmail}</h3>
+          )}
         </div>
       </div>
       <hr className="border-gray-700 mb-6" />

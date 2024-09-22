@@ -5,49 +5,16 @@ import {
   ItemsResponse,
   SuccessResponse,
 } from "../../utils/responseInterfaces";
+import Admin from "../../models/Admin";
 
 const getAllActivities = async (req: Request, res: Response) => {
   try {
-    const {
-      adminId,
-      activityType,
-      entityType,
-      startDate,
-      endDate,
-      page = 1,
-      limit = 10,
-    } = req.query;
+    const adminId = await Admin.findOne({ adminEmail: res.locals.admin.email });
+    const { page = 1, limit = 10 } = req.query;
     const filter: any = {};
+
     if (adminId) {
       filter.adminId = adminId;
-    }
-
-    if (activityType) {
-      const activityTypesArray = Array.isArray(activityType)
-        ? activityType
-        : [activityType];
-      filter.activityType = { $in: activityTypesArray };
-    }
-
-    if (entityType) {
-      const entityTypesArray = Array.isArray(entityType)
-        ? entityType
-        : [entityType];
-      filter.entityType = { $in: entityTypesArray };
-    }
-    if (startDate) {
-      const start = new Date(startDate as string);
-      const end = new Date(endDate as string);
-      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-        filter.timestamp = { $gte: start, $lte: end };
-      } else if (!isNaN(start.getTime())) {
-        filter.timestamp = { $gte: start };
-      } else {
-        return res.status(400).json({
-          success: false,
-          errors: [{ field: "date", message: "Invalid date format" }],
-        });
-      }
     }
 
     const skip = (Number(page) - 1) * Number(limit);
@@ -68,6 +35,7 @@ const getAllActivities = async (req: Request, res: Response) => {
         totalPages: Math.ceil(totalActivities / Number(limit)),
       },
     };
+
     res.status(200).json(successResponse);
   } catch (error) {
     console.error("Error fetching activities:", error);

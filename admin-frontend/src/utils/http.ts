@@ -3,24 +3,30 @@ import { authHeader } from "../services/auth-header.service";
 import ErrorCode from "../enums/ErrorCode";
 import { ErrorSeverity } from "../enums/ErrorSeverity";
 import { ErrorResponse, SuccessResponse } from "../types/response";
+export type BaseFilterParams = {
+  itemLimit?: number;
+  currentPage: number;
+  searchTerm?: string;
+};
 
+export type ExtendedFilterParams<ExtraParams = object> = BaseFilterParams &
+  ExtraParams;
 export const queryClient = new QueryClient();
 export const SERVER_URL = "http://localhost:5431";
 export const API_URL = SERVER_URL + "/api/";
 export async function getData<T>({
   url,
   body,
+  headers = {},
   method = "GET",
   isTokenRequired = true,
 }: {
   method?: string;
   url: RequestInfo;
   body?: BodyInit;
+  headers?: HeadersInit;
   isTokenRequired?: boolean;
 }): Promise<T> {
-  let headers: HeadersInit = {
-    "Content-Type": "application/json",
-  };
   if (isTokenRequired) {
     const token = authHeader();
     if (!token["x-access-token"]) {

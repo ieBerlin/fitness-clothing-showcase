@@ -4,7 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import ProductForm from "../components/ProductForm";
 import { useNavigate } from "react-router-dom";
 import { createProduct } from "../utils/authUtils";
-import ErrorDisplay from "../components/ErrorDisplay";
+import ErrorAlert from "../components/ErrorAlert";
 import {
   ErrorResponse,
   ProductResponse,
@@ -62,7 +62,7 @@ const AddProductPage: FC = () => {
   if (isError) {
     return (
       <div className="space-y-4">
-        <ErrorDisplay error={error} />
+        <ErrorAlert error={error} />
       </div>
     );
   }

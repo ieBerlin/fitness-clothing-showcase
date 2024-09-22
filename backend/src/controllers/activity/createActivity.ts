@@ -127,7 +127,7 @@ const createActivity = async (req: Request, res: Response) => {
       timestamp: new Date(),
     });
 
-    const successResponse: SuccessResponse<{ message: string }> = {
+    const successResponse: SuccessResponse = {
       success: true,
     };
 

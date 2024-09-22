@@ -6,11 +6,12 @@ import corsMiddleware from "./middlewares/corsConfig";
 import delayMiddleware from "./middlewares/delayMiddleware";
 dotenv.config();
 const app = express();
+
 app.use(express.json());
 app.use(corsMiddleware);
-app.use('/public',express.static('public'))
+app.use("/public", express.static("public"));
 // app.use(delayMiddleware);
-app.set('trust proxy',true)
+app.set("trust proxy", true);
 const PORT = process.env.PORT || 5431;
 Routes(app);
 app.listen(PORT, async () => {

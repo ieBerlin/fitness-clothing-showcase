@@ -48,6 +48,9 @@ export const login = async (data: IAdmin) =>
   getData<string>({
     url: new URL(`${API_URL}auth/login`).toString(),
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(data),
     isTokenRequired: false,
   });

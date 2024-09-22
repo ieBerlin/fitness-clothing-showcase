@@ -3,13 +3,12 @@ import path from "path";
 import fs from "fs/promises";
 import Admin from "../../models/Admin";
 import { SuccessResponse } from "../../utils/responseInterfaces";
-import ErrorSeverity from './../../enums/ErrorSeverity';
-import ErrorCode from './../../enums/ErrorCode';
+import ErrorSeverity from "./../../enums/ErrorSeverity";
+import ErrorCode from "./../../enums/ErrorCode";
 const deleteAdminImage = async (req: Request, res: Response) => {
-  const { adminId } = req.params;
-
   try {
-    const admin = await Admin.findById(adminId);
+    const adminEmail = res.locals.admin.email;
+    const admin = await Admin.findOne({ adminEmail });
     if (!admin) {
       return res.status(404).json({
         success: false,
@@ -51,7 +50,7 @@ const deleteAdminImage = async (req: Request, res: Response) => {
     admin.adminImage = "";
     await admin.save();
 
-    const successResponse: SuccessResponse<{ message: string }> = {
+    const successResponse: SuccessResponse = {
       success: true,
     };
 

@@ -12,13 +12,13 @@ import {
 import { queryClient } from "../utils/http";
 import { debounce, isArray } from "lodash";
 import { ReactNode, useEffect, useRef, useState } from "react";
-import ErrorDisplay from "../components/ErrorDisplay";
+import ErrorAlert from "../components/ErrorAlert";
 import LoadingSpinner from "../components/LoadingSpinner";
-import SearchInput from "../components/SearchInput";
+import SearchBar from "../components/SearchBar";
 import Product from "../models/Product";
 import {
+  DataResponse,
   ErrorResponse,
-  ProductsResponse,
   SectionResponse,
 } from "../types/response";
 import { ValidationError } from "../types/validation-error.types";
@@ -309,7 +309,7 @@ export function AddProductToSectionModal(): ModalContentProps {
     isError: hasQueryErrors,
     error: queryError,
     data: fetchedProducts,
-  } = useQuery<ProductsResponse, ErrorResponse>({
+  } = useQuery<DataResponse<Product>, ErrorResponse>({
     queryKey: ["products-sections"],
     queryFn: () =>
       fetchProducts({
@@ -321,13 +321,13 @@ export function AddProductToSectionModal(): ModalContentProps {
     enabled: type === "add-product-to-section",
   });
   useEffect(() => {
-    if (fetchedProducts && fetchedProducts.products) {
+    if (fetchedProducts && fetchedProducts.items) {
       setProductsState((prevState) => {
         const currentArgs = searchRef.current?.value ?? "";
         const prevArgs = prevState.args;
 
         const prevProducts = prevState.products;
-        const newProducts = (fetchedProducts.products as Product[]).filter(
+        const newProducts = (fetchedProducts.items as Product[]).filter(
           (product) => !prevProducts.some((pro) => pro._id === product._id)
         );
 
@@ -392,11 +392,11 @@ export function AddProductToSectionModal(): ModalContentProps {
     content = (
       <div className="space-y-4">
         {errors.map((error) => (
-          <ErrorDisplay key={error.statusCode} error={error} />
+          <ErrorAlert key={error.statusCode} error={error} />
         ))}
       </div>
     );
-  } else if (fetchedProducts?.products && fetchedProducts.products.length > 0) {
+  } else if (fetchedProducts?.items && fetchedProducts.items.length > 0) {
     function handleShowMoreItems() {
       const totalPages = fetchedProducts?.totalPages;
       const currentPage = fetchedProducts?.currentPage;
@@ -410,8 +410,8 @@ export function AddProductToSectionModal(): ModalContentProps {
         });
       }
     }
-    const isShowMoreVisible = fetchedProducts?.totalProducts
-      ? fetchedProducts.totalProducts > productsState.products.length
+    const isShowMoreVisible = fetchedProducts?.totalItems
+      ? fetchedProducts.totalItems > productsState.products.length
       : 0;
     content = (
       <div>
@@ -472,7 +472,7 @@ export function AddProductToSectionModal(): ModalContentProps {
     bodyContent: (
       <div className="p-4">
         <div className="mb-4">
-          <SearchInput onChange={handleInputChange} ref={searchRef} />
+          <SearchBar onChange={handleInputChange} ref={searchRef} />
         </div>
         {content}
       </div>

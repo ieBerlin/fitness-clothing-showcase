@@ -5,7 +5,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import ProductForm from "../components/ProductForm";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { editProduct, fetchProduct } from "../utils/authUtils";
-import ErrorDisplay from "../components/ErrorDisplay";
+import ErrorAlert from "../components/ErrorAlert";
 import Product from "../models/Product";
 import { ErrorResponse, ProductResponse } from "../types/response";
 import ColorOption from "../models/Color";
@@ -155,7 +155,7 @@ const EditProductPage: React.FC = () => {
   if (isError) {
     return (
       <div className="space-y-4">
-        <ErrorDisplay error={error} />
+        <ErrorAlert error={error} />
       </div>
     );
   }

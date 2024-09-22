@@ -1,6 +1,6 @@
 import { Document, model, Schema } from "mongoose";
 
-export interface IAdmin extends Document {
+export interface IAdmin {
   adminEmail: string;
   adminPassword: string;
   adminImage: string;
