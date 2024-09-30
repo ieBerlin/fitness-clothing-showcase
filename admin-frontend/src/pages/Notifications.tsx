@@ -1,18 +1,98 @@
-import React, { FC } from "react";
+import React, { FC, useCallback, useState } from "react";
 import PageTemplate from "../components/PageTemplate";
 import { Notification } from "../types/notification.types";
-import notifications from "../dummy-data/notifications";
-
+import { fetchNotifications } from "../utils/authUtils";
+import DataTable from "../components/DataTable";
+import { ExtendedFilterParams } from "../utils/http";
+import {
+  defaultFilterParams,
+  NotificationFilterParams,
+} from "../types/notificationFilters";
+import { notificationQueryKey } from "../constants/queryKeys";
+import TimeOption from "../enums/TimeOption";
+import RadioGroup from "../components/RadioGroup";
+import { ChevronDoubleDownIcon } from "@heroicons/react/24/outline";
+import DropdownFilterGroup from "../components/FilterDropdownMenus";
+import DropdownMenu from "../components/DropdownMenu";
+import { getDateRanges } from "../constants/dropdownOptions";
 const Notifications: React.FC = () => {
+  const [params, setParams] =
+    useState<ExtendedFilterParams<typeof defaultFilterParams>>(
+      defaultFilterParams
+    );
+  const handleUpdateArgs = useCallback(
+    (
+      params: ExtendedFilterParams<
+        ExtendedFilterParams<NotificationFilterParams>
+      >
+    ) => {
+      setParams(params);
+    },
+    []
+  );
+  const fetchFilteringArgs = {
+    ...params,
+    startDate: getDateRanges(params.timing).start,
+    endDate: getDateRanges(params.timing).end,
+  };
   return (
     <PageTemplate title="Notifications">
-      <div className="max-w-4xl mx-auto p-4">
-        <ul className="space-y-4">
-          {notifications.map((item) => (
-            <NotificationItem key={item.id} notification={item} />
-          ))}
-        </ul>
-      </div>
+      <DataTable<Notification, NotificationFilterParams>
+        fetchItems={fetchNotifications}
+        fetchDataParams={fetchFilteringArgs}
+        initialParams={params}
+        updateParams={handleUpdateArgs}
+        renderTableContent={({
+          dataEntries: notifications,
+          updateFilterParams,
+        }) => ({
+          ContentRenderer: () => (
+            <div className="max-w-4xl mx-auto p-4">
+              <ul className="space-y-4">
+                {notifications.length &&
+                  notifications.map((item) => (
+                    <NotificationItem key={item._id} notification={item} />
+                  ))}
+              </ul>
+            </div>
+          ),
+          dropDownMenus: (
+            <DropdownFilterGroup
+              dropDownMenus={[
+                <DropdownMenu
+                  label={
+                    <div className="flex items-center gap-2 px-4 py-2 border rounded-lg bg-gray-50 text-gray-800 shadow-sm">
+                      <span className="text-lg font-semibold">Timing</span>
+                      <ChevronDoubleDownIcon className="w-5 h-5 text-gray-600" />
+                    </div>
+                  }
+                  content={
+                    <div className="flex flex-col space-y-2 p-2 text-gray-800">
+                      <RadioGroup
+                        classes="flex-col border-0"
+                        label="Timing"
+                        onChange={(e) =>
+                          updateFilterParams(
+                            "timing",
+                            e.target.value as TimeOption
+                          )
+                        }
+                        options={Object.values(TimeOption).map((item) => ({
+                          label: item.charAt(0).toUpperCase() + item.slice(1),
+                          value: item,
+                        }))}
+                        name={"timing"}
+                        selectedValue={params.timing}
+                      />
+                    </div>
+                  }
+                />,
+              ]}
+            />
+          ),
+        })}
+        queryKey={notificationQueryKey}
+      />
     </PageTemplate>
   );
 };

@@ -22,6 +22,7 @@ import {
 import Activity from "../models/Activity";
 import Admin from "../models/Admin";
 import { Link } from "react-router-dom";
+import { activityQueryKey, statisticQueryKey } from "../constants/queryKeys";
 interface ActivityItemProps {
   activity: Activity;
 }
@@ -33,7 +34,7 @@ export const ActivityItem: FC<ActivityItemProps> = ({ activity }) => {
     isFetching,
     data: adminData,
   } = useQuery<Admin, ErrorResponse>({
-    queryKey: [`admin-${activity.adminId}`],
+    queryKey: activityQueryKey,
     queryFn: () => fetchAdmin(activity.adminId),
     staleTime: Infinity,
   });
@@ -148,12 +149,12 @@ function Dashboard() {
   const results = useQueries({
     queries: [
       {
-        queryKey: ["sections"],
+        queryKey: activityQueryKey,
         queryFn: fetchActivities,
         staleTime: Infinity,
       },
       {
-        queryKey: ["statistics"],
+        queryKey: statisticQueryKey,
         queryFn: fetchStatistics,
         staleTime: Infinity,
       },
@@ -165,7 +166,7 @@ function Dashboard() {
   const error = results.map(
     (result) => result.error as unknown as ErrorResponse
   );
-  const activities = results[0]?.data?.activities || [];
+  const activities = (results[0]?.data?.activities || []) as Activity[];
   const statistics = results[1].data;
   if (isFetching) {
     return (

@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
-import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
-import Admin from "../../models/Admin";
+import {
+  ErrorResponse,
+  ItemsResponse,
+  SuccessResponse,
+} from "../../utils/responseInterfaces";
+import Admin, { IAdmin } from "../../models/Admin";
 
 const getAdmins = async (req: Request, res: Response) => {
   try {
@@ -22,11 +26,11 @@ const getAdmins = async (req: Request, res: Response) => {
 
     const totalAdmins = await Admin.countDocuments(filter);
 
-    const successResponse: SuccessResponse = {
+    const successResponse: SuccessResponse<ItemsResponse<IAdmin>> = {
       success: true,
       data: {
-        admins,
-        totalAdmins,
+        items: admins,
+        totalItems: totalAdmins,
         currentPage: Number(page),
         totalPages: Math.ceil(totalAdmins / Number(limit)),
       },

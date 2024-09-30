@@ -1,11 +1,11 @@
-import React from 'react';
+import React from "react";
+import PageTemplate from "../components/PageTemplate";
 
 const ActivityDetails: React.FC = () => {
   return (
-    <div>
-      <h1>Activity Details</h1>
-      <p>Details of a specific admin activity.</p>
-    </div>
+    <PageTemplate title="Admin Details">
+      <div></div>
+    </PageTemplate>
   );
 };
 

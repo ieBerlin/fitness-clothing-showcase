@@ -6,9 +6,8 @@ import ErrorAlert from "./ErrorAlert";
 import LoadingSpinner from "./LoadingSpinner";
 import { DataResponse, ErrorResponse } from "../types/response";
 
-
-
 const DataTable = <T, ExtraParams>({
+  isDataMerged = true,
   fetchDataParams,
   initialParams,
   queryKey,
@@ -16,6 +15,7 @@ const DataTable = <T, ExtraParams>({
   renderTableContent,
   updateParams,
 }: {
+  isDataMerged?: boolean;
   fetchItems: (
     params: ExtendedFilterParams<ExtraParams>
   ) => Promise<DataResponse<T>>;
@@ -51,12 +51,12 @@ const DataTable = <T, ExtraParams>({
     queryKey,
     queryFn: () => fetchItems({ ...fetchDataParams }),
   });
-  console.log(window.location.href);
-  console.log(dataEntries);
   useEffect(() => {
     const newItems: T[] = isArray(data) ? data || [] : data?.items || [];
-    setDataEntries((prevEntries) => prevEntries.concat(newItems));
-  }, [data, fetchDataParams, setDataEntries]);
+    setDataEntries((prevEntries) =>
+      isDataMerged ? prevEntries.concat(newItems) : newItems
+    );
+  }, [data, fetchDataParams, isDataMerged, setDataEntries]);
   const moreResultsVisible =
     data?.currentPage !== data?.totalPages && data?.totalPages !== 0;
 
