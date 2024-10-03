@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
-import { emailValidator, passwordValidator } from "../../utils/validators";
+import {
+  emailValidator,
+  isValidName,
+  passwordValidator,
+} from "../../utils/validators";
 import { SuccessResponse } from "./../../utils/responseInterfaces";
 import ErrorSeverity from "../../enums/ErrorSeverity";
 import ErrorCode from "../../enums/ErrorCode";
@@ -9,9 +13,10 @@ import {
   doesAdminExist,
 } from "../../services/adminService";
 import { ValidationError } from "../../utils/ValidationError";
+import { IAdmin } from "../../models/Admin";
 const createAdmin = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, fullName } = req.body;
 
     const errors: ValidationError[] = [];
 
@@ -39,6 +44,15 @@ const createAdmin = async (req: Request, res: Response) => {
       });
     }
 
+    if (!fullName || typeof fullName !== "string" || !isValidName(fullName)) {
+      errors.push({
+        field: "fullName",
+        message: "Invalid full name format",
+        code: ErrorCode.ValidationError,
+        severity: ErrorSeverity.Medium,
+      });
+    }
+
     if (errors.length > 0) {
       return res.status(400).json({
         success: false,
@@ -46,7 +60,6 @@ const createAdmin = async (req: Request, res: Response) => {
       });
     }
 
-    // Check if admin with the given email already exists
     if (await doesAdminExist(email)) {
       return res.status(400).json({
         success: false,
@@ -62,10 +75,13 @@ const createAdmin = async (req: Request, res: Response) => {
     }
 
     // Create new admin
-    const data: AdminData = { email, password };
+    const data: AdminData = {
+      adminEmail: email,
+      adminPassword: password,
+      fullName: fullName,
+    };
     await addAdmin(data);
 
-    // Respond with success
     const successResponse: SuccessResponse = {
       success: true,
     };

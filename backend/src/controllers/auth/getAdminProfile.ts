@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import Admin, { IAdmin } from "../../models/Admin";
 import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
+import { AdminData } from "../../services/adminService";
 
-interface SanitizedAdmin extends Omit<IAdmin, "adminPassword"> {
+interface SanitizedAdmin extends Omit<AdminData, "adminPassword"> {
   adminId: string;
 }
 
@@ -40,6 +41,12 @@ const getAdminProfile = async (req: Request, res: Response) => {
       adminId: admin._id as unknown as string,
       adminEmail: admin.adminEmail,
       adminImage: admin.adminImage,
+      createdAt: admin.createdAt,
+      updatedAt: admin.updatedAt,
+      lastLoginAt: admin.lastLoginAt,
+      fullName: admin.fullName,
+      status: admin.status,
+      role: admin.role,
     };
 
     const successResponse: SuccessResponse<SanitizedAdmin> = {

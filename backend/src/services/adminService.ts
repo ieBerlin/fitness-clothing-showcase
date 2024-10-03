@@ -3,8 +3,15 @@ import Admin from "../models/Admin";
 const saltRounds = 10;
 
 export interface AdminData {
-  email: string;
-  password: string;
+  adminEmail: string;
+  adminPassword: string;
+  adminImage?: string;
+  fullName: string;
+  role?: "admin" | "manager";
+  status?: "active" | "suspended" | "deleted";
+  createdAt?: Date;
+  updatedAt?: Date;
+  lastLoginAt?: Date;
 }
 
 export async function doesAdminExist(email: string): Promise<boolean> {
@@ -19,7 +26,7 @@ export async function doesAdminExist(email: string): Promise<boolean> {
 
 // Promise<Admin>
 export async function createAdmin(adminData: AdminData) {
-  const { email, password: plaintextPassword } = adminData;
+  const { adminEmail: email, adminPassword: plaintextPassword } = adminData;
 
   try {
     const hashedPassword = await hashPassword(plaintextPassword);
@@ -27,7 +34,10 @@ export async function createAdmin(adminData: AdminData) {
     if (existingAdmin) {
       throw new Error("Admin with this email already exists.");
     }
-    return await Admin.create({ adminEmail: email, adminPassword: hashedPassword });
+    return await Admin.create({
+      adminEmail: email,
+      adminPassword: hashedPassword,
+    });
     // const newAdmin = await Admin.create({
     //   adminEmail: email,
     //   adminPassword: hashedPassword,
@@ -36,7 +46,7 @@ export async function createAdmin(adminData: AdminData) {
     // return newAdmin;
   } catch (error) {
     console.error("Error creating admin:", error);
-    throw new Error('Error occured')
+    throw new Error("Error occured");
   }
 }
 export default async function hashPassword(password: string): Promise<string> {

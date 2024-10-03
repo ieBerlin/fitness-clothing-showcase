@@ -1,15 +1,23 @@
-import { BellIcon } from "@heroicons/react/24/solid";
 import DropdownMenu from "./DropdownMenu";
-import notifications from "../dummy-data/notifications";
-import { Link } from "react-router-dom";
 import DropdownItem from "./DropdownItem";
 import { currentDate } from "../utils/date";
-import { fetchMyProfile } from "../utils/authUtils";
+import { fetchMyProfile, fetchNotifications } from "../utils/authUtils";
 import { useQuery } from "@tanstack/react-query";
+import { ExtendedFilterParams } from "../utils/http";
+import { useCallback, useState } from "react";
+import DataTable from "./DataTable";
+import Notification from "../models/Notification";
+import { notificationQueryKey } from "../constants/queryKeys";
+import { BellIcon } from "@heroicons/react/24/outline";
+import { Link } from "react-router-dom";
 
 const hasNewNotifications = false;
 
 function Navbar() {
+  const [params, setParams] = useState<ExtendedFilterParams<null>>(null);
+  const handleUpdateArgs = useCallback((params: ExtendedFilterParams<null>) => {
+    setParams(params);
+  }, []);
   const {
     isFetching: isFetchingProfile,
     data: profile,
@@ -52,52 +60,69 @@ function Navbar() {
                 <h2 className="font-semibold text-center text-gray-200 mb-4">
                   Recent Notifications
                 </h2>
-                <ul className="space-y-2">
-                  {notifications.length > 0 ? (
-                    notifications.map((notification) => (
-                      <li
-                        key={notification.id}
-                        className={`relative p-4 border-b border-gray-700 ${
-                          notification.isRead
-                            ? "bg-gray-800 text-gray-400"
-                            : "bg-gray-700 text-gray-100"
-                        }`}
-                      >
-                        {!notification.isRead && (
-                          <div className="absolute top-2 left-2 w-2.5 h-2.5 rounded-full bg-pink-500" />
+                <DataTable<Notification, null>
+                  canShowMoreResults={false}
+                  fetchItems={fetchNotifications}
+                  fetchDataParams={params}
+                  initialParams={params}
+                  updateParams={handleUpdateArgs}
+                  renderTableContent={({ dataEntries: notifications }) => ({
+                    ContentRenderer: () => (
+                      <ul className="space-y-2">
+                        {notifications.length > 0 ? (
+                          notifications.map((notification) => (
+                            <li
+                              key={notification._id}
+                              className={`relative p-4 border-b border-gray-700 ${
+                                notification.isRead
+                                  ? "bg-gray-800 text-gray-400"
+                                  : "bg-gray-700 text-gray-100"
+                              }`}
+                            >
+                              {!notification.isRead && (
+                                <div className="absolute top-2 left-2 w-2.5 h-2.5 rounded-full bg-pink-500" />
+                              )}
+                              <h4
+                                className={`font-semibold text-sm ${
+                                  notification.isRead ? "mt-1" : ""
+                                }`}
+                              >
+                                {notification.title}
+                              </h4>
+                              <p className="text-gray-300 text-xs mt-1">
+                                {notification.message}
+                              </p>
+                              <div className="flex justify-end mt-2">
+                                <span className="text-gray-500 text-xs">
+                                  {new Date(
+                                    notification.createdAt
+                                  ).toLocaleString("en-US", {
+                                    day: "2-digit",
+                                    month: "short",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </span>
+                              </div>
+                            </li>
+                          ))
+                        ) : (
+                          <li className="p-4 text-gray-500 text-sm text-center">
+                            No notifications
+                          </li>
                         )}
-                        <h4
-                          className={`font-semibold text-sm ${
-                            notification.isRead ? "mt-1" : ""
-                          }`}
-                        >
-                          {notification.title}
-                        </h4>
-                        <p className="text-gray-300 text-xs mt-1">
-                          {notification.description}
-                        </p>
-                        <div className="flex justify-end mt-2">
-                          <span className="text-gray-500 text-xs">
-                            {new Date(notification.date).toLocaleString(
-                              "en-US",
-                              {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              }
-                            )}
-                          </span>
-                        </div>
-                      </li>
-                    ))
-                  ) : (
-                    <li className="p-4 text-gray-500 text-sm text-center">
-                      No notifications
-                    </li>
-                  )}
-                </ul>
+                      </ul>
+                    ),
+                    // dropDownMenus: (
+                    //   <AdminActivityDropdown
+                    //     params={params}
+                    //     updateFilterParams={updateFilterParams}
+                    //   />
+                    // ),
+                  })}
+                  queryKey={notificationQueryKey}
+                />
               </div>
               <Link
                 to="/notifications"

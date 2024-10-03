@@ -1,6 +1,5 @@
 import React, { FC, useCallback, useState } from "react";
 import PageTemplate from "../components/PageTemplate";
-import { Notification } from "../types/notification.types";
 import { fetchNotifications } from "../utils/authUtils";
 import DataTable from "../components/DataTable";
 import { ExtendedFilterParams } from "../utils/http";
@@ -9,12 +8,13 @@ import {
   NotificationFilterParams,
 } from "../types/notificationFilters";
 import { notificationQueryKey } from "../constants/queryKeys";
-import TimeOption from "../enums/TimeOption";
-import RadioGroup from "../components/RadioGroup";
 import { ChevronDoubleDownIcon } from "@heroicons/react/24/outline";
 import DropdownFilterGroup from "../components/FilterDropdownMenus";
 import DropdownMenu from "../components/DropdownMenu";
 import { getDateRanges } from "../constants/dropdownOptions";
+import Notification from "../models/Notification";
+import SearchBar from "../components/SearchBar";
+import TimingRadioGroup from "../components/TimingRadioGroup";
 const Notifications: React.FC = () => {
   const [params, setParams] =
     useState<ExtendedFilterParams<typeof defaultFilterParams>>(
@@ -58,6 +58,13 @@ const Notifications: React.FC = () => {
           ),
           dropDownMenus: (
             <DropdownFilterGroup
+              searchDropDownMenu={
+                <SearchBar
+                  onChange={(e) =>
+                    updateFilterParams("searchTerm", e.target.value)
+                  }
+                />
+              }
               dropDownMenus={[
                 <DropdownMenu
                   label={
@@ -67,24 +74,10 @@ const Notifications: React.FC = () => {
                     </div>
                   }
                   content={
-                    <div className="flex flex-col space-y-2 p-2 text-gray-800">
-                      <RadioGroup
-                        classes="flex-col border-0"
-                        label="Timing"
-                        onChange={(e) =>
-                          updateFilterParams(
-                            "timing",
-                            e.target.value as TimeOption
-                          )
-                        }
-                        options={Object.values(TimeOption).map((item) => ({
-                          label: item.charAt(0).toUpperCase() + item.slice(1),
-                          value: item,
-                        }))}
-                        name={"timing"}
-                        selectedValue={params.timing}
-                      />
-                    </div>
+                    <TimingRadioGroup
+                      updateFilterParams={updateFilterParams}
+                      params={params}
+                    />
                   }
                 />,
               ]}
@@ -111,7 +104,7 @@ const NotificationItem: FC<{ notification: Notification }> = ({
         <h2 className="text-lg font-semibold text-gray-900">
           {notification.title}
         </h2>
-        <p className="text-gray-600 mt-2">{notification.description}</p>
+        <p className="text-gray-600 mt-2">{notification.message}</p>
         <p className="text-sm text-gray-500 mt-1">
           {new Intl.DateTimeFormat("en-US", {
             year: "numeric",
@@ -119,7 +112,7 @@ const NotificationItem: FC<{ notification: Notification }> = ({
             day: "numeric",
             hour: "numeric",
             minute: "numeric",
-          }).format(notification.date)}
+          }).format(notification.createdAt)}
         </p>
       </div>
 

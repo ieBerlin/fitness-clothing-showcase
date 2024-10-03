@@ -261,7 +261,7 @@ export const fetchNotifications = async <ItemsResponse>(
   urlParams.append("page", currentPage.toString());
   urlParams.append("limit", itemLimit.toString());
 
-  const url = new URL(`${API_URL}notifications`);
+  const url = new URL(`${API_URL}notification`);
   url.search = urlParams.toString();
   return getData<ItemsResponse>({
     url: url.toString(),

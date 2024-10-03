@@ -7,6 +7,7 @@ import LoadingSpinner from "./LoadingSpinner";
 import { DataResponse, ErrorResponse } from "../types/response";
 
 const DataTable = <T, ExtraParams>({
+  canShowMoreResults = true,
   isDataMerged = true,
   fetchDataParams,
   initialParams,
@@ -15,6 +16,7 @@ const DataTable = <T, ExtraParams>({
   renderTableContent,
   updateParams,
 }: {
+  canShowMoreResults?: boolean;
   isDataMerged?: boolean;
   fetchItems: (
     params: ExtendedFilterParams<ExtraParams>
@@ -119,7 +121,7 @@ const DataTable = <T, ExtraParams>({
       {DropdownFilterGroup}
       {renderTableDisplay()}
 
-      {!isFetching && (
+      {canShowMoreResults && !isFetching && (
         <div className="mt-6 flex justify-center items-center">
           {moreResultsVisible ? (
             <button

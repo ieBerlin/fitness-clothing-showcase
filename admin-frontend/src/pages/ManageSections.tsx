@@ -27,6 +27,7 @@ import {
   ProductFilterParams,
 } from "../types/productFilters";
 import PriceFilterDropdown from "../components/PriceFilterDropdown";
+import { Link } from "react-router-dom";
 
 function ManageSections() {
   const [params, setParams] =
@@ -94,11 +95,10 @@ function ManageSections() {
                         }
                       />
                     }
-                    dropDownMenus={[
-                      <PriceFilterDropdown
-                        updateFilterParams={updateFilterParams}
-                        params={params}
-                      />,
+                    dropDownMenus={PriceFilterDropdown({
+                      updateFilterParams,
+                      params,
+                    }).concat(
                       <ExcelExport
                         data={sections.map((section) => section.products) || []}
                         fileName={(activeSection?.name ?? "section")
@@ -132,8 +132,8 @@ function ManageSections() {
                       >
                         <PlusIcon className="w-5 h-5" />
                         <span className="font-medium">Add New Products</span>
-                      </button>,
-                    ]}
+                      </button>
+                    )}
                   />
 
                   {activeSection && (
@@ -149,7 +149,7 @@ function ManageSections() {
                           []
                         }
                         tableHeadItems={[
-                          "count",
+                          "Count",
                           "Product Name",
                           "Price",
                           "Availability",
@@ -159,26 +159,54 @@ function ManageSections() {
                         renderContent={({ item: product, index }) => (
                           <tr
                             key={product._id}
-                            className="hover:bg-gray-50 transition-colors"
+                            className="hover:bg-gray-100 transition-colors duration-200"
                           >
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 border-b border-gray-200">
                               {index + 1}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
-                              {product.productName}
+                            <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                              <Link
+                                to={`/products/${product._id}`}
+                                className="block text-gray-800"
+                              >
+                                <div className="text-sm font-medium">
+                                  {product.productName}
+                                </div>
+                              </Link>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
-                              ${product.price.toFixed(2)}
+                            <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                              <Link
+                                to={`/products/${product._id}`}
+                                className="block text-gray-600"
+                              >
+                                <div className="text-sm font-medium">
+                                  ${product.price.toFixed(2)}
+                                </div>
+                              </Link>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
-                              <StyledAvailability
-                                status={product.availability}
-                              />
+                            <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                              <Link
+                                to={`/products/${product._id}`}
+                                className="block text-gray-600"
+                              >
+                                <div className="text-sm font-medium">
+                                  <StyledAvailability
+                                    status={product.availability}
+                                  />
+                                </div>
+                              </Link>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
-                              {productsQuantity(product)}
+                            <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                              <Link
+                                to={`/products/${product._id}`}
+                                className="block text-gray-600"
+                              >
+                                <div className="text-sm font-medium">
+                                  {productsQuantity(product)}
+                                </div>
+                              </Link>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                            <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
                               <DropdownMenu
                                 position="top-1 right-1"
                                 label={

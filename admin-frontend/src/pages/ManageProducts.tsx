@@ -56,7 +56,7 @@ function ManageProducts() {
                 isLoading={loading}
                 data={dataEntries}
                 tableHeadItems={[
-                  "count",
+                  "Count",
                   "Product Name",
                   "Price",
                   "Availability",
@@ -66,40 +66,68 @@ function ManageProducts() {
                 renderContent={({ item: product, index }) => (
                   <tr
                     key={product._id}
-                    className="hover:bg-gray-50 transition-colors"
+                    className="hover:bg-gray-100 transition-colors duration-200"
                   >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 border-b border-gray-200">
                       {index + 1}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
-                      {product.productName}
+                    <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                      <Link
+                        to={`/products/${product._id}`}
+                        className="block text-gray-800"
+                      >
+                        <div className="text-sm font-medium">
+                          {product.productName}
+                        </div>
+                      </Link>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
-                      ${product.price.toFixed(2)}
+                    <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                      <Link
+                        to={`/products/${product._id}`}
+                        className="block text-gray-600"
+                      >
+                        <div className="text-sm font-medium">
+                          ${product.price.toFixed(2)}
+                        </div>
+                      </Link>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
-                      <StyledAvailability status={product.availability} />
+                    <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                      <Link
+                        to={`/products/${product._id}`}
+                        className="block text-gray-600"
+                      >
+                        <div className="text-sm font-medium">
+                          <StyledAvailability status={product.availability} />
+                        </div>
+                      </Link>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
-                      {productsQuantity(product)}
+                    <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                      <Link
+                        to={`/products/${product._id}`}
+                        className="block text-gray-600"
+                      >
+                        <div className="text-sm font-medium">
+                          {productsQuantity(product)}
+                        </div>
+                      </Link>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
                       <DropdownMenu
                         position="top-1 right-1"
                         label={
                           <EllipsisHorizontalIcon className="h-5 w-5 text-gray-600 hover:text-gray-800 transition-colors" />
                         }
                         content={
-                          <div>
+                          <div className="bg-white shadow-lg rounded-md">
                             <Link
                               to={`/products/${product._id}/edit`}
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors"
                             >
                               Edit Product
                             </Link>
                             <button
                               onClick={() => handleDeleteProduct(product)}
-                              className="block px-4 py-2 text-sm text-red-600 hover:bg-red-100 hover:text-red-800 w-full text-left"
+                              className="block px-4 py-2 text-sm text-red-600 hover:bg-red-100 hover:text-red-800 w-full text-left rounded-md transition-colors"
                             >
                               Delete Product
                             </button>
@@ -120,18 +148,17 @@ function ManageProducts() {
                     }
                   />
                 }
-                dropDownMenus={[
-                  <PriceFilterDropdown
-                    updateFilterParams={updateFilterParams}
-                    params={params}
-                  />,
+                dropDownMenus={PriceFilterDropdown({
+                  updateFilterParams,
+                  params,
+                }).concat(
                   <Link
                     className="px-4 py-2 rounded-md bg-gray-700 text-white hover:bg-gray-500"
                     to="add"
                   >
                     Add Product
-                  </Link>,
-                ]}
+                  </Link>
+                )}
               />
             ),
           })}

@@ -51,7 +51,7 @@ const AdminActivity: FC = () => {
                 {items.map((item, index) => (
                   <li
                     key={index}
-                    className="p-4 border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-lg transition-shadow duration-300"
+                    className="p-4 border border-gray-300 rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow duration-300"
                   >
                     <div className="flex items-start">
                       <div className="mr-4">
@@ -88,7 +88,7 @@ const AdminActivity: FC = () => {
                                 <span className="text-base font-semibold text-gray-800">
                                   PRODUCT ID:{" "}
                                 </span>
-                                <span className="text-sm text-blue-600 hover:underline">
+                                <span className="text-sm font-medium text-blue-600 hover:underline">
                                   {item.entityId}
                                 </span>
                               </Link>
@@ -97,7 +97,7 @@ const AdminActivity: FC = () => {
                                   <span className="text-base font-semibold text-gray-800">
                                     Action Done By Admin ID:{" "}
                                   </span>
-                                  <span className="text-sm text-blue-600 hover:underline">
+                                  <span className="text-sm font-medium text-blue-600 hover:underline">
                                     {item.adminId}
                                   </span>
                                 </Link>
@@ -122,6 +122,7 @@ const AdminActivity: FC = () => {
                 ))}
               </ul>
             ),
+
             dropDownMenus: (
               <AdminActivityDropdown
                 params={params}

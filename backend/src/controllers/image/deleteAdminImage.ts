@@ -22,6 +22,19 @@ const deleteAdminImage = async (req: Request, res: Response) => {
         ],
       });
     }
+    if (!admin.adminImage) {
+      return res.status(404).json({
+        success: false,
+        errors: [
+          {
+            field: "adminImage",
+            message: "Admin Image not found.",
+            code: ErrorCode.NotFound,
+            severity: ErrorSeverity.High,
+          },
+        ],
+      });
+    }
 
     const imagePath = path.join(
       __dirname,
