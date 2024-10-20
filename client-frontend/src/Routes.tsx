@@ -18,17 +18,8 @@ const routes = createBrowserRouter([
         element: <HomePage />,
       },
       {
-        path: "products",
-        children: [
-          {
-            index: true,
-            element: <ProductListingPage />,
-          },
-          {
-            path: ":productId",
-            element: <ProductDetailsPage />,
-          },
-        ],
+        path: "products/:productId",
+        element: <ProductDetailsPage />,
       },
       {
         path: "sections/:sectionId",
@@ -39,6 +30,10 @@ const routes = createBrowserRouter([
   {
     path: "*",
     element: <NotFoundPage />,
+  },
+  {
+    path: "/products",
+    element: <ProductListingPage />,
   },
 ]);
 export default routes;

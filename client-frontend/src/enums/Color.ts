@@ -1,0 +1,23 @@
+enum Color {
+  BLACK = "#000000",
+  WHITE = "#FFFFFF",
+  GRAY = "#808080",
+  NAVY_BLUE = "#000080",
+  RED = "#FF0000",
+  BLUE = "#0000FF",
+  GREEN = "#008000",
+  OLIVE = "#808000",
+  PURPLE = "#800080",
+  PINK = "#FFC0CB",
+  YELLOW = "#FFFF00",
+  ORANGE = "#FFA500",
+  BROWN = "#A52A2A",
+  MAROON = "#800000",
+  BEIGE = "#F5F5DC",
+  TURQUOISE = "#40E0D0",
+  TEAL = "#008080",
+  BURGUNDY = "#800020",
+  KHAKI = "#F0E68C",
+  LILAC = "#C8A2C8",
+}
+export default Color;
