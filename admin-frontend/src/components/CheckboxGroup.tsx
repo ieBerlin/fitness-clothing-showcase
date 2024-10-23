@@ -38,14 +38,14 @@ const CheckboxGroup: FC<CheckboxGroupProps> = ({
         {label}
       </label>
       <div
-        className={`flex ${classes} gap-y-2 w-full justify-around ${
+        className={`flex ${classes} w-full justify-around ${
           isError ? "border-red-500" : ""
         }`}
       >
         {options.map((option) => {
           const isChecked = checkedValues.includes(option.value.toLowerCase());
           return (
-            <li key={option.value} className={"flex items-center"}>
+            <li key={option.value} className={"flex items-center p-2"}>
               <input
                 type="checkbox"
                 id={option.value}
@@ -59,11 +59,9 @@ const CheckboxGroup: FC<CheckboxGroupProps> = ({
               />
               <label
                 htmlFor={option.value}
-                className={`text-sm ${
-                  isError ? "text-red-500" : "text-gray-500"
-                }`}
+                className={`text-sm ${isError ? "text-red-500" : "text-black "}`}
               >
-                {option.label}
+                {option.label.replace(/_/g, " ")}
               </label>
             </li>
           );

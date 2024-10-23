@@ -3,6 +3,7 @@ import { authHeader } from "../services/auth-header.service";
 import ErrorCode from "../enums/ErrorCode";
 import { ErrorSeverity } from "../enums/ErrorSeverity";
 import { ErrorResponse, SuccessResponse } from "../types/response";
+import { verifyToken } from "../services/admin.service";
 export type BaseFilterParams = {
   itemLimit?: number;
   currentPage: number;
@@ -122,5 +123,17 @@ export async function getData<T>({
         },
       ],
     } as ErrorResponse;
+  }
+}
+export async function loader(): Promise<boolean> {
+  try {
+    const tokenResponse = await verifyToken();
+    if (tokenResponse) {
+      return true;
+    }
+
+    return false;
+  } catch (_) {
+    return false;
   }
 }

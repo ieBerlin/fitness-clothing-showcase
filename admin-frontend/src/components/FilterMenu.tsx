@@ -17,7 +17,7 @@ const FilterMenu: React.FC<FilterProps> = ({
   onCheck,
 }) => {
   return (
-    <div className="flex flex-col space-y-2 p-2 text-gray-800">
+    <div className="flex flex-col space-y-2 p-4 bg-[#171717] text-white">
       <CheckboxGroup
         classes="flex-col"
         name={name}

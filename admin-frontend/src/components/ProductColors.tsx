@@ -62,7 +62,7 @@ const ColorItem: FC<ColorItemProps> = ({
             value={colorOption.name.toLocaleLowerCase()}
             checked={checkbox.isChecked}
             onChange={handleCheckboxChange}
-            className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
           />
           <div
             className="w-5 h-5 rounded-full border-[0.5px] border-gray-700"
@@ -80,7 +80,7 @@ const ColorItem: FC<ColorItemProps> = ({
         <button
           type="button"
           onClick={toggleCheckboxVisibility}
-          className="text-blue-800 font-semibold"
+          className="text-gray-950 font-semibold lowercase"
         >
           {checkbox.isChecked && checkbox.isShown ? "Hide" : "Show"}
         </button>
@@ -118,10 +118,12 @@ const Sizes: FC<SizesProps> = ({ visibility, isUnisex, availableSizes }) => {
         {displaySizes.map((size) => (
           <li
             key={size.name}
-            className="flex flex-row justify-between items-center gap-4 bg-gray-200 p-3 rounded-lg shadow-sm mb-2"
+            className="flex flex-row justify-between items-center gap-4 bg-gray-200 p-3 pt-1 mb-2"
           >
-            <span className="text-gray-900 font-semibold">{size.name}</span>
-            <div className="flex gap-4 items-center">
+            <span className="text-gray-900 font-semibold text-lg w-[60px]">
+              {size.name}
+            </span>
+            <div className="gap-4 items-center grid grid-cols-2 flex-grow">
               <NumberInput
                 min={0}
                 label="Quantity"

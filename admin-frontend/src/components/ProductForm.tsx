@@ -108,14 +108,14 @@ const ProductForm: FC<ProductFormProps> = ({
               <button
                 onClick={onStepPrevious}
                 type="button"
-                className="bg-gray-900 px-3 py-2 rounded-md text-white hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-gray-950 px-4 py-2 text-white hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Previous Step
               </button>
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`bg-gray-900 px-3 py-2 rounded-md text-white hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                className={`bg-gray-950 px-4 py-2 text-white hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                   isLoading ? "bg-gray-600" : ""
                 }`}
               >
@@ -174,7 +174,7 @@ const ProductForm: FC<ProductFormProps> = ({
               <button
                 onClick={onStepPrevious}
                 type="button"
-                className="bg-gray-900 px-3 py-2 rounded-md text-white hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-gray-950 px-4 py-2 text-white hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Previous Step
               </button>

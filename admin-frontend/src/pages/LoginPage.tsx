@@ -1,12 +1,9 @@
-/* eslint-disable react-refresh/only-export-components */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { FormEvent, useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { ErrorResponse, useLoaderData, useNavigate } from "react-router-dom";
-import { login, verifyToken } from "../services/admin.service";
-import { IAdmin } from "../types/response";
+import { useLoaderData, useNavigate } from "react-router-dom";
+import { login } from "../services/admin.service";
+import { ErrorResponse, IAdmin } from "../types/response";
 function LoginPage() {
-  const [inputBorder, setInputBorder] = useState<string>("border-transparent");
   const [isErrorShown, setIsErrorShown] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -22,19 +19,18 @@ function LoginPage() {
       return result;
     },
     onError: (error) => {
-      console.log(error);
-      setInputBorder("border-red-500");
       setIsErrorShown(true);
       setErrorMessage(
-        error.status === 400
-          ? "Unmatched admin credentials"
+        error.statusCode === 400
+          ? error.errors.length
+            ? error.errors.map((error) => error.message).join("\n")
+            : "Unmatched admin credentials"
           : "An unexpected error occurred"
       );
     },
     onSuccess: () => {
       setEmail("");
       setPassword("");
-      setInputBorder("border-transparent");
       setIsErrorShown(false);
       navigate("/dashboard");
     },
@@ -58,14 +54,35 @@ function LoginPage() {
   };
 
   return (
-    <div className="bg-blue-300 flex flex-col items-center justify-center min-h-screen p-6">
+    <div
+      className="flex flex-col items-center justify-center min-h-screen p-6"
+      style={{
+        backgroundImage:
+          "url('https://www.theindustry.fashion/wp-content/uploads/2024/09/CNY_3495.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "top",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      <div className="text-center mb-6">
+        <h1 className="text-white text-4xl font-extrabold tracking-wide uppercase">
+          Admin Login
+        </h1>
+        <p className="text-gray-300 mt-2 text-sm uppercase font-bold">
+          Authorized Personnel Only
+        </p>
+        <p className="text-red-600 mt-1 text-xs font-bold uppercase bg-gray-100 px-2 py-1 rounded-md">
+          Warning: This page is restricted to admins!
+        </p>
+      </div>
+
       <form
-        className="flex gap-3 flex-col p-6 bg-gray-200 rounded shadow-md w-full max-w-sm"
+        className="flex gap-3 flex-col p-6 bg-white border border-gray-300 rounded-lg shadow-lg w-full max-w-md"
         onSubmit={handleSubmitForm}
         aria-live="polite"
       >
-        <label htmlFor="email" className="text-gray-700">
-          Email:
+        <label htmlFor="email" className="text-gray-800 font-medium mb-1">
+          Email
         </label>
         <input
           type="email"
@@ -73,18 +90,18 @@ function LoginPage() {
           name="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className={`outline-none focus:border-blue-500 ${inputBorder} border-2 rounded p-2`}
+          className={`outline-none border-2 border-gray-300 rounded p-3 bg-white text-gray-800 transition duration-300 focus:border-gray-600`}
           disabled={isPending}
           required
           placeholder="Type your email..."
           aria-describedby="email-error"
           onFocus={() => {
-            setInputBorder("border-transparent");
             setIsErrorShown(false);
           }}
         />
-        <label htmlFor="password" className="text-gray-700">
-          Password:
+
+        <label htmlFor="password" className="text-gray-800 font-medium mb-1">
+          Password
         </label>
         <input
           type="password"
@@ -92,21 +109,23 @@ function LoginPage() {
           name="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className={`outline-none focus:border-blue-500 ${inputBorder} border-2 rounded p-2`}
+          className={`outline-none border-2 border-gray-300 rounded p-3 bg-white text-gray-800 transition duration-300 focus:border-gray-600`}
           disabled={isPending}
           required
           placeholder="Type your password..."
           aria-describedby="password-error"
           onFocus={() => {
-            setInputBorder("border-transparent");
             setIsErrorShown(false);
           }}
         />
+
         <button
           type="submit"
-          className={`p-2 rounded ${
-            isPending ? "bg-gray-500" : "bg-blue-500"
-          } text-white`}
+          className={`p-3 rounded-lg font-semibold transition duration-300 ${
+            isPending
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-black hover:bg-gray-800"
+          } text-white shadow-md`}
           disabled={isPending}
         >
           {isPending ? (
@@ -137,27 +156,23 @@ function LoginPage() {
             "Login"
           )}
         </button>
+
         {isErrorShown && (
-          <h1 id="password-error" className="text-red-500 text-center text-sm">
+          <h1
+            id="password-error"
+            className="text-red-500 text-center text-sm font-bold uppercase"
+          >
             {errorMessage}
           </h1>
         )}
       </form>
+
+      <p className="text-white text-xs mt-6 uppercase font-medium tracking-wider">
+        © 2024 YourCompany. Unauthorized access is prohibited and will be
+        prosecuted.
+      </p>
     </div>
   );
 }
 
 export default LoginPage;
-
-export async function loader(): Promise<boolean> {
-  try {
-    const tokenResponse = await verifyToken();
-    if (tokenResponse) {
-      return true;
-    }
-
-    return false;
-  } catch (_) {
-    return false;
-  }
-}

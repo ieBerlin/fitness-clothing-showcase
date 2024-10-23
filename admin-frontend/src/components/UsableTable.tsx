@@ -20,7 +20,7 @@ const UsableTable = <T,>({
   loadingIcon,
 }: UsableTableProps<T>) => {
   return (
-    <table className="min-w-full divide-y divide-gray-200 bg-white">
+    <table className="min-w-full divide-y divide-gray-200 bg-white border border-gray-200">
       <thead className="bg-gray-50">
         <tr>
           {tableHeadItems.map((header, index) => (

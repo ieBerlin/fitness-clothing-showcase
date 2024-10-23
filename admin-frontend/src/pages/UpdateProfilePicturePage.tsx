@@ -12,7 +12,6 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import ErrorAlert from "../components/ErrorAlert";
 import { useDispatch } from "react-redux";
 import { openConfirmationModal } from "../features/modal";
-import { ModalType } from "../enums/ModalType";
 import { queryClient, SERVER_URL } from "../utils/http";
 const UpdateProfilePicturePage: React.FC = () => {
   const dispatch = useDispatch();
@@ -34,7 +33,6 @@ const UpdateProfilePicturePage: React.FC = () => {
         queryClient.invalidateQueries({ queryKey: ["admin-profile-picture"] });
         dispatch(
           openConfirmationModal({
-            type: ModalType.CONFIRMATION,
             message: "Your profile picture has been updated successfully!",
           })
         );
@@ -42,7 +40,6 @@ const UpdateProfilePicturePage: React.FC = () => {
       onError: () => {
         dispatch(
           openConfirmationModal({
-            type: ModalType.CONFIRMATION,
             message: "Failed to update your profile picture!",
           })
         );
@@ -57,7 +54,6 @@ const UpdateProfilePicturePage: React.FC = () => {
         queryClient.invalidateQueries({ queryKey: ["admin-profile-picture"] });
         dispatch(
           openConfirmationModal({
-            type: ModalType.CONFIRMATION,
             message: "Your profile picture has been deleted successfully!",
           })
         );
@@ -65,7 +61,6 @@ const UpdateProfilePicturePage: React.FC = () => {
       onError: () => {
         dispatch(
           openConfirmationModal({
-            type: ModalType.CONFIRMATION,
             message: "Failed to delete your profile picture!",
           })
         );
@@ -135,29 +130,29 @@ const UpdateProfilePicturePage: React.FC = () => {
   }
   return (
     <PageTemplate title="Update Profile Picture">
-      <div className="flex justify-center items-center py-10">
-        <div className="bg-white rounded-lg shadow-lg border border-gray-300 p-8 w-full max-w-md">
-          <form
-            onSubmit={handleUploadSubmit}
-            className="flex flex-col items-center"
-          >
-            <div className="relative w-32 h-32 mb-4">
+      <div className="bg-white h-full border border-gray-300 p-8 w-full flex flex-col">
+        <form
+          onSubmit={handleUploadSubmit}
+          className="flex flex-col items-center flex-grow"
+        >
+          <div className=" flex-grow flex items-center justify-center">
+            <div className="relative w-48 h-48">
               <img
                 src={(profilePicture as string) || "/default-profile.jpg"}
                 alt="Profile"
-                className="w-full h-full rounded-full border-4 border-gray-300 object-cover"
+                className="max-h-[200px] w-full h-full rounded-full border-4 border-gray-300 shadow-lg object-cover transition-transform duration-300 hover:scale-110"
               />
               {profilePicture && !isProcessing && (
                 <button
                   type="button"
-                  className="absolute top-0 right-0 bg-red-600 text-white p-1 rounded-full cursor-pointer hover:bg-red-700 transition-colors"
+                  className="absolute top-0 right-0 bg-red-600 text-white p-1 rounded-full shadow hover:bg-red-700 transition-colors"
                   onClick={handleImageRemoval}
                 >
                   <XCircleIcon className="w-6 h-6" />
                 </button>
               )}
               {!isProcessing && (
-                <label className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer shadow-lg hover:bg-blue-700 transition-colors">
+                <label className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer shadow-lg hover:bg-blue-700 transition-colors flex items-center">
                   <CameraIcon className="w-6 h-6" />
                   <input
                     type="file"
@@ -170,33 +165,31 @@ const UpdateProfilePicturePage: React.FC = () => {
                 </label>
               )}
             </div>
-            <div className="flex flex-row gap-2 items-center justify-center w-full">
+          </div>
+          <div className="flex flex-row gap-2 items-end justify-center w-full mt-4 ">
+            <button
+              type="submit"
+              className={`w-full py-2 px-4 text-white font-semibold rounded-md shadow-md transition-all duration-300 ${
+                isProcessing
+                  ? "bg-gray-500 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
+              disabled={isProcessing}
+            >
+              {isProcessing ? "Uploading..." : "Upload"}
+            </button>
+            {!isProcessing && adminProfilePicture && (
               <button
-                type="submit"
-                className={`w-full py-2 px-4 text-white font-semibold rounded-md shadow-md transition-colors ${
-                  isProcessing
-                    ? "bg-gray-500 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700"
-                }`}
+                onClick={handleDeleteSubmit}
+                type="button"
+                className="w-full py-2 px-4 text-white font-semibold rounded-md shadow-md transition-all duration-300 bg-red-600 hover:bg-red-700"
                 disabled={isProcessing}
               >
-                {isProcessing ? "Uploading..." : "Upload"}
+                Delete
               </button>
-              {!isProcessing && adminProfilePicture && (
-                <button
-                  onClick={handleDeleteSubmit}
-                  type="button"
-                  className={
-                    "w-full py-2 px-4 text-white font-semibold rounded-md shadow-md transition-colors bg-red-600 hover:bg-red-700"
-                  }
-                  disabled={isProcessing}
-                >
-                  Delete
-                </button>
-              )}
-            </div>
-          </form>
-        </div>
+            )}
+          </div>
+        </form>
       </div>
     </PageTemplate>
   );

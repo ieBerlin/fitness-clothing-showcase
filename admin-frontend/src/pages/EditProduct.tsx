@@ -162,20 +162,22 @@ const EditProductPage: React.FC = () => {
 
   return (
     <PageTemplate title="Edit Product Details">
-      <ProductForm
-        validationErrors={
-          isMutationError && mutationErrors
-            ? (mutationErrors as unknown as ErrorResponse).errors
-            : undefined
-        }
-        isEditing
-        isLoading={isLoading}
-        productData={formData}
-        onProductDataChange={setFormData}
-        currentStepId={activeStep.id}
-        onStepNext={handleNextStep}
-        onStepPrevious={handlePreviousStep}
-      />
+      <div className="bg-white h-full border border-gray-300 p-8">
+        <ProductForm
+          validationErrors={
+            isMutationError && mutationErrors
+              ? (mutationErrors as unknown as ErrorResponse).errors
+              : undefined
+          }
+          isEditing
+          isLoading={isLoading}
+          productData={formData}
+          onProductDataChange={setFormData}
+          currentStepId={activeStep.id}
+          onStepNext={handleNextStep}
+          onStepPrevious={handlePreviousStep}
+        />
+      </div>
     </PageTemplate>
   );
 };

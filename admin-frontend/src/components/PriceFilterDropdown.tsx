@@ -9,10 +9,9 @@ import { sectionQueryKey } from "../constants/queryKeys";
 import {
   formattedPriceOptions,
   formattedAvailabilityOptions,
-  paginationOptions,
 } from "../constants/dropdownOptions";
-import { ChevronDoubleDownIcon } from "@heroicons/react/24/outline";
 import { ProductFilterParams } from "../types/productFilters";
+import ItemLimitDropdownMenu from "./ItemLimitDropdownMenu";
 
 interface FiltersDropdownProps {
   updateFilterParams: <
@@ -29,37 +28,17 @@ function FiltersDropdown({
   params,
 }: FiltersDropdownProps): JSX.Element[] {
   return [
-    <div className="flex items-center gap-4">
-      <span className="text-gray-600 font-medium">Showing</span>
-      <DropdownMenu
-        label={
-          <div className="flex items-center gap-2 px-4 py-2 border rounded-lg bg-gray-100 text-gray-800 shadow-sm transition-shadow duration-200 hover:shadow-md">
-            <span className="text-lg font-medium">{params.itemLimit}</span>
-            <ChevronDoubleDownIcon className="w-4 h-4 text-gray-600" />
-          </div>
-        }
-        content={
-          <ul className="space-y-2">
-            {paginationOptions.map((option) => (
-              <li
-                key={option}
-                className="cursor-pointer hover:bg-gray-200 active:bg-gray-300 px-4 py-2 rounded-lg transition-colors duration-200 ease-in-out"
-                onClick={() => updateFilterParams("itemLimit", option)}
-              >
-                <span className="text-gray-800 font-medium">{option}</span>
-              </li>
-            ))}
-          </ul>
-        }
-      />
-    </div>,
+    <ItemLimitDropdownMenu
+      params={params}
+      updateFilterParams={updateFilterParams}
+    />,
     <DropdownMenu
       closeOnContentClick={false}
       onSubmit={() => {
         queryClient.invalidateQueries({ queryKey: sectionQueryKey });
       }}
       label={
-        <div className="flex items-center gap-2 px-4 py-2 border rounded-lg bg-gray-100 text-gray-800 shadow-sm transition-shadow duration-200 hover:shadow-md">
+        <div className="border border-gray-200 bg-gray-50 flex items-center gap-2 px-4 py-2 text-gray-800 duration-200">
           <span className="font-medium">Price</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -98,7 +77,7 @@ function FiltersDropdown({
         queryClient.invalidateQueries({ queryKey: sectionQueryKey });
       }}
       label={
-        <div className="flex items-center gap-2 px-4 py-2 border rounded-lg bg-gray-100 text-gray-800 shadow-sm transition-shadow duration-200 hover:shadow-md">
+        <div className="border border-gray-200 bg-gray-50  flex items-center gap-2 px-4 py-2 text-gray-800 duration-200">
           <span className="font-medium">Availability</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"

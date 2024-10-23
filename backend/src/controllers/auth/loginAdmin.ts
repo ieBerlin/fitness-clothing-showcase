@@ -21,7 +21,7 @@ export default async function login(req: Request, res: Response) {
   ) {
     errors.push({
       field: "password",
-      message: "Password must be at least 6 characters long!",
+      message: "Password must be at least 8 characters long!",
     });
   }
 
@@ -34,7 +34,9 @@ export default async function login(req: Request, res: Response) {
   }
 
   try {
-    const admin = await Admin.findOne({ adminEmail: email });
+    const admin = await Admin.findOne({
+      adminEmail: { $regex: new RegExp(`^${email}$`, "i") },
+    });
 
     if (!admin) {
       const errorResponse: ErrorResponse = {
@@ -55,6 +57,11 @@ export default async function login(req: Request, res: Response) {
     }
 
     const token = signJwt(email);
+    await Admin.findOneAndUpdate(
+      { adminEmail: email },
+      { lastLoginAt: new Date() }
+    );
+
     const successResponse: SuccessResponse = {
       success: true,
       data: token,

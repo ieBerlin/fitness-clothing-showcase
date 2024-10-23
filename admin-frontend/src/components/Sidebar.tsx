@@ -21,28 +21,36 @@ function Sidebar() {
     queryFn: fetchMyProfile,
     staleTime: Infinity,
   });
+
   return (
-    <aside className="bg-gray-800 p-6">
+    <aside className="bg-[#171717] p-6">
       <div className="flex items-center gap-3 mb-6">
         <div className="text-center mx-auto">
           {isFetchingProfile ? (
             <div className="flex items-center justify-center w-full py-4 flex-col gap-2">
-              <LoadingSpinner fill="blue-600" text="gray-400" dimension="8" />
-              <h2 className="text-gray-500 font-semibold">
-                Loading profile...
-              </h2>
+              <LoadingSpinner fill="blue-500" text="gray-400" dimension="8" />
+              <h2 className="text-white font-semibold">Loading profile...</h2>
             </div>
           ) : isErrorProfile ? (
-            <h2 className="text-red-500 font-semibold">
+            <h2 className="text-red-400 font-semibold">
               Error loading profile
             </h2>
           ) : (
-            <h3 className="text-gray-300 text-sm">{profile?.adminEmail}</h3>
+            <div>
+              {profile?.fullName && (
+                <h3 className="text-gray-200 text-sm font-bold">
+                  {profile?.fullName}
+                </h3>
+              )}
+              <h3 className="text-gray-200 text-sm font-bold">
+                {profile?.adminEmail}
+              </h3>
+            </div>
           )}
         </div>
       </div>
       <hr className="border-gray-700 mb-6" />
-      <ul>
+      <ul className="space-y-4">
         <SidebarItem label="Dashboard" path="/dashboard" Icon={HomeIcon} />
         <SidebarItem label="Products" path="/products" Icon={ShoppingBagIcon} />
         <SidebarItem label="Sections" path="/sections" Icon={StarIcon} />
@@ -53,4 +61,5 @@ function Sidebar() {
     </aside>
   );
 }
+
 export default Sidebar;

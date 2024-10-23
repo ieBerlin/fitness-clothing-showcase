@@ -1,6 +1,6 @@
 import { API_URL, getData, ExtendedFilterParams } from "./http";
 import {
-  AdminProfileResponse,
+  // AdminProfileResponse,
   AdminResponse,
   DataResponse,
   ProductResponse,
@@ -11,6 +11,7 @@ import Product from "../models/Product";
 import Section from "../models/Section";
 import Activity from "../models/Activity";
 import { ActivityFilterParams } from "../types/activityFilters";
+import Admin from "../models/Admin";
 export interface FetchProductParams {
   productId: string;
 }
@@ -273,7 +274,7 @@ export const fetchMyActivities = async ({
 }: {
   currentPage?: number;
   itemLimit?: number;
-}) => {
+}): Promise<DataResponse<Activity>> => {
   const params = new URLSearchParams();
 
   params.append("page", currentPage.toString());
@@ -298,7 +299,7 @@ export const fetchStatistics = async () =>
     url: new URL(`${API_URL}statistics`).toString(),
   });
 export const fetchMyProfile = async () =>
-  getData<AdminProfileResponse>({
+  getData<Admin>({
     url: new URL(`${API_URL}auth/my-profile`).toString(),
   });
 export const fetchAdmin = async (adminId: string) =>

@@ -106,7 +106,7 @@ function ManageSections() {
                           .replace(/\s+/g, "-")
                           .replace(/[^a-z0-9-]/g, "")}
                       >
-                        <button className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg shadow-md hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        <button className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white  hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500">
                           <ArrowUpOnSquareIcon className="w-5 h-5" />
                           <span className="font-medium">Export</span>
                         </button>
@@ -128,7 +128,7 @@ function ManageSections() {
                           );
                           // handleAddProductToASection();
                         }}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-700 text-white rounded-lg shadow-md hover:bg-blue-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex items-center gap-2 px-4 py-2 bg-[#171717] text-white  hover:bg-[#212121] transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <PlusIcon className="w-5 h-5" />
                         <span className="font-medium">Add New Products</span>
@@ -137,7 +137,7 @@ function ManageSections() {
                   />
 
                   {activeSection && (
-                    <div className="bg-white shadow-lg">
+                    <div className="bg-white">
                       <UsableTable<Product>
                         isLoading={loading}
                         data={
@@ -213,12 +213,16 @@ function ManageSections() {
                                   <EllipsisHorizontalIcon className="h-5 w-5 text-gray-600 hover:text-gray-800 transition-colors" />
                                 }
                                 content={
-                                  <button
-                                    onClick={() => handleRemoveProduct(product)}
-                                    className="block px-4 py-2 text-sm text-red-600 hover:bg-red-100 hover:text-red-800 w-full text-left"
-                                  >
-                                    Remove Product
-                                  </button>
+                                  <div className="bg-[#212121] ">
+                                    <button
+                                      onClick={() =>
+                                        handleRemoveProduct(product)
+                                      }
+                                      className="block px-4 py-2 text-sm text-white hover:bg-red-500 w-full text-left font-semibold transition-colors"
+                                    >
+                                      Remove Product
+                                    </button>
+                                  </div>
                                 }
                               />
                             </td>
@@ -251,7 +255,7 @@ const SectionList: React.FC<SectionListProps> = ({
   onSectionChange,
 }) => {
   return (
-    <div>
+    <div className="bg-white p-4 mb-4 border borderg-gray-200">
       <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {sections.map((section) => (
           <li
@@ -262,14 +266,14 @@ const SectionList: React.FC<SectionListProps> = ({
           >
             <button
               onClick={() => onSectionChange(section)}
-              className={`w-full p-4 rounded-lg border border-gray-300 shadow-lg ${
+              className={`w-full p-4  ${
                 activeSection?._id === section._id
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-gray-800"
-              } hover:bg-blue-700 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  ? "bg-[#171717] text-white"
+                  : "bg-white text-gray-800 border border-gray-300"
+              } hover:bg-[#212121] hover:text-white transition-colors focus:outline-none `}
             >
               <div className="flex items-center justify-center h-full">
-                <h2 className="text-lg font-semibold">{section.name}</h2>
+                <h2 className="text-md font-bold uppercase">{section.name}</h2>
               </div>
             </button>
           </li>

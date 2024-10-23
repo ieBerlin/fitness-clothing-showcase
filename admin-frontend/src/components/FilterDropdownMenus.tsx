@@ -6,8 +6,8 @@ const DropdownFilterGroup: FC<{
   searchDropDownMenu?: ReactNode;
 }> = ({ dropDownMenus, searchDropDownMenu }) => {
   return (
-    <div className="w-full space-y-6">
-      <div className="flex flex-wrap items-center gap-4 w-full p-4 bg-white shadow-md rounded-lg">
+    <div className="w-full space-y-6 mb-2">
+      <div className="flex flex-wrap items-center gap-4 w-full p-4 bg-white border border-gray-200">
         {searchDropDownMenu && (
           <div className="flex-1 min-w-[200px]">{searchDropDownMenu}</div>
         )}

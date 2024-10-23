@@ -14,12 +14,12 @@ const SelectInput: React.FC<SelectInputProps> = ({
 }) => {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
+      <label className="block my-2 font-semibold text-sm text-gray-700">
         {label}
       </label>
-      <div className="relative">
+      <div className="relative w-full">
         <select
-          className="capitalize block w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500 outline-none"
+          className="capitalize block w-full border-2 border-gray-200 rounded-lg px-4 py-2 text-sm focus:border-blue-500 focus:ring-blue-500 outline-none"
           defaultValue={selectedField?.toUpperCase()}
           {...props}
         >

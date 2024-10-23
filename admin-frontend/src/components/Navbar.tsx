@@ -3,14 +3,16 @@ import DropdownItem from "./DropdownItem";
 import { currentDate } from "../utils/date";
 import { fetchMyProfile, fetchNotifications } from "../utils/authUtils";
 import { useQuery } from "@tanstack/react-query";
-import { ExtendedFilterParams } from "../utils/http";
+import { ExtendedFilterParams, SERVER_URL } from "../utils/http";
 import { useCallback, useState } from "react";
 import DataTable from "./DataTable";
 import Notification from "../models/Notification";
 import { notificationQueryKey } from "../constants/queryKeys";
 import { BellIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
-
+import defaultUserPicture from "/default-profile.jpg";
+import Admin from "../models/Admin";
+import { ErrorResponse } from "../types/response";
 const hasNewNotifications = false;
 
 function Navbar() {
@@ -22,13 +24,13 @@ function Navbar() {
     isFetching: isFetchingProfile,
     data: profile,
     isError: isErrorProfile,
-  } = useQuery({
+  } = useQuery<Admin, ErrorResponse>({
     queryKey: ["basic-informations"],
     queryFn: fetchMyProfile,
     staleTime: Infinity,
   });
   return (
-    <nav className="bg-gray-700 px-6 py-2 flex justify-between items-center">
+    <nav className="bg-[#171717] px-6 py-2 flex justify-between items-center">
       <div>
         {isFetchingProfile ? (
           <div className="text-white text-xl font-bold">Loading...</div>
@@ -38,7 +40,10 @@ function Navbar() {
           </div>
         ) : (
           <h1 className="text-white text-xl font-bold">
-            Welcome back, {profile?.adminEmail.split("@")[0]}
+            Welcome back,{" "}
+            {profile?.fullName
+              ? profile.fullName
+              : profile?.adminEmail.split("@")[0]}
           </h1>
         )}
         <h2 className="text-gray-300 text-md">{currentDate}</h2>
@@ -55,7 +60,7 @@ function Navbar() {
             </div>
           }
           content={
-            <div className="relative flex flex-col w-[270px] max-h-[300px] overflow-hidden bg-gray-900 rounded-lg shadow-lg">
+            <div className="relative flex flex-col w-[270px] max-h-[300px] overflow-hidden bg-[#171717] rounded-lg shadow-lg">
               <div className="flex-1 overflow-y-auto p-2">
                 <h2 className="font-semibold text-center text-gray-200 mb-4">
                   Recent Notifications
@@ -75,7 +80,7 @@ function Navbar() {
                               key={notification._id}
                               className={`relative p-4 border-b border-gray-700 ${
                                 notification.isRead
-                                  ? "bg-gray-800 text-gray-400"
+                                  ? "bg-[#171717] text-gray-400"
                                   : "bg-gray-700 text-gray-100"
                               }`}
                             >
@@ -126,7 +131,7 @@ function Navbar() {
               </div>
               <Link
                 to="/notifications"
-                className="bg-gray-800 text-gray-200 font-semibold text-center py-2 rounded-b-lg shadow-md hover:bg-gray-700"
+                className="bg-[#171717] text-gray-200 font-semibold text-center py-2 rounded-b-lg shadow-md hover:bg-[#212121]"
               >
                 View All Notifications
               </Link>
@@ -137,13 +142,17 @@ function Navbar() {
         <DropdownMenu
           label={
             <img
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Joe_Biden_presidential_portrait.jpg/220px-Joe_Biden_presidential_portrait.jpg"
+              src={
+                profile?.adminImage
+                  ? `${SERVER_URL}/public/uploads/admin/${profile.adminImage}`
+                  : defaultUserPicture
+              }
               alt="Admin Avatar"
               className="h-8 w-8 rounded-full object-cover bg-gray-600"
             />
           }
           content={
-            <div className="bg-gray-800 text-gray-200 rounded-lg shadow-lg">
+            <div className="bg-[#171717] text-gray-200 rounded-lg shadow-lg">
               <DropdownItem label="Your Profile" href="/profile" />
               <DropdownItem label="Settings" href="/settings" />
               <DropdownItem label="Logout" href="/logout" />

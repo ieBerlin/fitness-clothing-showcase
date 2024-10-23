@@ -128,7 +128,7 @@ const DataTable = <T, ExtraParams>({
               onClick={() =>
                 updateFilterParams("currentPage", initialParams.currentPage)
               }
-              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold rounded-lg shadow-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105"
+              className="uppercase px-6 py-2 bg-black hover:bg-gray-900 text-white font-semibold hover:from-gray-700 hover:to-gray-500 transition-all duration-300 transform hover:scale-105"
             >
               Show More
             </button>

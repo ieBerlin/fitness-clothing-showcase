@@ -14,7 +14,8 @@ import DropdownMenu from "../components/DropdownMenu";
 import { getDateRanges } from "../constants/dropdownOptions";
 import Notification from "../models/Notification";
 import SearchBar from "../components/SearchBar";
-import TimingRadioGroup from "../components/TimingRadioGroup";
+import RadioGroup from "../components/RadioGroup";
+import TimeOption from "../enums/TimeOption";
 const Notifications: React.FC = () => {
   const [params, setParams] =
     useState<ExtendedFilterParams<typeof defaultFilterParams>>(
@@ -68,16 +69,30 @@ const Notifications: React.FC = () => {
               dropDownMenus={[
                 <DropdownMenu
                   label={
-                    <div className="flex items-center gap-2 px-4 py-2 border rounded-lg bg-gray-50 text-gray-800 shadow-sm">
+                    <div className="flex items-center gap-2 px-3 py-2 border bg-gray-50 text-gray-800">
                       <span className="text-lg font-semibold">Timing</span>
                       <ChevronDoubleDownIcon className="w-5 h-5 text-gray-600" />
                     </div>
                   }
                   content={
-                    <TimingRadioGroup
-                      updateFilterParams={updateFilterParams}
-                      params={params}
-                    />
+                    <div className="flex flex-col p-4 bg-[#171717] text-white">
+                      <RadioGroup
+                        classes="flex-col border-0"
+                        label="Timing"
+                        onChange={(e) =>
+                          updateFilterParams(
+                            "timing",
+                            e.target.value as TimeOption
+                          )
+                        }
+                        options={Object.values(TimeOption).map((item) => ({
+                          label: item.charAt(0).toUpperCase() + item.slice(1),
+                          value: item,
+                        }))}
+                        name={"timing"}
+                        selectedValue={params.timing}
+                      />
+                    </div>
                   }
                 />,
               ]}

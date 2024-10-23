@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
-import LoginPage, { loader as loginLoader } from "./pages/LoginPage";
+
+import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
 import ManageProducts from "./pages/ManageProducts";
 import ManageSections from "./pages/ManageSections";
@@ -22,6 +23,8 @@ import AdminDetails from "./pages/AdminDetails";
 import RootLayout, {
   loader as authenticatedLoader,
 } from "./components/RootLayout";
+import { loader as loginLoader } from "./utils/http";
+import ProfileSettings from "./pages/ProfileSettings";
 
 const routes = createBrowserRouter([
   {
@@ -39,6 +42,7 @@ const routes = createBrowserRouter([
         path: "dashboard",
         element: <Dashboard />,
       },
+      { path: "settings", element: <ProfileSettings /> },
       {
         path: "products",
         children: [

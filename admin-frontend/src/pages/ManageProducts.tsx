@@ -118,16 +118,16 @@ function ManageProducts() {
                           <EllipsisHorizontalIcon className="h-5 w-5 text-gray-600 hover:text-gray-800 transition-colors" />
                         }
                         content={
-                          <div className="bg-white shadow-lg rounded-md">
+                          <div className="bg-[#212121] ">
                             <Link
                               to={`/products/${product._id}/edit`}
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors"
+                              className="block px-4 py-2 text-sm text-white hover:bg-blue-500 font-semibold transition-colors"
                             >
                               Edit Product
                             </Link>
                             <button
                               onClick={() => handleDeleteProduct(product)}
-                              className="block px-4 py-2 text-sm text-red-600 hover:bg-red-100 hover:text-red-800 w-full text-left rounded-md transition-colors"
+                              className="block px-4 py-2 text-sm text-white hover:bg-red-500 w-full text-left font-semibold transition-colors"
                             >
                               Delete Product
                             </button>
@@ -153,7 +153,7 @@ function ManageProducts() {
                   params,
                 }).concat(
                   <Link
-                    className="px-4 py-2 rounded-md bg-gray-700 text-white hover:bg-gray-500"
+                    className="px-4 py-2 bg-gray-950 hover:bg-gray-800 text-white"
                     to="add"
                   >
                     Add Product

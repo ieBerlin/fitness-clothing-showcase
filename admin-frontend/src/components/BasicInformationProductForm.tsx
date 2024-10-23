@@ -47,6 +47,7 @@ const BasicInformationProductForm: React.FC<
           label="Product ID"
           placeholder="Enter the product ID..."
           readOnly
+          disabled
           name="product-id"
           value={defaultValues._id ?? ""}
           required
@@ -147,10 +148,10 @@ const BasicInformationProductForm: React.FC<
         <button
           disabled={isLoading}
           type="submit"
-          className={`px-3 py-2 rounded-md text-white transition-colors ${
+          className={`px-4 py-2 text-white transition-colors ${
             isLoading
               ? "bg-gray-600 cursor-not-allowed"
-              : "bg-gray-900 hover:bg-gray-800"
+              : "bg-gray-950 hover:bg-gray-800"
           }`}
         >
           {isLoading ? (

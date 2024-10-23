@@ -40,7 +40,7 @@ function EmptyStateModal(): ModalContentProps {
     actionsButtons: [
       <button
         key="close"
-        className="px-4 py-2 bg-blue-500 text-white rounded"
+        className="px-4 py-2 bg-blue-500 text-white"
         onClick={() => closeModal()} // Assuming closeModal is handled elsewhere
       >
         Close
@@ -328,7 +328,7 @@ export function AddProductToSectionModal(): ModalContentProps {
             <div>
               <div className="flex justify-between flex-row w-full mb-3">
                 <h3 className="text-lg font-semibold">Available Products:</h3>
-                <div className="px-2 py-1 bg-gray-300 rounded-md w-fit">
+                <div className="px-2 py-1 bg-gray-300 w-fit">
                   <h3 className="text-gray-800 font-semibold">
                     {" "}
                     All {dataEntries.length ?? 0}
@@ -339,7 +339,7 @@ export function AddProductToSectionModal(): ModalContentProps {
                 {dataEntries.map((product) => (
                   <li
                     key={product._id}
-                    className={`p-3 border border-gray-300 rounded cursor-pointer ${
+                    className={`p-3 border border-gray-300 cursor-pointer ${
                       selectedProducts.find((p) => p._id === product._id)
                         ? "bg-blue-100 border-blue-500"
                         : "hover:bg-blue-50"
@@ -380,11 +380,7 @@ export function AddProductToSectionModal(): ModalContentProps {
         }}
         disabled={selectedProducts.length === 0 || isMutating}
       />,
-      <ActionButton
-        key="cancel"
-        label="Cancel"
-        onConfirm={() => dispatch(closeModal())}
-      />,
+      <CancelButton />,
     ],
   };
 }

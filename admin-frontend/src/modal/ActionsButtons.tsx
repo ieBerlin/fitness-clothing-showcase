@@ -1,14 +1,13 @@
 import { useDispatch } from "react-redux";
 import { closeModal } from "../features/modal";
-interface ActionButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+
+interface ActionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   label?: string;
   isLoading?: boolean;
   onConfirm: () => void;
 }
 
-interface CancelButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface CancelButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading?: boolean;
 }
 
@@ -20,14 +19,15 @@ export function ActionButton({
   return (
     <button
       onClick={onConfirm}
-      className={`px-2 py-1 rounded-md font-medium text-md lg:text-lg ${
-        isLoading
-          ? "bg-gray-300 text-gray-700"
-          : "bg-orange-500 hover:bg-orange-400 text-white"
-      }`}
+      className={`px-4 py-2 text-lg font-semibold tracking-wider uppercase transition-all duration-300 border-2 border-black 
+        ${isLoading 
+          ? "bg-white text-gray-500 cursor-not-allowed opacity-50" 
+          : "bg-black text-white hover:bg-white hover:text-black hover:shadow-lg transform hover:scale-105"
+        } 
+        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black`}
       disabled={isLoading}
     >
-      {label}
+      {isLoading ? "Loading..." : label}
     </button>
   );
 }
@@ -38,12 +38,13 @@ export function CancelButton({ isLoading = false }: CancelButtonProps) {
   return (
     <button
       onClick={() => dispatch(closeModal())}
-      className={`px-2 py-1 rounded-md font-medium text-md lg:text-lg ${
-        isLoading
-          ? "bg-gray-300 text-gray-700"
-          : "bg-gray-500 hover:bg-gray-400 text-white"
-      }`}
-      disabled={isLoading} // Disable button when loading
+      className={`px-4 py-2 text-lg font-semibold tracking-wider uppercase transition-all duration-300 border-2 border-black 
+        ${isLoading 
+          ? "bg-white text-gray-500 cursor-not-allowed opacity-50" 
+          : "bg-white text-black hover:bg-black hover:text-white hover:shadow-lg transform hover:scale-105"
+        } 
+        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black`}
+      disabled={isLoading}
     >
       Cancel
     </button>

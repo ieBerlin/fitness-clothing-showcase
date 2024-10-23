@@ -38,7 +38,7 @@ const SearchBar = forwardRef<HTMLInputElement, SearchInputProps>(
         onChange={handleSearchDebounce}
         ref={ref}
         type="search"
-        className="block w-full px-4 py-3 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white shadow-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition duration-300"
+        className="block w-full px-4 py-3 pl-10 text-sm text-gray-900 border border-gray-300 rounded-sm bg-white focus:border-gray-500 focus:ring-1 focus:ring-gray-500 transition duration-300"
         placeholder="Search for anything ..."
         required
       />

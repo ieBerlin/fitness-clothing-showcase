@@ -252,10 +252,10 @@ function Dashboard() {
         </ul>
       </div>
       <hr className="my-6 border-gray-300" />
-      <div className="bg-white p-6 rounded-lg shadow-lg">
-        <div className="flex items-center mb-4">
+      <div>
+        <div className="flex items-center mb-6">
           <ClockIcon className="w-6 h-6 text-gray-700 mr-2" />
-          <h2 className="text-gray-700 text-lg font-semibold">
+          <h2 className="text-gray-700 font-bold text-xl ">
             Last 3 Days' Activities
           </h2>
         </div>

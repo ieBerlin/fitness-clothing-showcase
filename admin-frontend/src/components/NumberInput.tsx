@@ -26,7 +26,7 @@ const NumberInput: FC<NumberInputProps> = ({
     <div className="flex flex-col w-full">
       {label && (
         <label
-          className={`block mb-2 font-semibold text-sm ${
+          className={`block my-2 font-semibold text-sm ${
             isError ? "text-red-500" : "text-gray-700"
           }`}
         >
