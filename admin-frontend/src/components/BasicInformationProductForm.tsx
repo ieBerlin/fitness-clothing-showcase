@@ -11,6 +11,7 @@ import { ValidationError } from "../types/validation-error.types";
 import Product from "../models/Product";
 import Season from "../enums/Season";
 import Availability from "../enums/Availability";
+import ActionButton from "./ActionButton";
 
 interface BasicInformationProductFormProps {
   errors?: ValidationError[];
@@ -41,7 +42,16 @@ const BasicInformationProductForm: React.FC<
   const getErrorMessage = (field: string) =>
     errors.find((error) => error.field === field)?.message || "";
   return (
-    <Form onSubmit={onStepNext} className="text-gray-800">
+    <Form
+      onSubmit={onStepNext}
+      className="text-gray-800 bg-white p-8 border border-gray-200"
+    >
+      <div className="flex w-full justify-end mb-4">
+        {" "}
+        <ActionButton isLoading={isLoading} disabled={isLoading} type="submit">
+          Save Changes
+        </ActionButton>
+      </div>
       {isEditing && (
         <TextInput
           label="Product ID"
@@ -135,6 +145,7 @@ const BasicInformationProductForm: React.FC<
         isError={!!getErrorMessage("product-wool-percentage")}
         errorMessage={getErrorMessage("product-wool-percentage")}
       />
+
       <CheckboxGroup
         label="Available Seasons"
         options={seasonOptions}
@@ -144,42 +155,6 @@ const BasicInformationProductForm: React.FC<
         isError={!!getErrorMessage("product-season")}
         errorMessage={getErrorMessage("product-season")}
       />
-      <div className="flex w-full justify-end mt-4">
-        <button
-          disabled={isLoading}
-          type="submit"
-          className={`px-4 py-2 text-white transition-colors ${
-            isLoading
-              ? "bg-gray-600 cursor-not-allowed"
-              : "bg-gray-950 hover:bg-gray-800"
-          }`}
-        >
-          {isLoading ? (
-            <span className="flex items-center justify-center">
-              <svg
-                className="w-5 h-5 mr-2 animate-spin"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeOpacity="0.25"
-                />
-                <path d="M4 12a8 8 0 1 1 16 0" stroke="currentColor" />
-              </svg>
-              Loading...
-            </span>
-          ) : (
-            "Save Changes"
-          )}
-        </button>
-      </div>
     </Form>
   );
 };

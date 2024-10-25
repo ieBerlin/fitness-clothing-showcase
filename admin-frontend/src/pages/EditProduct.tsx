@@ -1,4 +1,4 @@
-import React, { FormEvent, useEffect, useState } from "react";
+import React, { FormEvent, ReactNode, useEffect, useState } from "react";
 import PageTemplate from "../components/PageTemplate";
 import { useLocation, useParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -143,26 +143,12 @@ const EditProductPage: React.FC = () => {
       setActiveStep(steps[currentStepIndex - 1]);
     }
   };
-
+  let content: ReactNode;
   if (isFetching) {
-    return (
-      <div className="flex items-center justify-center w-full py-10 flex-col gap-2">
-        <LoadingSpinner fill="blue-600" text="gray-400" dimension="w-16 h-16" />
-        <h2 className="text-gray-500 font-semibold">Loading...</h2>
-      </div>
-    );
-  }
-  if (isError) {
-    return (
-      <div className="space-y-4">
-        <ErrorAlert error={error} />
-      </div>
-    );
-  }
-
-  return (
-    <PageTemplate title="Edit Product Details">
-      <div className="bg-white h-full border border-gray-300 p-8">
+    content = <LoadingSpinner title={"Fetching data, please wait..."} />;
+  } else {
+    content = (
+      <>
         <ProductForm
           validationErrors={
             isMutationError && mutationErrors
@@ -177,9 +163,15 @@ const EditProductPage: React.FC = () => {
           onStepNext={handleNextStep}
           onStepPrevious={handlePreviousStep}
         />
-      </div>
-    </PageTemplate>
-  );
+        {isError && (
+          <div className="p-6">
+            <ErrorAlert error={error as ErrorResponse} />
+          </div>
+        )}
+      </>
+    );
+  }
+  return <PageTemplate title="Edit Product Details">{content}</PageTemplate>;
 };
 
 export default EditProductPage;

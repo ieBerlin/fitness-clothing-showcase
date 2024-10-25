@@ -9,7 +9,7 @@ import {
 import SidebarItem from "./SidebarItem";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMyProfile } from "../utils/authUtils";
-import LoadingSpinner from "./LoadingSpinner";
+import SpinnerWithMessage from "./SpinnerWithMessage";
 
 function Sidebar() {
   const {
@@ -27,10 +27,7 @@ function Sidebar() {
       <div className="flex items-center gap-3 mb-6">
         <div className="text-center mx-auto">
           {isFetchingProfile ? (
-            <div className="flex items-center justify-center w-full py-4 flex-col gap-2">
-              <LoadingSpinner fill="blue-500" text="gray-400" dimension="8" />
-              <h2 className="text-white font-semibold">Loading profile...</h2>
-            </div>
+            <SpinnerWithMessage message={"Loading Profile"} />
           ) : isErrorProfile ? (
             <h2 className="text-red-400 font-semibold">
               Error loading profile

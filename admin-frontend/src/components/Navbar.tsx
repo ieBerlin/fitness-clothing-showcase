@@ -1,21 +1,27 @@
 import DropdownMenu from "./DropdownMenu";
-import DropdownItem from "./DropdownItem";
 import { currentDate } from "../utils/date";
 import { fetchMyProfile, fetchNotifications } from "../utils/authUtils";
 import { useQuery } from "@tanstack/react-query";
-import { ExtendedFilterParams, SERVER_URL } from "../utils/http";
+import {
+  defaultUserPicture,
+  ExtendedFilterParams,
+  SERVER_URL,
+} from "../utils/http";
 import { useCallback, useState } from "react";
 import DataTable from "./DataTable";
 import Notification from "../models/Notification";
 import { notificationQueryKey } from "../constants/queryKeys";
 import { BellIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
-import defaultUserPicture from "/default-profile.jpg";
 import Admin from "../models/Admin";
 import { ErrorResponse } from "../types/response";
+import { useDispatch } from "react-redux";
+import { openModal } from "../features/modal";
+import { ModalType } from "../enums/ModalType";
 const hasNewNotifications = false;
 
 function Navbar() {
+  const dispatch = useDispatch();
   const [params, setParams] = useState<ExtendedFilterParams<null>>(null);
   const handleUpdateArgs = useCallback((params: ExtendedFilterParams<null>) => {
     setParams(params);
@@ -29,6 +35,13 @@ function Navbar() {
     queryFn: fetchMyProfile,
     staleTime: Infinity,
   });
+  function handleLogoutClick() {
+    dispatch(
+      openModal({
+        type: ModalType.LOGOUT,
+      })
+    );
+  }
   return (
     <nav className="bg-[#171717] px-6 py-2 flex justify-between items-center">
       <div>
@@ -138,7 +151,6 @@ function Navbar() {
             </div>
           }
         />
-
         <DropdownMenu
           label={
             <img
@@ -152,10 +164,19 @@ function Navbar() {
             />
           }
           content={
-            <div className="bg-[#171717] text-gray-200 rounded-lg shadow-lg">
-              <DropdownItem label="Your Profile" href="/profile" />
-              <DropdownItem label="Settings" href="/settings" />
-              <DropdownItem label="Logout" href="/logout" />
+            <div className="flex flex-col bg-[#171717] text-gray-200">
+              <Link
+                to="/profile"
+                className="px-4 py-2 text-sm font-medium text-gray-200 hover:text-white hover:bg-[#212121] transition-colors"
+              >
+                Your Profile
+              </Link>
+              <button
+                onClick={handleLogoutClick}
+                className="px-4 w-full h-full text-start py-2 text-sm font-medium text-gray-200 hover:text-white hover:bg-[#212121] cursor-pointer transition-colors"
+              >
+                Logout
+              </button>
             </div>
           }
         />

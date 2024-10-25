@@ -34,11 +34,11 @@ const CheckboxGroup: FC<CheckboxGroupProps> = ({
   };
   return (
     <div className="flex flex-col">
-      <label className="block my-2 font-semibold text-sm text-gray-700">
+      <label className="block my-2 font-semibold text-sm white">
         {label}
       </label>
       <div
-        className={`flex ${classes} w-full justify-around ${
+        className={`flex bg-[#171717] ${classes} w-full justify-around ${
           isError ? "border-red-500" : ""
         }`}
       >
@@ -59,7 +59,7 @@ const CheckboxGroup: FC<CheckboxGroupProps> = ({
               />
               <label
                 htmlFor={option.value}
-                className={`text-sm ${isError ? "text-red-500" : "text-black "}`}
+                className={`text-sm ${isError ? "text-red-500" : "text-white "}`}
               >
                 {option.label.replace(/_/g, " ")}
               </label>

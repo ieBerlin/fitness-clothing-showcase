@@ -19,15 +19,14 @@ import { fetchSections } from "../utils/authUtils";
 import { SectionResponseItem } from "../types/response";
 import DropdownFilterGroup from "../components/FilterDropdownMenus";
 import SearchBar from "../components/SearchBar";
-import { productsQuantity } from "../utils/func";
-import StyledAvailability from "../components/StyledAvailability";
 import { sectionQueryKey } from "../constants/queryKeys";
 import {
   defaultFilterParams,
   ProductFilterParams,
 } from "../types/productFilters";
 import PriceFilterDropdown from "../components/PriceFilterDropdown";
-import { Link } from "react-router-dom";
+import ProductTableRow from "../components/ProductTableRow";
+import { productTableHeaders } from "../constants/tableHeaders";
 
 function ManageSections() {
   const [params, setParams] =
@@ -62,181 +61,123 @@ function ManageSections() {
   );
 
   return (
-    <PageTemplate title="Section Management">
-      <div className="flex flex-col p-6 space-y-6">
-        <DataTable<SectionResponseItem, ProductFilterParams>
-          isDataMerged={false}
-          updateParams={handleUpdateArgs}
-          fetchDataParams={params}
-          initialParams={params}
-          queryKey={sectionQueryKey}
-          fetchItems={fetchSections}
-          renderTableContent={({
-            updateFilterParams,
-            dataEntries: sections,
-          }) => {
-            if (sections.length && !activeSection) {
-              handleSectionChange(sections[0].section);
-            }
-            return {
-              ContentRenderer: ({ loading }) => (
-                <div className="flex flex-col w-full gap-2">
-                  <SectionList
-                    sections={sections.map((section) => section.section)}
-                    activeSection={activeSection}
-                    onSectionChange={handleSectionChange}
-                  />
-                  {/* drop down menus */}
-                  <DropdownFilterGroup
-                    searchDropDownMenu={
-                      <SearchBar
-                        onChange={(e) =>
-                          updateFilterParams("searchTerm", e.target.value)
-                        }
-                      />
-                    }
-                    dropDownMenus={PriceFilterDropdown({
-                      updateFilterParams,
-                      params,
-                    }).concat(
-                      <ExcelExport
-                        data={sections.map((section) => section.products) || []}
-                        fileName={(activeSection?.name ?? "section")
-                          .toLowerCase()
-                          .replace(/\s+/g, "-")
-                          .replace(/[^a-z0-9-]/g, "")}
-                      >
-                        <button className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white  hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500">
-                          <ArrowUpOnSquareIcon className="w-5 h-5" />
-                          <span className="font-medium">Export</span>
-                        </button>
-                      </ExcelExport>,
-                      <button
-                        onClick={() => {
-                          dispatch(
-                            openModal({
-                              type: "add-product-to-section",
-                              data: {
-                                sectionId: activeSection?._id,
-                                items:
-                                  sections.find(
-                                    (section) =>
-                                      section.section._id === activeSection?._id
-                                  )?.products.items || [],
-                              },
-                            })
-                          );
-                          // handleAddProductToASection();
-                        }}
-                        className="flex items-center gap-2 px-4 py-2 bg-[#171717] text-white  hover:bg-[#212121] transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <PlusIcon className="w-5 h-5" />
-                        <span className="font-medium">Add New Products</span>
+    <PageTemplate title="Manage Sections">
+      <DataTable<SectionResponseItem, ProductFilterParams>
+        isDataMerged={false}
+        updateParams={handleUpdateArgs}
+        fetchDataParams={params}
+        initialParams={params}
+        queryKey={sectionQueryKey}
+        fetchItems={fetchSections}
+        renderTableContent={({ updateFilterParams, dataEntries: sections }) => {
+          if (sections.length && !activeSection) {
+            handleSectionChange(sections[0].section);
+          }
+          return {
+            ContentRenderer: ({ loading }) => (
+              <div className="flex flex-col w-full gap-2">
+                <SectionList
+                  sections={sections.map((section) => section.section)}
+                  activeSection={activeSection}
+                  onSectionChange={handleSectionChange}
+                />
+                {/* drop down menus */}
+                <DropdownFilterGroup
+                  searchDropDownMenu={
+                    <SearchBar
+                      onChange={(e) =>
+                        updateFilterParams("searchTerm", e.target.value)
+                      }
+                    />
+                  }
+                  dropDownMenus={PriceFilterDropdown({
+                    updateFilterParams,
+                    params,
+                  }).concat(
+                    <ExcelExport
+                      data={sections.map((section) => section.products) || []}
+                      fileName={(activeSection?.name ?? "section")
+                        .toLowerCase()
+                        .replace(/\s+/g, "-")
+                        .replace(/[^a-z0-9-]/g, "")}
+                    >
+                      <button className="flex items-center gap-2 px-4 py-2  bg-[#171717] text-white  hover:bg-[#212121] transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        <ArrowUpOnSquareIcon className="w-5 h-5" />
+                        <span className="font-medium">Export</span>
                       </button>
-                    )}
-                  />
-
-                  {activeSection && (
-                    <div className="bg-white">
-                      <UsableTable<Product>
-                        isLoading={loading}
-                        data={
-                          sections?.find(
-                            (section) =>
-                              section.section.name === activeSection?.name
-                          )?.products.items ||
-                          [] ||
-                          []
-                        }
-                        tableHeadItems={[
-                          "Count",
-                          "Product Name",
-                          "Price",
-                          "Availability",
-                          "Quantity",
-                          "Actions",
-                        ]}
-                        renderContent={({ item: product, index }) => (
-                          <tr
-                            key={product._id}
-                            className="hover:bg-gray-100 transition-colors duration-200"
-                          >
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 border-b border-gray-200">
-                              {index + 1}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                              <Link
-                                to={`/products/${product._id}`}
-                                className="block text-gray-800"
-                              >
-                                <div className="text-sm font-medium">
-                                  {product.productName}
-                                </div>
-                              </Link>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                              <Link
-                                to={`/products/${product._id}`}
-                                className="block text-gray-600"
-                              >
-                                <div className="text-sm font-medium">
-                                  ${product.price.toFixed(2)}
-                                </div>
-                              </Link>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                              <Link
-                                to={`/products/${product._id}`}
-                                className="block text-gray-600"
-                              >
-                                <div className="text-sm font-medium">
-                                  <StyledAvailability
-                                    status={product.availability}
-                                  />
-                                </div>
-                              </Link>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                              <Link
-                                to={`/products/${product._id}`}
-                                className="block text-gray-600"
-                              >
-                                <div className="text-sm font-medium">
-                                  {productsQuantity(product)}
-                                </div>
-                              </Link>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                              <DropdownMenu
-                                position="top-1 right-1"
-                                label={
-                                  <EllipsisHorizontalIcon className="h-5 w-5 text-gray-600 hover:text-gray-800 transition-colors" />
-                                }
-                                content={
-                                  <div className="bg-[#212121] ">
-                                    <button
-                                      onClick={() =>
-                                        handleRemoveProduct(product)
-                                      }
-                                      className="block px-4 py-2 text-sm text-white hover:bg-red-500 w-full text-left font-semibold transition-colors"
-                                    >
-                                      Remove Product
-                                    </button>
-                                  </div>
-                                }
-                              />
-                            </td>
-                          </tr>
-                        )}
-                      />
-                    </div>
+                    </ExcelExport>,
+                    <button
+                      onClick={() => {
+                        dispatch(
+                          openModal({
+                            type: "add-product-to-section",
+                            data: {
+                              sectionId: activeSection?._id,
+                              items:
+                                sections.find(
+                                  (section) =>
+                                    section.section._id === activeSection?._id
+                                )?.products.items || [],
+                            },
+                          })
+                        );
+                        // handleAddProductToASection();
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 bg-[#171717] text-white  hover:bg-[#212121] transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <PlusIcon className="w-5 h-5" />
+                      <span className="font-medium">Add New Products</span>
+                    </button>
                   )}
-                </div>
-              ),
-            };
-          }}
-        />
-      </div>
+                />
+
+                {activeSection && (
+                  <div className="bg-white">
+                    <UsableTable<Product>
+                      key={activeSection._id}
+                      isLoading={loading}
+                      data={
+                        sections?.find(
+                          (section) =>
+                            section.section.name === activeSection?.name
+                        )?.products.items ||
+                        [] ||
+                        []
+                      }
+                      tableHeadItems={productTableHeaders}
+                      renderContent={({ item, index }) => (
+                        <ProductTableRow
+                          key={item._id}
+                          product={item}
+                          count={index + 1}
+                          actionsButtons={
+                            <DropdownMenu
+                              position="top-1 right-1"
+                              label={
+                                <EllipsisHorizontalIcon className="h-5 w-5 text-gray-600 hover:text-gray-800 transition-colors" />
+                              }
+                              content={
+                                <div className="bg-[#212121] ">
+                                  <button
+                                    onClick={() => handleRemoveProduct(item)}
+                                    className="block px-4 py-2 text-sm text-white hover:bg-red-500 w-full text-left font-semibold transition-colors"
+                                  >
+                                    Remove Product
+                                  </button>
+                                </div>
+                              }
+                            />
+                          }
+                        />
+                      )}
+                    />
+                  </div>
+                )}
+              </div>
+            ),
+          };
+        }}
+      />
     </PageTemplate>
   );
 }

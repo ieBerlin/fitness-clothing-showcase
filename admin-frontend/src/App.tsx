@@ -10,8 +10,8 @@ function App() {
   return (
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
-        <Modal />
         <RouterProvider router={routes} />
+        <Modal />
       </QueryClientProvider>
     </Provider>
   );

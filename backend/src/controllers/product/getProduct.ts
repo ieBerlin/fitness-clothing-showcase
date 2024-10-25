@@ -1,18 +1,19 @@
 import { Request, Response } from "express";
 import Product, { IProduct } from "../../models/Product";
 import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
-import Availability from './../../enums/Availability';
+import Availability from "./../../enums/Availability";
+import mongoose from "mongoose";
 
 const getProduct = async (req: Request, res: Response) => {
   try {
     const { productId } = req.params;
 
-    if (!productId) {
+    if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
       const errorResponse: ErrorResponse = {
         success: false,
         errors: [{ field: "productId", message: "Product ID is required" }],
       };
-      return res.status(400).json(errorResponse);
+      return res.status(404).json(errorResponse);
     }
 
     const product = await Product.findById(productId);
@@ -25,7 +26,6 @@ const getProduct = async (req: Request, res: Response) => {
       return res.status(404).json(errorResponse);
     }
 
-    // Check product availability and update size availability accordingly
     if (["IN_STOCK", "DISCOUNTED"].includes(product.availability)) {
       product.colors.forEach((color) => {
         color.availableSizes = color.availableSizes.map((size) => {

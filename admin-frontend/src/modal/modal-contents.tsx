@@ -9,7 +9,12 @@ import {
   fetchProducts,
   removeProductFromSection,
 } from "../utils/authUtils";
-import { ExtendedFilterParams, queryClient } from "../utils/http";
+import {
+  ExtendedFilterParams,
+  imageUrl,
+  NoImageAvailable,
+  queryClient,
+} from "../utils/http";
 import { isArray } from "lodash";
 import { useCallback, useEffect, useState } from "react";
 import Product from "../models/Product";
@@ -21,7 +26,7 @@ import DropdownFilterGroup from "../components/FilterDropdownMenus";
 import SearchBar from "../components/SearchBar";
 import Availability from "../enums/Availability";
 import PriceOptions from "../enums/PriceOptions";
-import { productQueryKey } from "../constants/queryKeys";
+import { productQueryKey, sectionQueryKey } from "../constants/queryKeys";
 interface ModalContentProps {
   title?: string;
   bodyContent: React.ReactNode;
@@ -29,7 +34,7 @@ interface ModalContentProps {
 }
 function EmptyStateModal(): ModalContentProps {
   return {
-    title: "No Content Available", // Title of the modal
+    title: "No Content Available",
     bodyContent: (
       <div>
         <p className="text-gray-900 font-light">
@@ -41,7 +46,7 @@ function EmptyStateModal(): ModalContentProps {
       <button
         key="close"
         className="px-4 py-2 bg-blue-500 text-white"
-        onClick={() => closeModal()} // Assuming closeModal is handled elsewhere
+        onClick={() => closeModal()}
       >
         Close
       </button>,
@@ -53,11 +58,11 @@ export function ConfirmationModalContent(): ModalContentProps {
   const dispatch = useDispatch();
 
   return {
-    title: message, // Optional, as you have it in bodyContent too.
+    title: message,
     bodyContent: (
-      <div>
-        <p className="text-gray-900 font-light">{message}</p>
-      </div>
+      <p className="text-gray-800 font-medium text-center leading-relaxed">
+        {message}
+      </p>
     ),
     actionsButtons: [
       <ActionButton
@@ -68,25 +73,25 @@ export function ConfirmationModalContent(): ModalContentProps {
     ],
   };
 }
-
 export function LogoutModalContent(): ModalContentProps {
   const dispatch = useDispatch();
-
   const handleLogout = () => {
+    if (localStorage.getItem("token")) {
+      localStorage.removeItem("token");
+    }
+    queryClient.cancelQueries();
+    queryClient.clear();
     dispatch(closeModal());
-    dispatch(
-      openConfirmationModal({ message: "You have successfully logged out." })
-    );
+
+    window.location.href = "/";
   };
 
   return {
-    title: "Are You Sure You Want to Logout?", // Title of the modal
+    title: "Are You Sure You Want to Logout?",
     bodyContent: (
-      <div>
-        <p className="text-gray-900 font-light">
-          Are you sure you want to log out?
-        </p>
-      </div>
+      <p className="text-gray-800 font-medium text-center leading-relaxed">
+        Are you sure you want to log out?
+      </p>
     ),
     actionsButtons: [
       <ActionButton
@@ -108,7 +113,7 @@ export function ConfirmRemoveProductFromSection(): ModalContentProps {
     ErrorResponse,
     { sectionId: string; productId: string }
   >({
-    mutationKey: ["sections", `section-${section?.name}`],
+    mutationKey: sectionQueryKey,
     mutationFn: removeProductFromSection,
     onSuccess: () => {
       dispatch(closeModal());
@@ -118,7 +123,7 @@ export function ConfirmRemoveProductFromSection(): ModalContentProps {
         })
       );
       queryClient.invalidateQueries({
-        queryKey: ["sections"],
+        queryKey: sectionQueryKey,
       });
     },
   });
@@ -139,11 +144,12 @@ export function ConfirmRemoveProductFromSection(): ModalContentProps {
   return {
     title: "Remove Product",
     bodyContent: (
-      <div>
-        <h2 className="text-lg font-semibold">
-          Are you sure you want to remove {product.productName}?
+      <div className="text-gray-800">
+        <h2 className="text-xl font-semibold mb-2">
+          Are you sure you want to remove{" "}
+          <span className="text-red-600">{product.productName}</span> ?
         </h2>
-        <p className="text-gray-900 font-light">
+        <p className="text-gray-700 font-light">
           Removing <strong>{product.productName}</strong> from the section
           cannot be undone.
         </p>
@@ -282,13 +288,13 @@ export function AddProductToSectionModal(): ModalContentProps {
     ErrorResponse,
     { sectionId: string; items: Product[] }
   >({
-    mutationKey: ["sections"],
+    mutationKey: sectionQueryKey,
     mutationFn: addItemsToSection,
     onSuccess: () => {
       dispatch(closeModal());
       queryClient.invalidateQueries({
-        queryKey: ["sections"],
-      }); // Ensure the data is updated
+        queryKey: sectionQueryKey,
+      });
     },
     onError: (error) => {
       console.error("Failed to add products to section:", error);
@@ -323,15 +329,18 @@ export function AddProductToSectionModal(): ModalContentProps {
         fetchDataParams={params}
         initialParams={params}
         updateParams={handleUpdateArgs}
-        renderTableContent={({ dataEntries, updateFilterParams }) => ({
+        renderTableContent={({
+          dataEntries,
+          updateFilterParams,
+          allItems,
+        }) => ({
           ContentRenderer: () => (
             <div>
               <div className="flex justify-between flex-row w-full mb-3">
                 <h3 className="text-lg font-semibold">Available Products:</h3>
                 <div className="px-2 py-1 bg-gray-300 w-fit">
                   <h3 className="text-gray-800 font-semibold">
-                    {" "}
-                    All {dataEntries.length ?? 0}
+                    All {allItems ?? 0}
                   </h3>
                 </div>
               </div>
@@ -339,14 +348,32 @@ export function AddProductToSectionModal(): ModalContentProps {
                 {dataEntries.map((product) => (
                   <li
                     key={product._id}
-                    className={`p-3 border border-gray-300 cursor-pointer ${
+                    className={`p-3 border border-gray-200 rounded-lg shadow-sm cursor-pointer transition-transform transform ${
                       selectedProducts.find((p) => p._id === product._id)
-                        ? "bg-blue-100 border-blue-500"
-                        : "hover:bg-blue-50"
-                    } transition-all`}
+                        ? "bg-blue-50 border-blue-300 scale-105"
+                        : "hover:bg-blue-50 hover:scale-105"
+                    } flex items-center gap-4`}
                     onClick={() => handleItemAddOrRemove(product)}
                   >
-                    {product.productName}
+                    <div className="flex items-center gap-3 flex-grow">
+                      <img
+                        loading="lazy"
+                        className="w-10 h-10 object-cover rounded-md transition-opacity duration-300"
+                        src={
+                          product.images[0]?.pathname
+                            ? `${imageUrl}${product.images[0].pathname}`
+                            : NoImageAvailable
+                        }
+                        alt={`Image of ${product.productName}`}
+                      />
+                      <span className="text-gray-900 font-semibold text-base">
+                        {product.productName}
+                      </span>
+                    </div>
+
+                    <span className="ml-auto text-blue-600 font-semibold text-base">
+                      ${product.price}
+                    </span>
                   </li>
                 ))}
               </ul>

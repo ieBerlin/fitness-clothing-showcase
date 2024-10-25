@@ -5,10 +5,7 @@ import ProductForm from "../components/ProductForm";
 import { useNavigate } from "react-router-dom";
 import { createProduct } from "../utils/authUtils";
 import ErrorAlert from "../components/ErrorAlert";
-import {
-  ErrorResponse,
-  ProductResponse,
-} from "../types/response";
+import { ErrorResponse, ProductResponse } from "../types/response";
 import Product from "../models/Product";
 import Availability from "../enums/Availability";
 import Season from "../enums/Season";
@@ -32,6 +29,7 @@ const AddProductPage: FC = () => {
   >({
     mutationKey: ["product"],
     mutationFn: createProduct,
+    onMutate: (vars) => console.log(vars),
     onSuccess: (product) => {
       const productId = product._id;
       return navigate(`/products/${productId}/edit`, {
@@ -59,13 +57,7 @@ const AddProductPage: FC = () => {
     setFormData(updatedProductData);
     mutate(updatedProductData as Product);
   };
-  if (isError) {
-    return (
-      <div className="space-y-4">
-        <ErrorAlert error={error} />
-      </div>
-    );
-  }
+
   return (
     <PageTemplate title="Add Product Details">
       <ProductForm
@@ -75,6 +67,11 @@ const AddProductPage: FC = () => {
         onProductDataChange={setFormData}
         onStepNext={handleCreateProduct}
       />
+      {isError && !isPending && (
+        <div className="bg-white borde border-gray-200">
+          <ErrorAlert error={error} />
+        </div>
+      )}
     </PageTemplate>
   );
 };

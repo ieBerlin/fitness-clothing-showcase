@@ -13,14 +13,14 @@ import DropdownFilterGroup from "../components/FilterDropdownMenus";
 import SearchBar from "../components/SearchBar";
 import { ExtendedFilterParams } from "../utils/http";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
-import { productsQuantity } from "../utils/func";
-import StyledAvailability from "../components/StyledAvailability";
 import { productQueryKey } from "../constants/queryKeys";
 import {
   defaultFilterParams,
   ProductFilterParams,
 } from "../types/productFilters";
 import PriceFilterDropdown from "../components/PriceFilterDropdown";
+import ProductTableRow from "../components/ProductTableRow";
+import { productTableHeaders } from "../constants/tableHeaders";
 
 function ManageProducts() {
   const [params, setParams] =
@@ -42,7 +42,7 @@ function ManageProducts() {
 
   return (
     <PageTemplate title="Manage Products">
-      <div className="mb-6 flex space-x-4">
+      <div className="mb-6 flex space-x-4 h-full">
         <DataTable<Product, ProductFilterParams>
           key="manage-products-data-table"
           updateParams={handleUpdateArgs}
@@ -55,63 +55,13 @@ function ManageProducts() {
               <UsableTable<Product>
                 isLoading={loading}
                 data={dataEntries}
-                tableHeadItems={[
-                  "Count",
-                  "Product Name",
-                  "Price",
-                  "Availability",
-                  "Quantity",
-                  "Actions",
-                ]}
-                renderContent={({ item: product, index }) => (
-                  <tr
-                    key={product._id}
-                    className="hover:bg-gray-100 transition-colors duration-200"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 border-b border-gray-200">
-                      {index + 1}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                      <Link
-                        to={`/products/${product._id}`}
-                        className="block text-gray-800"
-                      >
-                        <div className="text-sm font-medium">
-                          {product.productName}
-                        </div>
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                      <Link
-                        to={`/products/${product._id}`}
-                        className="block text-gray-600"
-                      >
-                        <div className="text-sm font-medium">
-                          ${product.price.toFixed(2)}
-                        </div>
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                      <Link
-                        to={`/products/${product._id}`}
-                        className="block text-gray-600"
-                      >
-                        <div className="text-sm font-medium">
-                          <StyledAvailability status={product.availability} />
-                        </div>
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                      <Link
-                        to={`/products/${product._id}`}
-                        className="block text-gray-600"
-                      >
-                        <div className="text-sm font-medium">
-                          {productsQuantity(product)}
-                        </div>
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                tableHeadItems={productTableHeaders}
+                renderContent={({ item, index }) => (
+                  <ProductTableRow
+                    key={item._id}
+                    product={item}
+                    count={index + 1}
+                    actionsButtons={
                       <DropdownMenu
                         position="top-1 right-1"
                         label={
@@ -120,13 +70,13 @@ function ManageProducts() {
                         content={
                           <div className="bg-[#212121] ">
                             <Link
-                              to={`/products/${product._id}/edit`}
+                              to={`/products/${item._id}/edit`}
                               className="block px-4 py-2 text-sm text-white hover:bg-blue-500 font-semibold transition-colors"
                             >
                               Edit Product
                             </Link>
                             <button
-                              onClick={() => handleDeleteProduct(product)}
+                              onClick={() => handleDeleteProduct(item)}
                               className="block px-4 py-2 text-sm text-white hover:bg-red-500 w-full text-left font-semibold transition-colors"
                             >
                               Delete Product
@@ -134,8 +84,8 @@ function ManageProducts() {
                           </div>
                         }
                       />
-                    </td>
-                  </tr>
+                    }
+                  />
                 )}
               />
             ),

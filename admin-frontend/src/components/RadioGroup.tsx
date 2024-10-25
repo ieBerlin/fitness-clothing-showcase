@@ -33,7 +33,7 @@ const RadioGroup: FC<RadioInputProps> = ({
         {label.replace(/_/g, " ")}
       </label>
       <div
-        className={`flex ${classes} justify-evenly rounded-lg py-1 transition-all duration-200 ${
+        className={`flex ${classes} justify-evenly py-1 transition-all duration-200 ${
           isError ? "border-red-500" : "border-gray-300"
         } bg-[#171717]`}
       >

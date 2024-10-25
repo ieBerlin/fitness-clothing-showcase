@@ -15,7 +15,9 @@ const DataTable = <T, ExtraParams>({
   fetchItems,
   renderTableContent,
   updateParams,
+  loadingMessageIndicator = "Loading",
 }: {
+  loadingMessageIndicator?: string;
   canShowMoreResults?: boolean;
   isDataMerged?: boolean;
   fetchItems: (
@@ -27,12 +29,14 @@ const DataTable = <T, ExtraParams>({
   renderTableContent: ({
     dataEntries,
     updateFilterParams,
+    allItems,
   }: {
     dataEntries: T[];
     updateFilterParams: <K extends keyof ExtendedFilterParams<ExtraParams>>(
       paramKey: K,
       paramValue: ExtendedFilterParams<ExtraParams>[K]
     ) => void;
+    allItems?: number;
   }) => {
     ContentRenderer: ({
       loading,
@@ -84,6 +88,7 @@ const DataTable = <T, ExtraParams>({
     renderTableContent({
       updateFilterParams,
       dataEntries,
+      allItems: data?.totalItems,
     });
 
   const renderTableDisplay = (): ReactNode => {
@@ -91,12 +96,7 @@ const DataTable = <T, ExtraParams>({
       isFetching &&
       (!data?.items?.length || (isArray(data) && !data.length))
     ) {
-      return (
-        <div className="flex items-center justify-center w-full py-10 flex-col gap-2">
-          <LoadingSpinner fill="blue-600" text="gray-400" dimension="16" />
-          <h2 className="text-gray-500 font-semibold">Loading...</h2>
-        </div>
-      );
+      return <LoadingSpinner title={loadingMessageIndicator} />;
     }
 
     if (isError) {
@@ -117,7 +117,7 @@ const DataTable = <T, ExtraParams>({
   };
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full h-full">
       {DropdownFilterGroup}
       {renderTableDisplay()}
 
@@ -143,7 +143,4 @@ const DataTable = <T, ExtraParams>({
   );
 };
 
-// const MemoizedDataTable = React.memo(DataTable);
-
-// export default MemoizedDataTable;
 export default DataTable;

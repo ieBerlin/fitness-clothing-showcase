@@ -93,8 +93,6 @@ export const removeProductFromSection = async ({
   sectionId: string;
   productId: string;
 }) => {
-  console.log(sectionId);
-  console.log(productId);
   return getData<SectionResponse>({
     url: new URL(`${API_URL}section/${sectionId}/${productId}`).toString(),
     method: "DELETE",
@@ -164,16 +162,22 @@ export const editProduct = async (product: Product) =>
     url: new URL(`${API_URL}product/${product._id}`).toString(),
     method: "PUT",
     body: JSON.stringify(product),
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
 export const createProduct = async (product: Product) =>
   getData<ProductResponse>({
     url: new URL(`${API_URL}product`).toString(),
     method: "POST",
     body: JSON.stringify(product),
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
-export const fetchActivities = async <ItemsResponse>(
+export const fetchActivities = async (
   params: ExtendedFilterParams<ActivityFilterParams>
-) => {
+): Promise<DataResponse<Activity>> => {
   const {
     adminId,
     activityType,
@@ -220,7 +224,7 @@ export const fetchActivities = async <ItemsResponse>(
 
   const url = new URL(`${API_URL}activity`);
   url.search = urlParams.toString();
-  return getData<ItemsResponse>({
+  return getData<DataResponse<Activity>>({
     url: url.toString(),
   });
 };
@@ -335,6 +339,15 @@ export const updatePassword = async (data: {
     url: new URL(`${API_URL}auth/update-password`).toString(),
     method: "PUT",
     body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+export const updateMyProfile = async (fullName: string) =>
+  getData<null>({
+    url: "http://localhost:5431/api/auth/update-my-profile",
+    method: "PUT",
+    body: JSON.stringify({ fullName }),
     headers: {
       "Content-Type": "application/json",
     },

@@ -13,8 +13,6 @@ import ProductDetails from "./pages/ProductDetails";
 import SectionDetails from "./pages/SectionDetails";
 import EditProduct from "./pages/EditProduct";
 import AddProduct from "./pages/AddProduct";
-import EditSection from "./pages/EditSection";
-import ActivityDetails from "./pages/ActivityDetails";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import UpdateProfilePicturePage from "./pages/UpdateProfilePicturePage";
 import ViewProfilePage from "./pages/ViewProfilePage";
@@ -24,7 +22,7 @@ import RootLayout, {
   loader as authenticatedLoader,
 } from "./components/RootLayout";
 import { loader as loginLoader } from "./utils/http";
-import ProfileSettings from "./pages/ProfileSettings";
+import UpdateDetailsPage from "./pages/UpdateDetailsPage";
 
 const routes = createBrowserRouter([
   {
@@ -42,7 +40,6 @@ const routes = createBrowserRouter([
         path: "dashboard",
         element: <Dashboard />,
       },
-      { path: "settings", element: <ProfileSettings /> },
       {
         path: "products",
         children: [
@@ -83,10 +80,6 @@ const routes = createBrowserRouter([
                 index: true,
                 element: <SectionDetails />,
               },
-              {
-                path: "edit",
-                element: <EditSection />,
-              },
             ],
           },
         ],
@@ -107,6 +100,10 @@ const routes = createBrowserRouter([
             element: <UpdateProfilePicturePage />,
           },
           {
+            path: "update-details",
+            element: <UpdateDetailsPage />,
+          },
+          {
             path: "change-password",
             element: <ChangePasswordPage />,
           },
@@ -122,10 +119,6 @@ const routes = createBrowserRouter([
           {
             index: true,
             element: <AdminActivity />,
-          },
-          {
-            path: ":adminId",
-            element: <ActivityDetails />,
           },
         ],
       },

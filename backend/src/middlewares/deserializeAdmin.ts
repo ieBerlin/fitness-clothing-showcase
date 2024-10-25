@@ -8,7 +8,9 @@ const deserializeAdmin = async (
   next: NextFunction
 ) => {
   try {
+    console.log("authHeader")
     const authHeader = req.headers.authorization as string;
+    console.log(authHeader)
     const accessToken = authHeader
       ? authHeader.startsWith("Bearer ")
         ? authHeader.split(" ")[1]
@@ -41,7 +43,6 @@ const deserializeAdmin = async (
     next();
   } catch (error) {
     console.log(error);
-    // console.error("Error verifying JWT:", error);
     const errorResponse: ErrorResponse = {
       success: false,
       errors: [{ field: "server", message: "Failed to authenticate token." }],

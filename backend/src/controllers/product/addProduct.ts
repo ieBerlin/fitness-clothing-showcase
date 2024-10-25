@@ -21,7 +21,7 @@ const addProduct = async (req: Request, res: Response) => {
       availability,
       colors,
     } = req.body;
-
+console.log(req.body)
     const errors: ValidationError[] = [];
 
     if (

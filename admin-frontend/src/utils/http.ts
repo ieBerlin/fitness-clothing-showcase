@@ -3,6 +3,8 @@ import { authHeader } from "../services/auth-header.service";
 import ErrorCode from "../enums/ErrorCode";
 import { ErrorSeverity } from "../enums/ErrorSeverity";
 import { ErrorResponse, SuccessResponse } from "../types/response";
+import PublicNoImageAvailable from "/NoImageAvailable.jpg";
+import PublicDefaultUserPicture from "/default-profile.jpg";
 import { verifyToken } from "../services/admin.service";
 export type BaseFilterParams = {
   itemLimit?: number;
@@ -15,6 +17,9 @@ export type ExtendedFilterParams<ExtraParams = object> = BaseFilterParams &
 export const queryClient = new QueryClient();
 export const SERVER_URL = "http://localhost:5431";
 export const API_URL = SERVER_URL + "/api/";
+export const imageUrl = `${SERVER_URL}/public/uploads/product/`;
+export const NoImageAvailable = PublicNoImageAvailable;
+export const defaultUserPicture = PublicDefaultUserPicture;
 export async function getData<T>({
   url,
   body,
@@ -30,6 +35,7 @@ export async function getData<T>({
 }): Promise<T> {
   if (isTokenRequired) {
     const token = authHeader();
+
     if (!token["x-access-token"]) {
       throw {
         success: false,
@@ -52,7 +58,6 @@ export async function getData<T>({
       body,
       headers,
     });
-
     const data: SuccessResponse<T> | ErrorResponse = await response.json();
     if (data.success) {
       return (data as SuccessResponse).data;

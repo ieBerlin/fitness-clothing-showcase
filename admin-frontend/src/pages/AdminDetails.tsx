@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { ReactNode, useCallback, useState } from "react";
 import PageTemplate from "../components/PageTemplate";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -11,9 +11,12 @@ import { ErrorResponse } from "../types/response";
 import Admin from "../models/Admin";
 import Activity from "../models/Activity";
 import DataTable from "../components/DataTable";
-import { ExtendedFilterParams, SERVER_URL } from "../utils/http";
+import {
+  defaultUserPicture,
+  ExtendedFilterParams,
+  SERVER_URL,
+} from "../utils/http";
 
-import defaultUserPicture from "/default-profile.jpg";
 import {
   ActivityFilterParams,
   defaultFilterParams,
@@ -44,28 +47,20 @@ const AdminDetails: React.FC = () => {
     queryFn: () => fetchAdmin(adminId || ""),
     enabled: isString(adminId),
   });
-
+  let content: ReactNode;
   if (isAdminPending) {
-    return (
-      <div className="flex items-center justify-center w-full h-screen flex-col gap-4">
-        <LoadingSpinner fill="blue-600" text="gray-400" dimension="16" />
-        <h2 className="text-gray-500 font-semibold">Loading details...</h2>
-      </div>
-    );
-  }
-
-  if (isAdminError) {
-    return (
+    return (content = (
+      <LoadingSpinner title={"Fetching data, please wait..."} />
+    ));
+  } else if (isAdminError) {
+    return (content = (
       <div className="p-6">
         <ErrorAlert error={adminError as ErrorResponse} />
       </div>
-    );
-  }
-
-  return (
-    <PageTemplate title="Admin Details">
-      <div className="flex flex-col">
-        {/* Admin Information Section */}
+    ));
+  } else {
+    content = (
+      <div className="flex flex-col h-full">
         {adminData && (
           <div className="flex flex-row items-center bg-white p-6 mb-2 w-full border border-gray-200">
             <img
@@ -131,8 +126,9 @@ const AdminDetails: React.FC = () => {
           queryKey={activityQueryKey}
         />
       </div>
-    </PageTemplate>
-  );
+    );
+  }
+  return <PageTemplate title="Admin Details">{content}</PageTemplate>;
 };
 
 export default AdminDetails;

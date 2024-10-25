@@ -33,32 +33,30 @@ const AdminActivity: FC = () => {
   };
   return (
     <PageTemplate title="Admin Activities">
-      <div className="mb-6 flex space-x-4">
-        <DataTable<Activity, ActivityFilterParams>
-          key="admin-activity-data-table"
-          updateParams={handleUpdateArgs}
-          fetchDataParams={fetchFilteringArgs}
-          initialParams={params}
-          queryKey={activityQueryKey}
-          fetchItems={fetchActivities}
-          renderTableContent={({ updateFilterParams, dataEntries: items }) => ({
-            ContentRenderer: () => (
-              <ul className="space-y-6">
-                {items.map((item) => (
-                  <ActivityLogItem activityItem={item} key={item._id} />
-                ))}
-              </ul>
-            ),
+      <DataTable<Activity, ActivityFilterParams>
+        key="admin-activity-data-table"
+        updateParams={handleUpdateArgs}
+        fetchDataParams={fetchFilteringArgs}
+        initialParams={params}
+        queryKey={activityQueryKey}
+        fetchItems={fetchActivities}
+        renderTableContent={({ updateFilterParams, dataEntries: items }) => ({
+          ContentRenderer: () => (
+            <ul className="space-y-6">
+              {items.map((item) => (
+                <ActivityLogItem activityItem={item} key={item._id} />
+              ))}
+            </ul>
+          ),
 
-            dropDownMenus: (
-              <AdminActivityDropdown
-                params={params}
-                updateFilterParams={updateFilterParams}
-              />
-            ),
-          })}
-        />
-      </div>
+          dropDownMenus: (
+            <AdminActivityDropdown
+              params={params}
+              updateFilterParams={updateFilterParams}
+            />
+          ),
+        })}
+      />
     </PageTemplate>
   );
 };

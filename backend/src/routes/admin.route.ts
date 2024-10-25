@@ -1,6 +1,7 @@
 import { Router } from "express";
 import createAdmin from "../controllers/auth/createAdmin";
 import loginAdmin from "../controllers/auth/loginAdmin";
+import updateProfile from "../controllers/auth/updateProfile";
 import getAdmins from "../controllers/auth/getAdmins";
 import getSingleAdmin from "../controllers/auth/getSingleAdmin";
 import getAdminProfile from "../controllers/auth/getAdminProfile";
@@ -16,6 +17,7 @@ router.get("/:adminId", deserializeAdmin, adminAuth, getSingleAdmin);
 router.post("/signup", deserializeAdmin, adminAuth, createAdmin);
 router.post("/login", loginAdmin);
 router.post("/check-token", deserializeAdmin, adminAuth, allowAccess);
+router.put("/update-my-profile", deserializeAdmin, adminAuth, updateProfile);
 router.put(
   "/update-password",
   deserializeAdmin,

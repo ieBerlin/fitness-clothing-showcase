@@ -9,7 +9,7 @@ const getSection = async (req: Request, res: Response) => {
   try {
     const { sectionId } = req.params;
 
-    if (sectionId || !mongoose.Types.ObjectId.isValid(sectionId)) {
+    if (!sectionId || !mongoose.Types.ObjectId.isValid(sectionId)) {
       const errorResponse: ErrorResponse = {
         success: false,
         errors: [
