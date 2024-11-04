@@ -6,12 +6,17 @@ import CheckboxGroup from "./CheckboxGroup";
 import NumberInput from "./NumberInput";
 import DateInput from "./DateInput";
 
-import { availabilityOptions, seasonOptions } from "../utils/func";
+import {
+  availabilityOptions,
+  genderOptions,
+  seasonOptions,
+} from "../utils/func";
 import { ValidationError } from "../types/validation-error.types";
 import Product from "../models/Product";
 import Season from "../enums/Season";
 import Availability from "../enums/Availability";
 import ActionButton from "./ActionButton";
+import Gender from "../enums/Gender";
 
 interface BasicInformationProductFormProps {
   errors?: ValidationError[];
@@ -20,7 +25,7 @@ interface BasicInformationProductFormProps {
   isLoading: boolean;
   defaultValues: Product;
   onInputCheckChange: (
-    selectedValues: Season[] | boolean | Availability
+    selectedValues: Season[] | Availability | Gender
   ) => void;
 }
 
@@ -85,31 +90,22 @@ const BasicInformationProductForm: React.FC<
         errorMessage={getErrorMessage("product-description")}
       />
       <RadioGroup
-        label="Unisex"
-        options={[
-          { label: "YES", value: "true" },
-          { label: "NO", value: "false" },
-        ]}
-        selectedValue={
-          typeof defaultValues.isUnisex === "boolean"
-            ? defaultValues.isUnisex
-              ? "true"
-              : "false"
-            : undefined
-        }
-        name="product-unisex"
+        label="Gender"
+        options={genderOptions}
+        selectedValue={defaultValues.gender}
+        name="gender"
         required
         onChange={(e) =>
-          onInputCheckChange(e.target.value.toUpperCase() === "TRUE")
+          onInputCheckChange(e.target.value.toUpperCase() as Gender)
         }
-        isError={!!getErrorMessage("product-unisex")}
-        errorMessage={getErrorMessage("product-unisex")}
+        isError={!!getErrorMessage("gender")}
+        errorMessage={getErrorMessage("gender")}
       />
       <NumberInput
-        // min={0}
+        min={0}
         name="product-price"
         label="Price"
-        // required
+        required
         defaultValue={defaultValues.price}
         isError={!!getErrorMessage("product-price")}
         errorMessage={getErrorMessage("product-price")}

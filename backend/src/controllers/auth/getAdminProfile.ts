@@ -9,7 +9,6 @@ interface SanitizedAdmin extends Omit<AdminData, "adminPassword"> {
 
 const getAdminProfile = async (req: Request, res: Response) => {
   try {
-    // Validate if the email exists
     const adminEmail = res.locals?.admin?.email;
     if (!adminEmail) {
       const errorResponse: ErrorResponse = {
@@ -21,7 +20,7 @@ const getAdminProfile = async (req: Request, res: Response) => {
 
     const admin = await Admin.findOne({
       adminEmail,
-    });
+    }).select("-adminPassword");
 
     if (!admin) {
       const errorResponse: ErrorResponse = {
@@ -36,22 +35,9 @@ const getAdminProfile = async (req: Request, res: Response) => {
       return res.status(404).json(errorResponse);
     }
 
-    // Sanitize the admin object by excluding the password
-    const sanitizedAdmin: SanitizedAdmin = {
-      adminId: admin._id as unknown as string,
-      adminEmail: admin.adminEmail,
-      adminImage: admin.adminImage,
-      createdAt: admin.createdAt,
-      updatedAt: admin.updatedAt,
-      lastLoginAt: admin.lastLoginAt,
-      fullName: admin.fullName,
-      status: admin.status,
-      role: admin.role,
-    };
-
-    const successResponse: SuccessResponse<SanitizedAdmin> = {
+    const successResponse: SuccessResponse<IAdmin> = {
       success: true,
-      data: sanitizedAdmin,
+      data: admin,
     };
 
     return res.status(200).json(successResponse);

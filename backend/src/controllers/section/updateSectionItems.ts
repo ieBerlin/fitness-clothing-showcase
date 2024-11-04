@@ -1,10 +1,14 @@
 import { Request, Response } from "express";
 import Section, { ISection } from "../../models/Section";
-import Product from "../../models/Product";
+import Product, { IProduct } from "../../models/Product";
 import mongoose from "mongoose";
 import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
-import ErrorSeverity from './../../enums/ErrorSeverity';
-import ErrorCode from './../../enums/ErrorCode';
+import ErrorSeverity from "./../../enums/ErrorSeverity";
+import ErrorCode from "./../../enums/ErrorCode";
+import { createNotification } from "../../utils/createNotification";
+import NotificationTitle from "../../enums/NotificationTitle";
+import getNotificationMessage from "../../utils/getNotificationMessage";
+import { INotification } from "../../models/Notification";
 
 const updateSectionItems = async (req: Request, res: Response) => {
   const { sectionId } = req.params;
@@ -114,6 +118,15 @@ const updateSectionItems = async (req: Request, res: Response) => {
       success: true,
       data: updatedSection,
     };
+    const senderId = res.locals.admin.adminId;
+
+    await createNotification({
+      senderId,
+      title: NotificationTitle.SECTION_ITEMS_UPDATED,
+      message: getNotificationMessage(NotificationTitle.SECTION_ITEMS_UPDATED),
+      isRead: false,
+      createdAt: new Date(),
+    } as INotification);
 
     res.status(200).json(successResponse);
   } catch (error) {

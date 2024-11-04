@@ -13,6 +13,7 @@ interface VerificationToken {
   isValid: boolean;
   isExpired: boolean;
   decoded: JwtPayload | null;
+  adminId: string;
 }
 
 class TokenError extends Error {
@@ -42,6 +43,7 @@ export async function verifyJwt(token: string): Promise<VerificationToken> {
       isValid: true,
       isExpired: false,
       decoded,
+      adminId: admin._id as string,
     };
   } catch (error) {
     // console.log(error);
@@ -50,18 +52,21 @@ export async function verifyJwt(token: string): Promise<VerificationToken> {
         isValid: false,
         isExpired: true,
         decoded: null,
+        adminId: "",
       };
     } else if (error instanceof jwt.JsonWebTokenError) {
       return {
         isValid: false,
         isExpired: false,
         decoded: null,
+        adminId: "",
       };
     } else {
       return {
         isValid: false,
         isExpired: false,
         decoded: null,
+        adminId: "",
       };
     }
   }

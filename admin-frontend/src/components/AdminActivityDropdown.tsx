@@ -1,15 +1,15 @@
-import ActivityType from "../enums/ActivityType";
-import EntityType from "../enums/EntityType";
+// import EntityType from "../enums/EntityType";
 import { ChevronDoubleDownIcon } from "@heroicons/react/24/outline";
 import DropdownMenu from "../components/DropdownMenu";
-import { ExtendedFilterParams, queryClient } from "../utils/http";
+import { ExtendedFilterParams } from "../utils/http";
 import RadioGroup from "../components/RadioGroup";
-import FilterMenu from "../components/FilterMenu";
 import DropdownFilterGroup from "../components/FilterDropdownMenus";
-import { activityQueryKey } from "../constants/queryKeys";
 import TimeOption from "../enums/TimeOption";
 import { ActivityFilterParams } from "../types/activityFilters";
 import ItemLimitDropdownMenu from "./ItemLimitDropdownMenu";
+import FilterMenu from "./FilterMenu";
+import ActivityType from "../enums/ActivityType";
+import { activityTypeOptions } from "../utils/func";
 const AdminActivityDropdown = ({
   updateFilterParams,
   params,
@@ -56,9 +56,6 @@ const AdminActivityDropdown = ({
         />,
         <DropdownMenu
           closeOnContentClick={false}
-          onSubmit={() => {
-            queryClient.invalidateQueries({ queryKey: activityQueryKey });
-          }}
           label={
             <div className="flex items-center gap-2 px-3 py-2 border bg-gray-50 text-gray-800">
               <span className="text-lg font-semibold">Activity Type</span>
@@ -69,10 +66,7 @@ const AdminActivityDropdown = ({
             <FilterMenu
               label="Activity Type"
               name="activity-type"
-              options={Object.values(ActivityType).map((item) => ({
-                label: item.charAt(0).toUpperCase() + item.slice(1),
-                value: item,
-              }))}
+              options={activityTypeOptions}
               onCheck={(updatedValues) =>
                 updateFilterParams(
                   "activityType",
@@ -80,32 +74,6 @@ const AdminActivityDropdown = ({
                 )
               }
               defaultCheckedValues={params.activityType || []}
-            />
-          }
-        />,
-        <DropdownMenu
-          closeOnContentClick={false}
-          onSubmit={() => {
-            queryClient.invalidateQueries({ queryKey: activityQueryKey });
-          }}
-          label={
-            <div className="flex items-center gap-2 px-3 py-2 border bg-gray-50 text-gray-800">
-              <span className="text-lg font-semibold">Entity Type</span>
-              <ChevronDoubleDownIcon className="w-5 h-5 text-gray-600" />
-            </div>
-          }
-          content={
-            <FilterMenu
-              label="Entity Type"
-              name="entity-type"
-              options={Object.values(EntityType).map((item) => ({
-                label: item.charAt(0).toUpperCase() + item.slice(1),
-                value: item,
-              }))}
-              onCheck={(updatedValues) =>
-                updateFilterParams("entityType", updatedValues as EntityType[])
-              }
-              defaultCheckedValues={params.entityType || []}
             />
           }
         />,

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { initializeSections } from "../utils/initialize-sections";
-import addAdmin from "../utils/addAdmin";
+import addManager from "../utils/addManager";
 
 async function connectToDB(): Promise<void> {
   const MONGO_URI = process.env.MONGODB_URI;
@@ -13,7 +13,7 @@ async function connectToDB(): Promise<void> {
     await mongoose.connect(MONGO_URI);
     console.log("MongoDB connected successfully.");
 
-    await addAdmin();
+    await addManager();
     console.log("Admin initialized successfully.");
 
     await initializeSections();

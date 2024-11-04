@@ -13,7 +13,6 @@ import DropdownFilterGroup from "../components/FilterDropdownMenus";
 import SearchBar from "../components/SearchBar";
 import { ExtendedFilterParams } from "../utils/http";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
-import { productQueryKey } from "../constants/queryKeys";
 import {
   defaultFilterParams,
   ProductFilterParams,
@@ -21,6 +20,7 @@ import {
 import PriceFilterDropdown from "../components/PriceFilterDropdown";
 import ProductTableRow from "../components/ProductTableRow";
 import { productTableHeaders } from "../constants/tableHeaders";
+import { getQueryKey } from "../constants/queryKeys";
 
 function ManageProducts() {
   const [params, setParams] =
@@ -48,7 +48,7 @@ function ManageProducts() {
           updateParams={handleUpdateArgs}
           fetchDataParams={params}
           initialParams={params}
-          queryKey={productQueryKey}
+          queryKey={getQueryKey("products")}
           fetchItems={fetchProducts}
           renderTableContent={({ updateFilterParams, dataEntries }) => ({
             ContentRenderer: ({ loading }) => (

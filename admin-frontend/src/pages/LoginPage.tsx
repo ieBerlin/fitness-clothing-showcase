@@ -10,28 +10,52 @@ function LoginPage() {
   const [password, setPassword] = useState<string>("");
   const isAdminAlreadyAuthenticated = useLoaderData();
   const navigate = useNavigate();
+  const [rememberMe, setRememberMe] = useState(false);
 
-  const { mutate, isPending } = useMutation<string, ErrorResponse, IAdmin>({
+  const { mutate, isPending } = useMutation<
+    { token: string; status: string },
+    ErrorResponse,
+    IAdmin
+  >({
     mutationKey: ["admin"],
     mutationFn: async (token) => {
       const result = await login(token);
-      localStorage.setItem("token", result);
+      localStorage.setItem("token", result.token);
       return result;
     },
     onError: (error) => {
       setIsErrorShown(true);
-      setErrorMessage(
-        error.statusCode === 400
-          ? error.errors.length
-            ? error.errors.map((error) => error.message).join("\n")
-            : "Unmatched admin credentials"
-          : "An unexpected error occurred"
-      );
+      let errorMessage;
+      switch (error.statusCode) {
+        case 400:
+          errorMessage =
+            error.errors.length > 0
+              ? error.errors.map((err) => err.message).join("\n")
+              : "Unmatched admin credentials";
+          break;
+        case 401:
+          errorMessage =
+            error.errors.length > 0
+              ? error.errors.map((err) => err.message).join("\n")
+              : "Unauthorized access. Your account may be suspended or deleted.";
+          break;
+        default:
+          errorMessage = "An unexpected error occurred";
+      }
+
+      setErrorMessage(errorMessage);
     },
     onSuccess: () => {
       setEmail("");
       setPassword("");
       setIsErrorShown(false);
+      if (rememberMe) {
+        localStorage.setItem("savedEmail", email);
+        localStorage.setItem("savedPassword", password);
+      } else {
+        localStorage.removeItem("savedEmail");
+        localStorage.removeItem("savedPassword");
+      }
       navigate("/dashboard");
     },
   });
@@ -39,6 +63,13 @@ function LoginPage() {
   useEffect(() => {
     if (isAdminAlreadyAuthenticated) {
       navigate("/dashboard");
+    }
+    const savedEmail = localStorage.getItem("savedEmail");
+    const savedPassword = localStorage.getItem("savedPassword");
+    if (savedEmail && savedPassword) {
+      setEmail(savedEmail);
+      setPassword(savedPassword);
+      setRememberMe(true);
     }
   }, [isAdminAlreadyAuthenticated, navigate]);
 
@@ -118,7 +149,15 @@ function LoginPage() {
             setIsErrorShown(false);
           }}
         />
-
+        <label className="flex items-center mt-2">
+          <input
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            className="mr-2"
+          />
+          <span className="text-gray-800 font-medium">Remember Me</span>
+        </label>
         <button
           type="submit"
           className={`p-3 rounded-lg font-semibold transition duration-300 ${

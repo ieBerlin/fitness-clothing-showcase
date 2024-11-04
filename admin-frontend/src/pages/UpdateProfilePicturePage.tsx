@@ -112,12 +112,7 @@ const UpdateProfilePicturePage: React.FC = () => {
     setSelectedFile(null);
   };
   if (isFetchingProfilePicture) {
-    return (
-      <div className="flex items-center justify-center w-full py-10 flex-col gap-2">
-        <LoadingSpinner fill="blue-600" text="gray-400" dimension="16" />
-        <h2 className="text-gray-500 font-semibold">Loading...</h2>
-      </div>
-    );
+    return <LoadingSpinner title="Loading..." />;
   }
   if (hasFetchError && fetchError.statusCode === 500) {
     return (

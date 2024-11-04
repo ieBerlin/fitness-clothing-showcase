@@ -1,65 +1,59 @@
 import { Request, Response } from "express";
-import Activity, { IActivity } from "../../models/Activity";
 import {
   ErrorResponse,
   ItemsResponse,
   SuccessResponse,
 } from "../../utils/responseInterfaces";
+import Notification, { INotification } from "../../models/Notification";
 
 const getAllActivities = async (req: Request, res: Response) => {
   try {
     const {
-      adminId,
       activityType,
-      entityType,
       startDate,
       endDate,
       page = 1,
       limit = 10,
     } = req.query;
+
     const filter: any = {};
-    if (adminId) {
-      filter.adminId = adminId;
-    }
 
     if (activityType) {
       const activityTypesArray = Array.isArray(activityType)
         ? activityType
         : [activityType];
-      filter.activityType = { $in: activityTypesArray };
+      filter.title = { $in: activityTypesArray };
     }
 
-    if (entityType) {
-      const entityTypesArray = Array.isArray(entityType)
-        ? entityType
-        : [entityType];
-      filter.entityType = { $in: entityTypesArray };
-    }
-    if (startDate) {
-      const start = new Date(startDate as string);
-      const end = new Date(endDate as string);
-      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-        filter.timestamp = { $gte: start, $lte: end };
-      } else if (!isNaN(start.getTime())) {
-        filter.timestamp = { $gte: start };
-      } else {
+    if (startDate || endDate) {
+      const start = startDate ? new Date(startDate as string) : undefined;
+      const end = endDate ? new Date(endDate as string) : undefined;
+
+      if ((start && isNaN(start.getTime())) || (end && isNaN(end.getTime()))) {
         return res.status(400).json({
           success: false,
           errors: [{ field: "date", message: "Invalid date format" }],
         });
       }
+
+      if (start) {
+        filter.createdAt = { ...filter.createdAt, $gte: start };
+      }
+      if (end) {
+        filter.createdAt = { ...filter.createdAt, $lte: end };
+      }
     }
 
+
     const skip = (Number(page) - 1) * Number(limit);
+    const activities = await Notification.find(filter)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(Number(limit));
 
-    const activities = await Activity.find(filter)
-      .sort({ timestamp: -1 }) // Sort by latest activities first
-      .skip(skip)
-      .limit(Number(limit));
+    const totalActivities = await Notification.countDocuments(filter);
 
-    const totalActivities = await Activity.countDocuments(filter);
-
-    const successResponse: SuccessResponse<ItemsResponse<IActivity>> = {
+    const successResponse: SuccessResponse<ItemsResponse<INotification>> = {
       success: true,
       data: {
         items: activities,

@@ -1,8 +1,9 @@
 import { Document, Schema, model } from "mongoose";
 import { IImage } from "./Image";
-import Availability from './../enums/Availability';
-import Season from './../enums/Season';
-import Color from './../enums/Color';
+import Availability from "./../enums/Availability";
+import Season from "./../enums/Season";
+import Color from "./../enums/Color";
+import Gender from "./../enums/Gender";
 
 export interface Size {
   name: string;
@@ -19,7 +20,7 @@ export interface IProduct extends Document {
   productName: string;
   productDescription: string;
   colors: ColorOption[];
-  isUnisex: boolean;
+  gender: Gender;
   season: Season[];
   woolPercentage?: number;
   price: number;
@@ -47,7 +48,7 @@ const ProductSchema: Schema = new Schema({
       ],
     },
   ],
-  isUnisex: { type: Boolean, required: true },
+  gender: { type: String, enum: Object.values(Gender), required: true },
   season: { type: [String], enum: Object.values(Season), required: true },
   woolPercentage: { type: Number, min: 0, max: 100 },
   price: { type: Number, required: true },

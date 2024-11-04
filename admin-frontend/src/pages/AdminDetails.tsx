@@ -2,18 +2,17 @@ import React, { ReactNode, useCallback, useState } from "react";
 import PageTemplate from "../components/PageTemplate";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { activityQueryKey, adminQueryKey } from "../constants/queryKeys";
 import { fetchAdmin, fetchActivities } from "../utils/authUtils";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ErrorAlert from "../components/ErrorAlert";
 import { isString } from "lodash";
 import { ErrorResponse } from "../types/response";
 import Admin from "../models/Admin";
-import Activity from "../models/Activity";
 import DataTable from "../components/DataTable";
 import {
   defaultUserPicture,
   ExtendedFilterParams,
+  queryClient,
   SERVER_URL,
 } from "../utils/http";
 
@@ -23,6 +22,11 @@ import {
 } from "../types/activityFilters";
 import AdminActivityDropdown from "../components/AdminActivityDropdown";
 import ActivityLogItem from "../components/ActivityLogItem";
+import { openModal } from "../features/modal";
+import { ModalType } from "../enums/ModalType";
+import { useDispatch } from "react-redux";
+import Notification from "../models/Notification";
+import { getQueryKey } from "../constants/queryKeys";
 
 const AdminDetails: React.FC = () => {
   const [params, setParams] =
@@ -36,18 +40,24 @@ const AdminDetails: React.FC = () => {
     []
   );
   const { adminId } = useParams();
-
+  const managerData = queryClient.getQueryData(getQueryKey("admins")) as Admin;
+  const dispatch = useDispatch();
   const {
     data: adminData,
     isError: isAdminError,
     error: adminError,
     isPending: isAdminPending,
   } = useQuery<Admin, ErrorResponse>({
-    queryKey: [adminQueryKey, adminId],
+    queryKey: getQueryKey("admins"),
     queryFn: () => fetchAdmin(adminId || ""),
     enabled: isString(adminId),
   });
   let content: ReactNode;
+  const canBeEdited =
+    typeof adminData?._id === "string" &&
+    adminData.role === "admin" &&
+    managerData &&
+    managerData.role === "manager";
   if (isAdminPending) {
     return (content = (
       <LoadingSpinner title={"Fetching data, please wait..."} />
@@ -59,6 +69,14 @@ const AdminDetails: React.FC = () => {
       </div>
     ));
   } else {
+    function handleEditAdmin() {
+      dispatch(
+        openModal({
+          type: ModalType.EDIT_ADMIN,
+          data: adminData,
+        })
+      );
+    }
     content = (
       <div className="flex flex-col h-full">
         {adminData && (
@@ -97,10 +115,24 @@ const AdminDetails: React.FC = () => {
                   </span>
                 )}
               </p>
+              <p className="text-lg font-medium text-gray-700 mb-1">
+                <span className="font-semibold text-black">Position: </span>
+                {adminData.role}
+              </p>
             </div>
+            {canBeEdited && (
+              <div className="ml-auto flex items-start h-full">
+                <button
+                  onClick={handleEditAdmin}
+                  className="bg-teal-600 text-white font-semibold py-2 px-6 rounded-lg shadow-lg hover:bg-teal-700 active:bg-teal-800 transition duration-300 ease-in-out flex items-center space-x-2 "
+                >
+                  <span>Edit Admin</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
-        <DataTable<Activity, ActivityFilterParams>
+        <DataTable<Notification, ActivityFilterParams>
           fetchItems={fetchActivities}
           fetchDataParams={params}
           initialParams={params}
@@ -123,7 +155,7 @@ const AdminDetails: React.FC = () => {
               />
             ),
           })}
-          queryKey={activityQueryKey}
+          queryKey={getQueryKey("activities")}
         />
       </div>
     );

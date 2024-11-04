@@ -1,13 +1,12 @@
 import React, { FC, useCallback, useState } from "react";
 import PageTemplate from "../components/PageTemplate";
-import { fetchNotifications } from "../utils/authUtils";
+import { fetchNotifications, markAsRead } from "../utils/authUtils";
 import DataTable from "../components/DataTable";
-import { ExtendedFilterParams } from "../utils/http";
+import { ExtendedFilterParams, queryClient } from "../utils/http";
 import {
   defaultFilterParams,
   NotificationFilterParams,
 } from "../types/notificationFilters";
-import { notificationQueryKey } from "../constants/queryKeys";
 import { ChevronDoubleDownIcon } from "@heroicons/react/24/outline";
 import DropdownFilterGroup from "../components/FilterDropdownMenus";
 import DropdownMenu from "../components/DropdownMenu";
@@ -16,6 +15,11 @@ import Notification from "../models/Notification";
 import SearchBar from "../components/SearchBar";
 import RadioGroup from "../components/RadioGroup";
 import TimeOption from "../enums/TimeOption";
+import { useMutation } from "@tanstack/react-query";
+import { ErrorResponse } from "../types/response";
+import ErrorAlert from "../components/ErrorAlert";
+import { snakeCaseToReadable, sortNotifications } from "../utils/func";
+import { getQueryKey } from "../constants/queryKeys";
 const Notifications: React.FC = () => {
   const [params, setParams] =
     useState<ExtendedFilterParams<typeof defaultFilterParams>>(
@@ -39,6 +43,7 @@ const Notifications: React.FC = () => {
   return (
     <PageTemplate title="Notifications">
       <DataTable<Notification, NotificationFilterParams>
+        queryKey={getQueryKey("notifications")}
         fetchItems={fetchNotifications}
         fetchDataParams={fetchFilteringArgs}
         initialParams={params}
@@ -48,14 +53,12 @@ const Notifications: React.FC = () => {
           updateFilterParams,
         }) => ({
           ContentRenderer: () => (
-            <div className="max-w-4xl mx-auto p-4">
-              <ul className="space-y-4">
-                {notifications.length &&
-                  notifications.map((item) => (
-                    <NotificationItem key={item._id} notification={item} />
-                  ))}
-              </ul>
-            </div>
+            <ul className="space-y-4">
+              {notifications.length &&
+                sortNotifications(notifications).map((item) => (
+                  <NotificationItem key={item._id} notification={item} />
+                ))}
+            </ul>
           ),
           dropDownMenus: (
             <DropdownFilterGroup
@@ -99,7 +102,6 @@ const Notifications: React.FC = () => {
             />
           ),
         })}
-        queryKey={notificationQueryKey}
       />
     </PageTemplate>
   );
@@ -110,40 +112,75 @@ export default Notifications;
 const NotificationItem: FC<{ notification: Notification }> = ({
   notification,
 }) => {
-  function handleClickButton() {
-    return;
-  }
-  return (
-    <li className="bg-white p-4 rounded-lg shadow-md border border-gray-300 flex flex-row justify-between w-full">
-      <div>
-        <h2 className="text-lg font-semibold text-gray-900">
-          {notification.title}
-        </h2>
-        <p className="text-gray-600 mt-2">{notification.message}</p>
-        <p className="text-sm text-gray-500 mt-1">
-          {new Intl.DateTimeFormat("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            hour: "numeric",
-            minute: "numeric",
-          }).format(notification.createdAt)}
-        </p>
-      </div>
+  const { isError, error, mutate, isPending } = useMutation<
+    null,
+    ErrorResponse,
+    string[]
+  >({
+    mutationKey: getQueryKey("notifications"),
+    mutationFn: markAsRead,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: getQueryKey("notifications"),
+      });
+    },
+  });
 
-      <div className="flex flex-grow flex-1 flex-col justify-between items-end">
-        <div
-          className={`w-6 h-6  rounded-full ${
-            notification.isRead ? "bg-green-500" : "bg-red-500"
-          }`}
-        ></div>
-        <button
-          onClick={handleClickButton}
-          className="px-3 py-1 text-sm font-medium text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
-        >
-          Make As Read
-        </button>
-      </div>
-    </li>
+  function handleClickButton() {
+    mutate([notification._id]);
+  }
+
+  return (
+    <>
+      <li className="bg-white p-6 border-b border-black flex justify-between w-full">
+        <div className="flex-1">
+          <h2 className="text-xl uppercase font-bold text-black mb-2 tracking-widest">
+            {snakeCaseToReadable(notification.title)}
+          </h2>
+          <p className="text-black text-base mb-4 leading-7 tracking-wide border-l-2 border-black pl-3 italic">
+            {notification.message}
+          </p>
+          <p className="text-xs text-gray-600 italic">
+            {new Date(notification.createdAt).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}{" "}
+            at{" "}
+            {new Date(notification.createdAt).toLocaleTimeString("en-US", {
+              hour: "numeric",
+              minute: "numeric",
+            })}
+          </p>
+        </div>
+
+        <div className="flex flex-col items-end justify-between">
+          <div
+            className={`w-3 h-3 border-2 rounded-full ${
+              notification.isRead
+                ? "border-black bg-black"
+                : "border-black bg-white"
+            }`}
+          ></div>
+          {notification.isRead === false && (
+            <button
+              onClick={handleClickButton}
+              disabled={isPending}
+              className={`mt-6 px-4 py-2 font-semibold border text-xs uppercase tracking-wider transition-all duration-200 ease-in-out
+            ${
+              isPending
+                ? "bg-gray-300 text-gray-500 border-gray-400 cursor-not-allowed"
+                : "text-black border-black hover:bg-black hover:text-white"
+            }
+            ${isError ? "border-red-500 text-red-500" : ""}
+          `}
+            >
+              {isPending ? "Marking..." : "Mark as Read"}
+            </button>
+          )}
+        </div>
+      </li>
+      {isError && <ErrorAlert isTheTitleShown={false} error={error} />}
+    </>
   );
 };

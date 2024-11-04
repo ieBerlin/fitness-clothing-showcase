@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Activity, { IActivity } from "../../models/Activity";
+import Notification,{ INotification } from "../../models/Notification";
 import {
   ErrorResponse,
   ItemsResponse,
@@ -19,14 +19,14 @@ const getAllActivities = async (req: Request, res: Response) => {
 
     const skip = (Number(page) - 1) * Number(limit);
 
-    const activities = await Activity.find(filter)
+    const activities = await Notification.find(filter)
       .sort({ timestamp: -1 }) // Sort by latest activities first
       .skip(skip)
       .limit(Number(limit));
 
-    const totalActivities = await Activity.countDocuments(filter);
+    const totalActivities = await Notification.countDocuments(filter);
 
-    const successResponse: SuccessResponse<ItemsResponse<IActivity>> = {
+    const successResponse: SuccessResponse<ItemsResponse<INotification>> = {
       success: true,
       data: {
         items: activities,

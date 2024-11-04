@@ -9,6 +9,7 @@ import Availability from "../enums/Availability";
 import Season from "../enums/Season";
 import Image, { Angle } from "../models/Image";
 import ActionButton from "./ActionButton";
+import Gender from "../enums/Gender";
 
 interface ProductFormProps {
   validationErrors?: ValidationError[];
@@ -32,7 +33,7 @@ const ProductForm: FC<ProductFormProps> = ({
   onStepNext,
 }) => {
   const handleInputCheckChange = (
-    portion: Season[] | boolean | Availability
+    portion: Season[] | Availability | Gender
   ) => {
     let updatedProductData;
 
@@ -41,10 +42,10 @@ const ProductForm: FC<ProductFormProps> = ({
         ...productData,
         season: portion as Season[],
       };
-    } else if (typeof portion === "boolean") {
+    } else if (Object.values(Gender).includes(portion.toLowerCase() as Gender)) {
       updatedProductData = {
         ...productData,
-        isUnisex: portion,
+        gender: portion as Gender,
       };
     } else {
       updatedProductData = {
@@ -52,7 +53,7 @@ const ProductForm: FC<ProductFormProps> = ({
         availability: portion as Availability,
       };
     }
-
+    console.log(Object.values(Gender).includes(portion as Gender));
     onProductDataChange(updatedProductData);
   };
 
@@ -60,7 +61,7 @@ const ProductForm: FC<ProductFormProps> = ({
     _id,
     productName,
     productDescription,
-    isUnisex,
+    gender,
     price,
     releaseDate,
     availability,
@@ -72,13 +73,13 @@ const ProductForm: FC<ProductFormProps> = ({
 
   const defaultValues: Partial<Product> = {
     _id: isEditing ? _id : undefined,
-    productName: productName,
-    productDescription: productDescription,
-    isUnisex: isUnisex,
-    price: price,
+    productName,
+    productDescription,
+    gender,
+    price,
     releaseDate,
-    availability: availability,
-    woolPercentage: woolPercentage,
+    availability,
+    woolPercentage,
     colors,
     season: season.map((item) => item.toLowerCase() as Season),
     images,
@@ -123,7 +124,7 @@ const ProductForm: FC<ProductFormProps> = ({
             </div>
             <ProductColors
               productColors={defaultValues.colors}
-              isUnisex={defaultValues.isUnisex ?? false}
+              gender={defaultValues.gender!}
             />
           </Form>
         );

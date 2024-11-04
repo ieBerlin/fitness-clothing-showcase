@@ -2,14 +2,12 @@ import { API_URL, getData, ExtendedFilterParams } from "./http";
 import {
   // AdminProfileResponse,
   AdminResponse,
-  DataResponse,
   ProductResponse,
   SectionResponse,
   StatisticsResponse,
 } from "../types/response";
 import Product from "../models/Product";
 import Section from "../models/Section";
-import Activity from "../models/Activity";
 import { ActivityFilterParams } from "../types/activityFilters";
 import Admin from "../models/Admin";
 export interface FetchProductParams {
@@ -157,6 +155,15 @@ export const addItemsToSection = async ({
       "Content-Type": "application/json",
     },
   });
+export const markAsRead = async (notificationIds: string[]) =>
+  getData<null>({
+    url: new URL(`${API_URL}notification/mark-as-read`).toString(),
+    method: "PUT",
+    body: JSON.stringify({ notificationIds }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 export const editProduct = async (product: Product) =>
   getData<ProductResponse>({
     url: new URL(`${API_URL}product/${product._id}`).toString(),
@@ -175,13 +182,11 @@ export const createProduct = async (product: Product) =>
       "Content-Type": "application/json",
     },
   });
-export const fetchActivities = async (
+export const fetchActivities = async <DataResponse>(
   params: ExtendedFilterParams<ActivityFilterParams>
-): Promise<DataResponse<Activity>> => {
+) => {
   const {
-    adminId,
     activityType,
-    entityType,
     startDate,
     endDate,
     currentPage = 1,
@@ -189,9 +194,7 @@ export const fetchActivities = async (
     searchTerm,
   } = params;
   const urlParams = new URLSearchParams();
-  if (adminId) {
-    urlParams.append("adminId", adminId);
-  }
+
   if (
     searchTerm !== undefined &&
     searchTerm !== "" &&
@@ -202,9 +205,7 @@ export const fetchActivities = async (
   if (activityType && activityType.length > 0) {
     activityType.forEach((type) => urlParams.append("activityType", type));
   }
-  if (entityType && entityType.length > 0) {
-    entityType.forEach((type) => urlParams.append("entityType", type));
-  }
+
   if (startDate) {
     const start = new Date(startDate);
     if (!isNaN(start.getTime())) {
@@ -224,7 +225,7 @@ export const fetchActivities = async (
 
   const url = new URL(`${API_URL}activity`);
   url.search = urlParams.toString();
-  return getData<DataResponse<Activity>>({
+  return getData<DataResponse>({
     url: url.toString(),
   });
 };
@@ -272,29 +273,47 @@ export const fetchNotifications = async <ItemsResponse>(
     url: url.toString(),
   });
 };
-export const fetchMyActivities = async ({
+export const fetchMyActivities = async <ItemsResponse>({
   currentPage = 1,
   itemLimit = 10,
+  startDate,
+  endDate,
+  searchTerm,
 }: {
+  searchTerm?: string;
+
   currentPage?: number;
   itemLimit?: number;
-}): Promise<DataResponse<Activity>> => {
+  startDate: Date;
+  endDate: Date;
+}) => {
   const params = new URLSearchParams();
 
   params.append("page", currentPage.toString());
   params.append("limit", itemLimit.toString());
-
+  if (startDate) {
+    const start = new Date(startDate);
+    if (!isNaN(start.getTime())) {
+      params.append("startDate", start.toISOString());
+    }
+  }
+  if (
+    searchTerm !== undefined &&
+    searchTerm !== "" &&
+    searchTerm?.trim() !== ""
+  ) {
+    params.append("search", searchTerm.trim());
+  }
+  if (endDate) {
+    const end = new Date(endDate);
+    if (!isNaN(end.getTime())) {
+      params.append("endDate", end.toISOString());
+    }
+  }
   const url = new URL(`${API_URL}activity/my-activities`);
   url.search = params.toString();
 
-  return getData<DataResponse<Activity>>({
-    url: url.toString(),
-  });
-};
-export const fetchMyBasicInformations = async () => {
-  const url = new URL(`${API_URL}activity/my-activities`);
-
-  return getData<DataResponse<Activity>>({
+  return getData<ItemsResponse>({
     url: url.toString(),
   });
 };
@@ -337,6 +356,20 @@ export const updatePassword = async (data: {
 }) =>
   getData<null>({
     url: new URL(`${API_URL}auth/update-password`).toString(),
+    method: "PUT",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+export const updateProfile = async (data: {
+  adminId: string;
+  fullName: string;
+  role: string;
+  status: string;
+}) =>
+  getData<null>({
+    url: new URL(`${API_URL}auth/admin-management/${data.adminId}`).toString(),
     method: "PUT",
     body: JSON.stringify(data),
     headers: {

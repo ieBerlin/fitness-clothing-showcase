@@ -8,6 +8,7 @@ import {
   deleteProduct,
   fetchProducts,
   removeProductFromSection,
+  updateProfile,
 } from "../utils/authUtils";
 import {
   ExtendedFilterParams,
@@ -16,7 +17,7 @@ import {
   queryClient,
 } from "../utils/http";
 import { isArray } from "lodash";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Product from "../models/Product";
 import { ErrorResponse, SectionResponse } from "../types/response";
 import { ValidationError } from "../types/validation-error.types";
@@ -26,7 +27,11 @@ import DropdownFilterGroup from "../components/FilterDropdownMenus";
 import SearchBar from "../components/SearchBar";
 import Availability from "../enums/Availability";
 import PriceOptions from "../enums/PriceOptions";
-import { productQueryKey, sectionQueryKey } from "../constants/queryKeys";
+import Admin from "../models/Admin";
+import TextInput from "../components/TextInput";
+import SelectInput from "../components/SelectInput";
+import ErrorAlert from "../components/ErrorAlert";
+import { getQueryKey } from "../constants/queryKeys";
 interface ModalContentProps {
   title?: string;
   bodyContent: React.ReactNode;
@@ -113,7 +118,7 @@ export function ConfirmRemoveProductFromSection(): ModalContentProps {
     ErrorResponse,
     { sectionId: string; productId: string }
   >({
-    mutationKey: sectionQueryKey,
+    mutationKey: getQueryKey("sections"),
     mutationFn: removeProductFromSection,
     onSuccess: () => {
       dispatch(closeModal());
@@ -123,7 +128,7 @@ export function ConfirmRemoveProductFromSection(): ModalContentProps {
         })
       );
       queryClient.invalidateQueries({
-        queryKey: sectionQueryKey,
+        queryKey: getQueryKey("sections"),
       });
     },
   });
@@ -288,12 +293,12 @@ export function AddProductToSectionModal(): ModalContentProps {
     ErrorResponse,
     { sectionId: string; items: Product[] }
   >({
-    mutationKey: sectionQueryKey,
+    mutationKey: getQueryKey("sections"),
     mutationFn: addItemsToSection,
     onSuccess: () => {
       dispatch(closeModal());
       queryClient.invalidateQueries({
-        queryKey: sectionQueryKey,
+        queryKey: getQueryKey("sections"),
       });
     },
     onError: (error) => {
@@ -391,7 +396,7 @@ export function AddProductToSectionModal(): ModalContentProps {
             />
           ),
         })}
-        queryKey={productQueryKey}
+        queryKey={getQueryKey("sections")}
       />
     ),
     actionsButtons: [
@@ -408,6 +413,133 @@ export function AddProductToSectionModal(): ModalContentProps {
         disabled={selectedProducts.length === 0 || isMutating}
       />,
       <CancelButton />,
+    ],
+  };
+}
+
+export function EditAdminModalContent(): ModalContentProps {
+  const dispatch = useDispatch();
+  const { data: modalData } = useSelector((state: RootState) => state.modal);
+  const adminData = modalData as Admin;
+
+  const {
+    mutate,
+    isPending: isMutating,
+    isError,
+    error,
+  } = useMutation<
+    null,
+    ErrorResponse,
+    {
+      adminId: string;
+      fullName: string;
+      role: string;
+      status: string;
+    }
+  >({
+    mutationKey: getQueryKey("admins"),
+    mutationFn: updateProfile,
+    onSuccess: () => {
+      dispatch(closeModal());
+      dispatch(
+        openConfirmationModal({
+          message: "You have successfully updated this admin.",
+        })
+      );
+      queryClient.invalidateQueries({
+        queryKey: getQueryKey("admins"),
+      });
+    },
+  });
+  const formRef = useRef<HTMLFormElement | null>(null);
+
+  const handleSubmission = () => {
+    const fd = new FormData(formRef.current!);
+    const formData = {
+      fullName: fd.get("full-name") as string,
+      role: fd.get("role") as string,
+      status: fd.get("status") as string,
+      adminId: adminData._id,
+    };
+    mutate(formData);
+  };
+
+  return {
+    title: "Edit Admin Details",
+    bodyContent: (
+      <form
+        ref={formRef}
+        onSubmit={(e) => e.preventDefault()}
+        className="space-y-4 text-gray-700"
+      >
+        <TextInput
+          placeholder="Full Name"
+          name="full-name"
+          label="Full Name:"
+          type="text"
+          defaultValue={adminData?.fullName}
+        />
+        <TextInput
+          disabled
+          readOnly
+          placeholder="Email"
+          name="email"
+          label="Email:"
+          type="email"
+          defaultValue={adminData?.adminEmail}
+        />
+        <SelectInput
+          selectedField="admin"
+          // selectedField={adminData?.role}
+          name="role"
+          label={"Current Position"}
+          data={[
+            {
+              value: "manager",
+              label: "Manager",
+            },
+            {
+              value: "admin",
+              label: "Admin",
+            },
+          ]}
+        />
+
+        <div className="mb-4 p-4 bg-gray-50 rounded-md shadow-md">
+          <label className="block my-2 font-semibold text-sm text-gray-800">
+            <span className="text-gray-600">Joined On:</span>{" "}
+            {!adminData?.createdAt ? (
+              <span className="text-red-500">Not set yet</span>
+            ) : (
+              <span className="text-green-700">
+                {new Date(adminData.createdAt).toLocaleString()}
+              </span>
+            )}
+          </label>
+
+          <label className="block my-2 font-semibold text-sm text-gray-800">
+            <span className="text-gray-600">Last Updated On:</span>{" "}
+            {!adminData?.updatedAt ? (
+              <span className="text-red-500">Not set yet</span>
+            ) : (
+              <span className="text-blue-700">
+                {new Date(adminData.updatedAt).toLocaleString()}
+              </span>
+            )}
+          </label>
+        </div>
+        {isError && <ErrorAlert isTheTitleShown={false} error={error} />}
+      </form>
+    ),
+    actionsButtons: [
+      <ActionButton
+        isLoading={isMutating}
+        key="edit-admin-save"
+        label={isMutating ? "Updating..." : "Update Details"}
+        onConfirm={handleSubmission}
+        disabled={!adminData?._id || isMutating}
+      />,
+      <CancelButton key="edit-admin-cancel" />,
     ],
   };
 }

@@ -1,12 +1,9 @@
-import ActivityType from "../enums/ActivityType";
-import EntityType from "../enums/EntityType";
 import TimeOption from "../enums/TimeOption";
 import Availability from "../enums/Availability";
 import PriceOptions from "../enums/PriceOptions";
 
 export const paginationOptions = [10, 20, 50, 100];
-export const ActivityOptions = Object.values(ActivityType);
-export const EntityOptions = Object.values(EntityType);
+// export const ActivityOptions = Object.values(ActivityType);
 export const getDateRanges = (time: TimeOption) => {
   const now = new Date();
   const startOfDay = (date: Date) => new Date(date.setHours(0, 0, 0, 0));

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import Admin from "../../models/Admin";
-import { passwordValidator } from "../../utils/validators";
+import { isValidPassword } from "../../utils/validators";
 import { ValidationError } from "../../utils/ValidationError";
 import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
 
@@ -16,11 +16,7 @@ export default async function updateAdminPassword(req: Request, res: Response) {
     });
   }
 
-  if (
-    !newPassword ||
-    typeof newPassword !== "string" ||
-    !passwordValidator(newPassword)
-  ) {
+  if (!isValidPassword(newPassword)) {
     errors.push({
       field: "newPassword",
       message: "New password must meet the required criteria.",
@@ -63,6 +59,8 @@ export default async function updateAdminPassword(req: Request, res: Response) {
 
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
     admin.adminPassword = hashedNewPassword;
+    admin.updatedAt = new Date();
+    admin.lastLoginAt = new Date();
     await admin.save();
 
     const successResponse: SuccessResponse = {

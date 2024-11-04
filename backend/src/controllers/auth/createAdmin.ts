@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import {
-  emailValidator,
+  isValidEmail,
   isValidName,
-  passwordValidator,
+  isValidPassword,
 } from "../../utils/validators";
 import { SuccessResponse } from "./../../utils/responseInterfaces";
 import ErrorSeverity from "../../enums/ErrorSeverity";
@@ -13,15 +13,16 @@ import {
   doesAdminExist,
 } from "../../services/adminService";
 import { ValidationError } from "../../utils/ValidationError";
+import { createNotification } from "../../utils/createNotification";
+import NotificationTitle from "../../enums/NotificationTitle";
+import getNotificationMessage from "../../utils/getNotificationMessage";
 import { IAdmin } from "../../models/Admin";
+import { INotification } from "../../models/Notification";
 const createAdmin = async (req: Request, res: Response) => {
   try {
-    const { email, password, fullName } = req.body;
-
+    const { email, password, fullName, status, role } = req.body;
     const errors: ValidationError[] = [];
-
-    // Validate email
-    if (!email || typeof email !== "string" || !emailValidator(email)) {
+    if (!isValidEmail(email)) {
       errors.push({
         field: "email",
         message: "Invalid email format",
@@ -30,12 +31,7 @@ const createAdmin = async (req: Request, res: Response) => {
       });
     }
 
-    // Validate password
-    if (
-      !password ||
-      typeof password !== "string" ||
-      !passwordValidator(password)
-    ) {
+    if (!isValidPassword(password)) {
       errors.push({
         field: "password",
         message: "Invalid password format",
@@ -44,10 +40,32 @@ const createAdmin = async (req: Request, res: Response) => {
       });
     }
 
-    if (!fullName || typeof fullName !== "string" || !isValidName(fullName)) {
+    if (!isValidName(fullName)) {
       errors.push({
         field: "fullName",
         message: "Invalid full name format",
+        code: ErrorCode.ValidationError,
+        severity: ErrorSeverity.Medium,
+      });
+    }
+
+    if (!role || (role !== "admin" && role !== "manager")) {
+      errors.push({
+        field: "role",
+        message: "Role is required and must be either 'admin' or 'manager'",
+        code: ErrorCode.ValidationError,
+        severity: ErrorSeverity.Medium,
+      });
+    }
+
+    if (
+      !status ||
+      (status !== "active" && status !== "suspended" && status !== "deleted")
+    ) {
+      errors.push({
+        field: "status",
+        message:
+          "Status is required and must be either 'active', 'suspended', or 'deleted'",
         code: ErrorCode.ValidationError,
         severity: ErrorSeverity.Medium,
       });
@@ -74,17 +92,33 @@ const createAdmin = async (req: Request, res: Response) => {
       });
     }
 
-    // Create new admin
     const data: AdminData = {
       adminEmail: email,
       adminPassword: password,
-      fullName: fullName,
+      fullName,
+      createdAt: new Date(),
+      status,
+      role,
     };
-    await addAdmin(data);
+    const newAdmin = await addAdmin(data);
 
     const successResponse: SuccessResponse = {
       success: true,
     };
+    const senderId = res.locals.admin.adminId;
+
+    await createNotification({
+      senderId,
+      title: NotificationTitle.ADD_ADMIN_BY_MANAGER,
+      message: getNotificationMessage(NotificationTitle.ADD_ADMIN_BY_MANAGER, {
+        _id: newAdmin._id,
+        fullName,
+        role,
+        status,
+      } as IAdmin),
+      isRead: false,
+      createdAt: new Date(),
+    } as INotification);
 
     return res.status(201).json(successResponse);
   } catch (error) {

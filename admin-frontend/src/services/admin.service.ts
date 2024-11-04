@@ -45,7 +45,7 @@ function handleError(error: unknown): IErrorResponse {
 }
 
 export const login = async (data: IAdmin) =>
-  getData<string>({
+  getData<{ token: string; status: string }>({
     url: new URL(`${API_URL}auth/login`).toString(),
     method: "POST",
     headers: {

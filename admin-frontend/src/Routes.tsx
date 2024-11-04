@@ -8,7 +8,7 @@ import AnalyticsOverview from "./pages/AnalyticsOverview";
 import NotFoundPage from "./pages/NotFoundPage";
 import GlobalError from "./pages/GlobalError";
 import Notifications from "./pages/Notifications";
-import AdminActivity from "./pages/AdminActivity";
+import AuditTrail from "./pages/AuditTrail";
 import ProductDetails from "./pages/ProductDetails";
 import SectionDetails from "./pages/SectionDetails";
 import EditProduct from "./pages/EditProduct";
@@ -118,7 +118,7 @@ const routes = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <AdminActivity />,
+            element: <AuditTrail />,
           },
         ],
       },

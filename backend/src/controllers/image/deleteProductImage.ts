@@ -3,9 +3,13 @@ import path from "path";
 import fs from "fs/promises";
 import Product from "../../models/Product";
 import { IImage } from "../../models/Image";
-import { SuccessResponse } from './../../utils/responseInterfaces';
-import ErrorSeverity from './../../enums/ErrorSeverity';
-import ErrorCode from './../../enums/ErrorCode';
+import { SuccessResponse } from "./../../utils/responseInterfaces";
+import ErrorSeverity from "./../../enums/ErrorSeverity";
+import ErrorCode from "./../../enums/ErrorCode";
+import { createNotification } from "../../utils/createNotification";
+import NotificationTitle from "../../enums/NotificationTitle";
+import getNotificationMessage from "../../utils/getNotificationMessage";
+import { INotification } from "../../models/Notification";
 
 const deleteProductImage = async (req: Request, res: Response) => {
   const { imageId } = req.params;
@@ -25,7 +29,9 @@ const deleteProductImage = async (req: Request, res: Response) => {
         ],
       });
     }
-    const image = product.images.find((img: IImage) => img.pathname === imageId);
+    const image = product.images.find(
+      (img: IImage) => img.pathname === imageId
+    );
     if (!image) {
       return res.status(404).json({
         success: false,
@@ -64,15 +70,23 @@ const deleteProductImage = async (req: Request, res: Response) => {
     }
 
     // Remove the image from the product's images array
-    product.images = product.images.filter((img: IImage) => img.pathname !== imageId);
+    product.images = product.images.filter(
+      (img: IImage) => img.pathname !== imageId
+    );
 
-    // Save the updated product document
     await product.save();
-
-    // Respond with success
+    
     const successResponse: SuccessResponse = {
       success: true,
     };
+    const senderId = res.locals.admin.adminId;
+    await createNotification({
+      senderId,
+      title: NotificationTitle.DELETE_PRODUCT_IMAGE,
+      message: getNotificationMessage(NotificationTitle.DELETE_PRODUCT_IMAGE),
+      isRead: false,
+      createdAt: new Date(),
+    } as INotification);
 
     return res.status(200).json(successResponse);
   } catch (dbError) {

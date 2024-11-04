@@ -1,4 +1,5 @@
 import { FC, InputHTMLAttributes } from "react";
+import { snakeCaseToReadable } from "../utils/func";
 
 interface RadioOption {
   value: string;
@@ -30,7 +31,7 @@ const RadioGroup: FC<RadioInputProps> = ({
   return (
     <div className="flex flex-col">
       <label className="block font-semibold text-sm white my-2">
-        {label.replace(/_/g, " ")}
+        {snakeCaseToReadable(label)}
       </label>
       <div
         className={`flex ${classes} justify-evenly py-1 transition-all duration-200 ${
@@ -67,7 +68,7 @@ const RadioGroup: FC<RadioInputProps> = ({
                   isChecked ? "font-semibold " : ""
                 }`}
               >
-                {option.label.replace(/_/g, " ")}
+                {snakeCaseToReadable(option.label)}
               </label>
             </div>
           );

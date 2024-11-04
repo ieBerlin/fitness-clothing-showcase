@@ -5,7 +5,6 @@ import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
 const markAsRead = async (req: Request, res: Response) => {
   try {
     const { notificationIds } = req.body;
-
     if (
       !notificationIds ||
       !Array.isArray(notificationIds) ||

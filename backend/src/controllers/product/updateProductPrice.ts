@@ -1,8 +1,13 @@
 import { Request, Response } from "express";
 import Product, { IProduct } from "../../models/Product";
 import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
+import { createNotification } from "../../utils/createNotification";
+import NotificationTitle from "../../enums/NotificationTitle";
+import getNotificationMessage from "../../utils/getNotificationMessage";
+import { INotification } from "../../models/Notification";
 
 const updateProductPrice = async (req: Request, res: Response) => {
+  const senderId = res.locals.admin.adminId;
   try {
     const { productId } = req.params;
     const { price } = req.body;
@@ -43,7 +48,16 @@ const updateProductPrice = async (req: Request, res: Response) => {
       success: true,
       data: updatedProduct,
     };
-
+    await createNotification({
+      senderId,
+      title: NotificationTitle.UPDATE_PRODUCT,
+      message: getNotificationMessage(
+        NotificationTitle.UPDATE_PRODUCT,
+        updatedProduct
+      ),
+      isRead: false,
+      createdAt: new Date(),
+    } as INotification);
     res.status(200).json(successResponse);
   } catch (error) {
     console.error("Error updating product price:", error);

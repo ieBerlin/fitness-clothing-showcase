@@ -9,16 +9,16 @@ import { ExtendedFilterParams } from "../utils/http";
 import ErrorAlert from "../components/ErrorAlert";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { ErrorResponse } from "../types/response";
-import Activity from "../models/Activity";
 import {
   ActivityFilterParams,
   defaultFilterParams,
 } from "../types/activityFilters";
 import DataTable from "../components/DataTable";
-import { activityQueryKey } from "../constants/queryKeys";
 import AdminActivityDropdown from "../components/AdminActivityDropdown";
 import ActivityLogItem from "../components/ActivityLogItem";
 import Admin from "../models/Admin";
+import Notification from "../models/Notification";
+import { getQueryKey } from "../constants/queryKeys";
 const ViewProfilePage: React.FC = () => {
   const {
     isFetching: isFetchingProfile,
@@ -43,12 +43,7 @@ const ViewProfilePage: React.FC = () => {
 
   let profileContent: ReactNode = <div></div>;
   if (isFetchingProfile) {
-    profileContent = (
-      <div className="flex items-center justify-center w-full py-10 flex-col gap-2">
-        <LoadingSpinner fill="blue-600" text="gray-400" dimension="16" />
-        <h2 className="text-gray-500 font-semibold">Loading profile...</h2>
-      </div>
-    );
+    profileContent = <LoadingSpinner title={"Loading profile..."} />;
   } else if (isErrorProfile) {
     profileContent = (
       <div className="space-y-4">
@@ -121,7 +116,7 @@ const ViewProfilePage: React.FC = () => {
           My Recent Activities
         </h2>
 
-        <DataTable<Activity, ActivityFilterParams>
+        <DataTable<Notification, ActivityFilterParams>
           fetchItems={fetchMyActivities}
           fetchDataParams={params}
           initialParams={params}
@@ -144,7 +139,7 @@ const ViewProfilePage: React.FC = () => {
               />
             ),
           })}
-          queryKey={activityQueryKey}
+          queryKey={getQueryKey("activities")}
         />
       </section>
     </PageTemplate>

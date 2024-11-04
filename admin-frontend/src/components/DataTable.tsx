@@ -1,4 +1,7 @@
-import { QueryKey, useQuery } from "@tanstack/react-query";
+import {
+  QueryKey,
+  useQuery,
+} from "@tanstack/react-query";
 import { ReactNode, useEffect, useState } from "react";
 import { ExtendedFilterParams, queryClient } from "../utils/http";
 import { isArray } from "lodash";

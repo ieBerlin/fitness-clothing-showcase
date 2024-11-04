@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ErrorDetails } from "../types/validation-error.types";
+import { snakeCaseToReadable } from "../utils/func";
 
 export default function ForbiddenPage() {
   const errorDetails: ErrorDetails = {
@@ -14,7 +15,7 @@ export default function ForbiddenPage() {
         {errorDetails.status}
       </h1>
       <h3 className="text-4xl font-semibold text-stone-950">
-        {errorDetails.title}
+        {snakeCaseToReadable(errorDetails.title)}
       </h3>
       <p className="text-xl font-medium text-stone-950">
         {errorDetails.message}

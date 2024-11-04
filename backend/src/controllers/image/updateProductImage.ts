@@ -3,8 +3,12 @@ import Product from "../../models/Product";
 import { Angle, IImage } from "../../models/Image";
 import mongoose from "mongoose";
 import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
-import ErrorSeverity from './../../enums/ErrorSeverity';
-import ErrorCode from './../../enums/ErrorCode';
+import ErrorSeverity from "./../../enums/ErrorSeverity";
+import ErrorCode from "./../../enums/ErrorCode";
+import { createNotification } from "../../utils/createNotification";
+import NotificationTitle from "../../enums/NotificationTitle";
+import { INotification } from "../../models/Notification";
+import getNotificationMessage from "../../utils/getNotificationMessage";
 
 interface MulterRequest extends Request {
   imageName?: string;
@@ -110,6 +114,14 @@ const updateProductImage = async (req: MulterRequest, res: Response) => {
     const successResponse: SuccessResponse = {
       success: true,
     };
+    const senderId = res.locals.admin.adminId;
+    await createNotification({
+      senderId,
+      title: NotificationTitle.UPDATE_PRODUCT_IMAGE,
+      message: getNotificationMessage(NotificationTitle.UPDATE_PRODUCT_IMAGE),
+      isRead: false,
+      createdAt: new Date(),
+    } as INotification);
 
     res.status(200).json(successResponse);
   } catch (error) {

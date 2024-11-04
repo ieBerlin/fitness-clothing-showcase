@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { emailValidator, passwordValidator } from "../../utils/validators";
+import { isValidEmail, isValidPassword } from "../../utils/validators";
 import bcrypt from "bcrypt";
 import { signJwt } from "../../utils/jwt.utils";
 import Admin from "../../models/Admin";
@@ -10,18 +10,14 @@ export default async function login(req: Request, res: Response) {
   const { email, password } = req.body;
   const errors: ValidationError[] = [];
 
-  if (!email || typeof email !== "string" || !emailValidator(email)) {
+  if (!isValidEmail(email)) {
     errors.push({ field: "email", message: "Valid email is required!" });
   }
 
-  if (
-    !password ||
-    typeof password !== "string" ||
-    !passwordValidator(password)
-  ) {
+  if (!isValidPassword(password)) {
     errors.push({
       field: "password",
-      message: "Password must be at least 8 characters long!",
+      message: "Valid password is required!",
     });
   }
 
@@ -57,15 +53,26 @@ export default async function login(req: Request, res: Response) {
     }
 
     const token = signJwt(email);
-    await Admin.findOneAndUpdate(
-      { adminEmail: email },
-      { lastLoginAt: new Date() }
-    );
-
-    const successResponse: SuccessResponse = {
-      success: true,
-      data: token,
-    };
+    if (admin.status !== "active") {
+      const errorResponse: ErrorResponse = {
+        success: false,
+        errors: [
+          {
+            field: "authentication",
+            message: `Your account has been ${admin.status}. Please contact support.`,
+          },
+        ],
+      };
+      return res.status(401).json(errorResponse);
+    }
+    const successResponse: SuccessResponse<{ token: string; status: string }> =
+      {
+        success: true,
+        data: {
+          token,
+          status: admin.status,
+        },
+      };
     return res.status(200).json(successResponse);
   } catch (error) {
     console.error("Error logging in:", error);

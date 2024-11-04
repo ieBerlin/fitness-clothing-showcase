@@ -20,7 +20,7 @@ const SelectInput: React.FC<SelectInputProps> = ({
       <div className="relative w-full">
         <select
           className="capitalize block w-full border-2 border-gray-200 rounded-lg px-4 py-2 text-sm focus:border-blue-500 focus:ring-blue-500 outline-none"
-          defaultValue={selectedField?.toUpperCase()}
+          defaultValue={selectedField}
           {...props}
         >
           {data.map((item) => (

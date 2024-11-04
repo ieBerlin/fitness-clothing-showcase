@@ -10,18 +10,20 @@ import SidebarItem from "./SidebarItem";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMyProfile } from "../utils/authUtils";
 import SpinnerWithMessage from "./SpinnerWithMessage";
+import Admin from "../models/Admin";
+import { ErrorResponse } from "../types/response";
+import { getQueryKey } from "../constants/queryKeys";
 
 function Sidebar() {
   const {
     isFetching: isFetchingProfile,
     data: profile,
     isError: isErrorProfile,
-  } = useQuery({
-    queryKey: ["basic-informations"],
+  } = useQuery<Admin, ErrorResponse>({
+    queryKey: getQueryKey("basicInformations"),
     queryFn: fetchMyProfile,
     staleTime: Infinity,
   });
-
   return (
     <aside className="bg-[#171717] p-6">
       <div className="flex items-center gap-3 mb-6">
@@ -52,7 +54,7 @@ function Sidebar() {
         <SidebarItem label="Products" path="/products" Icon={ShoppingBagIcon} />
         <SidebarItem label="Sections" path="/sections" Icon={StarIcon} />
         <SidebarItem label="Analytics" path="/analytics" Icon={ChartBarIcon} />
-        <SidebarItem label="Activity" path="/activity" Icon={UserCircleIcon} />
+        <SidebarItem label="PAT" path="/activity" Icon={UserCircleIcon} />
         <SidebarItem label="Admin" path="/admin" Icon={CogIcon} />
       </ul>
     </aside>

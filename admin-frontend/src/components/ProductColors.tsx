@@ -7,25 +7,26 @@ import Size, { defaultSizes, genderSizes } from "../models/Size";
 import ColorOption from "../models/Color";
 import Availability from "../enums/Availability";
 import Color from "../enums/Color";
+import Gender from "../enums/Gender";
 
 interface ProductColorsProps {
   productColors?: ColorOption[];
-  isUnisex: boolean;
+  gender: Gender;
 }
 interface ColorItemProps {
   colorOption: ColorOption;
   isSelected: boolean;
-  isUnisex: boolean;
+  gender: Gender;
 }
 interface SizesProps {
-  isUnisex: boolean;
+  gender: Gender;
   availableSizes: Size[];
   visibility: boolean;
 }
 const ColorItem: FC<ColorItemProps> = ({
   colorOption,
   isSelected,
-  isUnisex,
+  gender: gender,
 }) => {
   const [checkbox, setCheckbox] = useState<{
     isChecked: boolean;
@@ -88,15 +89,15 @@ const ColorItem: FC<ColorItemProps> = ({
       {checkbox.isChecked && (
         <Sizes
           visibility={checkbox.isChecked && checkbox.isShown}
-          isUnisex={isUnisex}
+          gender={gender}
           availableSizes={colorOption.availableSizes}
         />
       )}
     </li>
   );
 };
-const Sizes: FC<SizesProps> = ({ visibility, isUnisex, availableSizes }) => {
-  const displaySizes = isUnisex
+const Sizes: FC<SizesProps> = ({ visibility, gender, availableSizes }) => {
+  const displaySizes = gender
     ? availableSizes
     : availableSizes.filter(
         (size) =>
@@ -148,7 +149,7 @@ const Sizes: FC<SizesProps> = ({ visibility, isUnisex, availableSizes }) => {
 };
 const ProductColors: FC<ProductColorsProps> = ({
   productColors = [],
-  isUnisex,
+  gender,
 }) => {
   const colors = productColors;
   const unselectedColors: ColorOption[] = Object.entries(Color)
@@ -176,7 +177,7 @@ const ProductColors: FC<ProductColorsProps> = ({
             isSelected={productColors.some(
               (selected) => selected.name === colorOption.name
             )}
-            isUnisex={isUnisex}
+            gender={gender}
           />
         ))}
       </ul>

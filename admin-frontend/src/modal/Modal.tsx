@@ -7,6 +7,7 @@ import {
   ConfirmationModalContent,
   ConfirmProductDeletionModal,
   ConfirmRemoveProductFromSection,
+  EditAdminModalContent,
   FieldsError,
   LogoutModalContent,
   SuccessModalContent,
@@ -27,6 +28,7 @@ function Modal() {
     [ModalType.CONFIRMATION]: ConfirmationModalContent(),
     [ModalType.DELETE_PRODUCT]: ConfirmProductDeletionModal(),
     [ModalType.ADD_PRODUCT_TO_SECTION]: AddProductToSectionModal(),
+    [ModalType.EDIT_ADMIN]: EditAdminModalContent(),
     [ModalType.REMOVE_PRODUCT_TO_SECTION]: ConfirmRemoveProductFromSection(),
     [ModalType.PRODUCT_ADDED_SUCCESS]: SuccessModalContent(
       "This product has been added successfully."

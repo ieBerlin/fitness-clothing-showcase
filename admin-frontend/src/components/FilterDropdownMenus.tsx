@@ -12,7 +12,10 @@ const DropdownFilterGroup: FC<{
           <div className="flex-1 min-w-[200px]">{searchDropDownMenu}</div>
         )}
         {dropDownMenus && (
-          <div className="flex flex-wrap w-full items-center justify-around gap-2">
+          <div
+            className={`flex flex-wrap w-full items-center justify-end gap-2`}
+          >
+            {" "}
             {isArray(dropDownMenus) ? (
               dropDownMenus.map((menu, index) => (
                 <div key={index} className="w-full sm:w-auto flex-shrink-0">

@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import PageTemplate from "../components/PageTemplate";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ErrorAlert from "../components/ErrorAlert";
-import { productQueryKey } from "../constants/queryKeys";
 import Product from "../models/Product";
 import { fetchProduct } from "../utils/authUtils";
 import Availability from "../enums/Availability";
@@ -15,6 +14,7 @@ import { Link } from "react-router-dom";
 import ProductNotFound from "../components/ProductNotFound";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import SeasonTag from "../components/SeasonTag";
+import { getQueryKey } from "../constants/queryKeys";
 
 const ProductShowcase: React.FC = () => {
   const { productId } = useParams();
@@ -28,7 +28,7 @@ const ProductShowcase: React.FC = () => {
     error: productError,
     isLoading: isLoadingProduct,
   } = useQuery<Product, ErrorResponse>({
-    queryKey: [productQueryKey, productId],
+    queryKey: getQueryKey("products"),
     queryFn: () => fetchProduct(productId || ""),
     enabled: Boolean(productId),
     retry: 1,

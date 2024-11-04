@@ -8,11 +8,6 @@ const router = Router();
 
 router.get("/", deserializeAdmin, adminAuth, getNotifications);
 
-router.put(
-  "/mark-as-read/:notificationId",
-  deserializeAdmin,
-  adminAuth,
-  markAsRead
-);
+router.put("/mark-as-read", deserializeAdmin, adminAuth, markAsRead);
 
 export default router;

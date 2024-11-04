@@ -6,13 +6,19 @@ import Availability from "./../../enums/Availability";
 import Color from "../../enums/Color";
 import { genderSizes } from "../../enums/Size";
 import Season from "../../enums/Season";
+import NotificationTitle from "../../enums/NotificationTitle";
+import getNotificationMessage from "../../utils/getNotificationMessage";
+import { createNotification } from "../../utils/createNotification";
+import { INotification } from "../../models/Notification";
+import Gender from "../../enums/Gender";
 
 const addProduct = async (req: Request, res: Response) => {
+  const senderId = res.locals.admin.adminId;
   try {
     const {
       productName,
       productDescription,
-      isUnisex,
+      gender,
       season,
       woolPercentage,
       price,
@@ -21,7 +27,6 @@ const addProduct = async (req: Request, res: Response) => {
       availability,
       colors,
     } = req.body;
-console.log(req.body)
     const errors: ValidationError[] = [];
 
     if (
@@ -47,14 +52,18 @@ console.log(req.body)
       });
     }
 
-    if (typeof isUnisex !== "boolean") {
+    if (
+      typeof gender !== "string" ||
+      !Object.values(Gender).includes(gender as Gender)
+    ) {
       errors.push({
-        field: "isUnisex",
-        message: "isUnisex must be a boolean value",
+        field: "gender",
+        message:
+          "Gender is required and must be either 'male', 'female', or 'unisex'.",
       });
     }
 
-    const expectedSizes = isUnisex
+    const expectedSizes = gender
       ? [...genderSizes.men, ...genderSizes.women]
       : genderSizes.men;
 
@@ -134,7 +143,12 @@ console.log(req.body)
       });
     }
 
-    if (typeof woolPercentage !== "number" || woolPercentage <= 0) {
+    if (
+      woolPercentage &&
+      (typeof woolPercentage !== "number" ||
+        woolPercentage <= 0 ||
+        woolPercentage > 100)
+    ) {
       errors.push({
         field: "woolPercentage",
         message: "Wool Percentage must be a positive number",
@@ -168,7 +182,7 @@ console.log(req.body)
       productName,
       productDescription,
       colors,
-      isUnisex,
+      gender,
       season,
       woolPercentage,
       price,
@@ -176,6 +190,24 @@ console.log(req.body)
       images,
       availability,
     });
+    await createNotification({
+      senderId,
+      title: NotificationTitle.ADD_PRODUCT,
+      message: getNotificationMessage(NotificationTitle.ADD_PRODUCT, {
+        productName,
+        productDescription,
+        colors,
+        gender,
+        season,
+        woolPercentage,
+        price,
+        releaseDate,
+        images,
+        availability,
+      } as IProduct),
+      isRead: false,
+      createdAt: new Date(),
+    } as INotification);
 
     const successResponse: SuccessResponse<IProduct> = {
       success: true,

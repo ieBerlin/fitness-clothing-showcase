@@ -5,13 +5,13 @@ import RadioGroup from "../components/RadioGroup";
 import FilterMenu from "../components/FilterMenu";
 import PriceOptions from "../enums/PriceOptions";
 import Availability from "../enums/Availability";
-import { sectionQueryKey } from "../constants/queryKeys";
 import {
   formattedPriceOptions,
   formattedAvailabilityOptions,
 } from "../constants/dropdownOptions";
 import { ProductFilterParams } from "../types/productFilters";
 import ItemLimitDropdownMenu from "./ItemLimitDropdownMenu";
+import { getQueryKey } from "../constants/queryKeys";
 
 interface FiltersDropdownProps {
   updateFilterParams: <
@@ -35,7 +35,7 @@ function FiltersDropdown({
     <DropdownMenu
       closeOnContentClick={false}
       onSubmit={() => {
-        queryClient.invalidateQueries({ queryKey: sectionQueryKey });
+        queryClient.invalidateQueries({ queryKey: getQueryKey("sections") });
       }}
       label={
         <div className="border border-gray-200 bg-gray-50 flex items-center gap-2 px-4 py-2 text-gray-800 duration-200">
@@ -57,14 +57,14 @@ function FiltersDropdown({
         </div>
       }
       content={
-        <div className="flex flex-col space-y-2 p-2 text-gray-800">
+        <div className="flex flex-col space-y-2 p-2 bg-[#171717] text-white">
           <RadioGroup
-            classes="flex-col border-0"
-            label="Price"
+            classes="flex-col"
             onChange={(e) =>
               updateFilterParams("price", e.target.value as PriceOptions)
             }
             options={formattedPriceOptions}
+            label="Price"
             name={"price"}
             selectedValue={params.price}
           />
@@ -74,7 +74,7 @@ function FiltersDropdown({
     <DropdownMenu
       closeOnContentClick={false}
       onSubmit={() => {
-        queryClient.invalidateQueries({ queryKey: sectionQueryKey });
+        queryClient.invalidateQueries({ queryKey: getQueryKey("sections") });
       }}
       label={
         <div className="border border-gray-200 bg-gray-50  flex items-center gap-2 px-4 py-2 text-gray-800 duration-200">

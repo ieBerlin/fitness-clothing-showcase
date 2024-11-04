@@ -26,17 +26,17 @@ export async function doesAdminExist(email: string): Promise<boolean> {
 
 // Promise<Admin>
 export async function createAdmin(adminData: AdminData) {
-  const { adminEmail: email, adminPassword: plaintextPassword } = adminData;
-
   try {
-    const hashedPassword = await hashPassword(plaintextPassword);
-    const existingAdmin = await doesAdminExist(email);
+    const hashedPassword = await hashPassword(adminData.adminPassword);
+    const existingAdmin = await doesAdminExist(adminData.adminEmail);
     if (existingAdmin) {
       throw new Error("Admin with this email already exists.");
     }
     return await Admin.create({
-      adminEmail: email,
+      ...adminData,
       adminPassword: hashedPassword,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
     // const newAdmin = await Admin.create({
     //   adminEmail: email,

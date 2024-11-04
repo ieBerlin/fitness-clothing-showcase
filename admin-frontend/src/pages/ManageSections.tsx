@@ -19,7 +19,6 @@ import { fetchSections } from "../utils/authUtils";
 import { SectionResponseItem } from "../types/response";
 import DropdownFilterGroup from "../components/FilterDropdownMenus";
 import SearchBar from "../components/SearchBar";
-import { sectionQueryKey } from "../constants/queryKeys";
 import {
   defaultFilterParams,
   ProductFilterParams,
@@ -27,6 +26,7 @@ import {
 import PriceFilterDropdown from "../components/PriceFilterDropdown";
 import ProductTableRow from "../components/ProductTableRow";
 import { productTableHeaders } from "../constants/tableHeaders";
+import { getQueryKey } from "../constants/queryKeys";
 
 function ManageSections() {
   const [params, setParams] =
@@ -67,7 +67,7 @@ function ManageSections() {
         updateParams={handleUpdateArgs}
         fetchDataParams={params}
         initialParams={params}
-        queryKey={sectionQueryKey}
+        queryKey={getQueryKey("sections")}
         fetchItems={fetchSections}
         renderTableContent={({ updateFilterParams, dataEntries: sections }) => {
           if (sections.length && !activeSection) {

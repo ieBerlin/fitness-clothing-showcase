@@ -1,4 +1,5 @@
 import { FC, InputHTMLAttributes } from "react";
+import { snakeCaseToReadable } from "../utils/func";
 
 export interface CheckboxOption {
   value: string;
@@ -35,7 +36,7 @@ const CheckboxGroup: FC<CheckboxGroupProps> = ({
   return (
     <div className="flex flex-col">
       <label className="block my-2 font-semibold text-sm white">
-        {label}
+        {snakeCaseToReadable(label)}
       </label>
       <div
         className={`flex bg-[#171717] ${classes} w-full justify-around ${
@@ -59,9 +60,11 @@ const CheckboxGroup: FC<CheckboxGroupProps> = ({
               />
               <label
                 htmlFor={option.value}
-                className={`text-sm ${isError ? "text-red-500" : "text-white "}`}
+                className={`text-sm ${
+                  isError ? "text-red-500" : "text-white "
+                }`}
               >
-                {option.label.replace(/_/g, " ")}
+                {snakeCaseToReadable(option.label)}
               </label>
             </li>
           );

@@ -1,17 +1,14 @@
 import { Request, Response } from "express";
-import {
-  isValidName,
-} from "../../utils/validators";
+import { isValidName } from "../../utils/validators";
 import Admin from "../../models/Admin";
 import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
 import { ValidationError } from "../../utils/ValidationError";
 
 export default async function updateProfile(req: Request, res: Response) {
   const { fullName } = req.body;
-  console.log(req.body)
   const errors: ValidationError[] = [];
 
-  if (!fullName || typeof fullName !== "string" || !isValidName(fullName)) {
+  if (!isValidName(fullName)) {
     errors.push({
       field: "fullName",
       message: "Full Name must be at least 8 characters long!",
@@ -41,7 +38,7 @@ export default async function updateProfile(req: Request, res: Response) {
 
     await Admin.findOneAndUpdate(
       { adminEmail: res.locals.admin.email },
-      { fullName, lastLoginAt: new Date() },
+      { fullName, lastLoginAt: new Date(), updatedAt: new Date() },
       { new: true }
     );
 

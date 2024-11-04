@@ -6,12 +6,18 @@ import Availability from "../../enums/Availability";
 import Color from "../../enums/Color";
 import { genderSizes } from "../../enums/Size";
 import Season from "../../enums/Season";
+import { createNotification } from "../../utils/createNotification";
+import NotificationTitle from "../../enums/NotificationTitle";
+import getNotificationMessage from "../../utils/getNotificationMessage";
+import { INotification } from "../../models/Notification";
+import Gender from "../../enums/Gender";
 const updateProduct = async (req: Request, res: Response) => {
+  const senderId = res.locals.admin.adminId;
   try {
     const {
       productName,
       productDescription,
-      isUnisex,
+      gender,
       season,
       woolPercentage,
       price,
@@ -50,14 +56,18 @@ const updateProduct = async (req: Request, res: Response) => {
       });
     }
 
-    if (isUnisex !== undefined && typeof isUnisex !== "boolean") {
+    if (
+      typeof gender !== "string" ||
+      !Object.values(Gender).includes(gender as Gender)
+    ) {
       errors.push({
-        field: "isUnisex",
-        message: "If provided, isUnisex must be a boolean value",
+        field: "gender",
+        message:
+          "Gender is required and must be either 'male', 'female', or 'unisex'.",
       });
     }
 
-    const expectedSizes = isUnisex
+    const expectedSizes = gender
       ? [...genderSizes.men, ...genderSizes.women]
       : genderSizes.men;
 
@@ -175,7 +185,7 @@ const updateProduct = async (req: Request, res: Response) => {
     product.productName = productName ?? product.productName;
     product.productDescription =
       productDescription ?? product.productDescription;
-    product.isUnisex = isUnisex ?? product.isUnisex;
+    product.gender = gender ?? product.gender;
     product.season = season ?? product.season;
     product.woolPercentage = woolPercentage ?? product.woolPercentage;
     product.price = price ?? product.price;
@@ -189,7 +199,16 @@ const updateProduct = async (req: Request, res: Response) => {
       success: true,
       data: updatedProduct,
     };
-
+    await createNotification({
+      senderId,
+      title: NotificationTitle.UPDATE_PRODUCT,
+      message: getNotificationMessage(
+        NotificationTitle.UPDATE_PRODUCT,
+        updatedProduct
+      ),
+      isRead: false,
+      createdAt: new Date(),
+    } as INotification);
     res.status(200).json(successResponse);
   } catch (error) {
     console.error("Error updating product:", error);

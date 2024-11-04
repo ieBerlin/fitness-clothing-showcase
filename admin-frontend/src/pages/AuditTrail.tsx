@@ -2,9 +2,8 @@ import { FC, useCallback, useState } from "react";
 import PageTemplate from "../components/PageTemplate";
 import { fetchActivities } from "../utils/authUtils";
 import { ExtendedFilterParams } from "../utils/http";
-import Activity from "../models/Activity";
+import Notification from "../models/Notification";
 import DataTable from "../components/DataTable";
-import { activityQueryKey } from "../constants/queryKeys";
 import { getDateRanges } from "../constants/dropdownOptions";
 import {
   ActivityFilterParams,
@@ -12,8 +11,9 @@ import {
 } from "../types/activityFilters";
 import AdminActivityDropdown from "../components/AdminActivityDropdown";
 import ActivityLogItem from "../components/ActivityLogItem";
+import { getQueryKey } from "../constants/queryKeys";
 
-const AdminActivity: FC = () => {
+const AuditTrail: FC = () => {
   const [params, setParams] =
     useState<ExtendedFilterParams<ExtendedFilterParams<ActivityFilterParams>>>(
       defaultFilterParams
@@ -32,13 +32,13 @@ const AdminActivity: FC = () => {
     endDate: getDateRanges(params.timing).end,
   };
   return (
-    <PageTemplate title="Admin Activities">
-      <DataTable<Activity, ActivityFilterParams>
-        key="admin-activity-data-table"
+    <PageTemplate title="Product Audit Trail">
+      <DataTable<Notification, ActivityFilterParams>
+        key="audit-trail-data-table"
         updateParams={handleUpdateArgs}
         fetchDataParams={fetchFilteringArgs}
         initialParams={params}
-        queryKey={activityQueryKey}
+        queryKey={getQueryKey("notifications")}
         fetchItems={fetchActivities}
         renderTableContent={({ updateFilterParams, dataEntries: items }) => ({
           ContentRenderer: () => (
@@ -61,4 +61,4 @@ const AdminActivity: FC = () => {
   );
 };
 
-export default AdminActivity;
+export default AuditTrail;

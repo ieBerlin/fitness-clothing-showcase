@@ -5,27 +5,36 @@ import { useQuery } from "@tanstack/react-query";
 import {
   defaultUserPicture,
   ExtendedFilterParams,
+  queryClient,
   SERVER_URL,
 } from "../utils/http";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import DataTable from "./DataTable";
 import Notification from "../models/Notification";
-import { notificationQueryKey } from "../constants/queryKeys";
+import { getQueryKey } from "../constants/queryKeys";
 import { BellIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import Admin from "../models/Admin";
-import { ErrorResponse } from "../types/response";
+import { DataResponse, ErrorResponse } from "../types/response";
 import { useDispatch } from "react-redux";
 import { openModal } from "../features/modal";
 import { ModalType } from "../enums/ModalType";
-const hasNewNotifications = false;
-
+import { NotificationFilterParams } from "../types/notificationFilters";
+import { defaultFilterParams } from "../types/notificationFilter";
+import { snakeCaseToReadable, sortNotifications } from "../utils/func";
 function Navbar() {
+  const [hasNewNotifications, setHasNewNotifications] = useState(false);
   const dispatch = useDispatch();
-  const [params, setParams] = useState<ExtendedFilterParams<null>>(null);
-  const handleUpdateArgs = useCallback((params: ExtendedFilterParams<null>) => {
-    setParams(params);
-  }, []);
+  const [params, setParams] =
+    useState<ExtendedFilterParams<NotificationFilterParams>>(
+      defaultFilterParams
+    );
+  const handleUpdateArgs = useCallback(
+    (params: ExtendedFilterParams<NotificationFilterParams>) => {
+      setParams(params);
+    },
+    []
+  );
   const {
     isFetching: isFetchingProfile,
     data: profile,
@@ -42,6 +51,29 @@ function Navbar() {
       })
     );
   }
+  useEffect(() => {
+    const data = queryClient.getQueryData<DataResponse<Notification>>(
+      getQueryKey("notifications", [5])
+    );
+
+    if (data && Array.isArray(data.items)) {
+      const unreadNotificationsCount = data.items.filter(
+        (notification) => !notification.isRead
+      ).length;
+
+      if (unreadNotificationsCount > 0) {
+        setHasNewNotifications(true);
+      } else {
+        if (hasNewNotifications) {
+          setHasNewNotifications(false);
+        }
+      }
+    }
+  }, [
+    queryClient.getQueryData<DataResponse<Notification>>(
+      getQueryKey("notifications", [5])
+    ),
+  ]);
   return (
     <nav className="bg-[#171717] px-6 py-2 flex justify-between items-center">
       <div>
@@ -78,7 +110,8 @@ function Navbar() {
                 <h2 className="font-semibold text-center text-gray-200 mb-4">
                   Recent Notifications
                 </h2>
-                <DataTable<Notification, null>
+                <DataTable<Notification, NotificationFilterParams>
+                  queryKey={getQueryKey("notifications", [5])}
                   canShowMoreResults={false}
                   fetchItems={fetchNotifications}
                   fetchDataParams={params}
@@ -87,44 +120,46 @@ function Navbar() {
                   renderTableContent={({ dataEntries: notifications }) => ({
                     ContentRenderer: () => (
                       <ul className="space-y-2">
-                        {notifications.length > 0 ? (
-                          notifications.map((notification) => (
-                            <li
-                              key={notification._id}
-                              className={`relative p-4 border-b border-gray-700 ${
-                                notification.isRead
-                                  ? "bg-[#171717] text-gray-400"
-                                  : "bg-gray-700 text-gray-100"
-                              }`}
-                            >
-                              {!notification.isRead && (
-                                <div className="absolute top-2 left-2 w-2.5 h-2.5 rounded-full bg-pink-500" />
-                              )}
-                              <h4
-                                className={`font-semibold text-sm ${
-                                  notification.isRead ? "mt-1" : ""
+                        {notifications.length ? (
+                          sortNotifications(notifications).map(
+                            (notification) => (
+                              <li
+                                key={notification._id}
+                                className={`relative p-4 border-b border-gray-700 ${
+                                  notification.isRead
+                                    ? "bg-[#171717] text-gray-400"
+                                    : "bg-gray-700 text-gray-100"
                                 }`}
                               >
-                                {notification.title}
-                              </h4>
-                              <p className="text-gray-300 text-xs mt-1">
-                                {notification.message}
-                              </p>
-                              <div className="flex justify-end mt-2">
-                                <span className="text-gray-500 text-xs">
-                                  {new Date(
-                                    notification.createdAt
-                                  ).toLocaleString("en-US", {
-                                    day: "2-digit",
-                                    month: "short",
-                                    year: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
-                                </span>
-                              </div>
-                            </li>
-                          ))
+                                {!notification.isRead && (
+                                  <div className="absolute top-2 left-2 w-2.5 h-2.5 rounded-full bg-pink-500" />
+                                )}
+                                <h4
+                                  className={`font-semibold text-sm line-clamp-1  ${
+                                    notification.isRead ? "mt-1" : ""
+                                  }`}
+                                >
+                                  {snakeCaseToReadable(notification.title)}
+                                </h4>
+                                <p className="text-gray-300  line-clamp-1 text-xs mt-1">
+                                  {notification.message}
+                                </p>
+                                <div className="flex justify-end mt-2">
+                                  <span className="text-gray-500 text-xs">
+                                    {new Date(
+                                      notification.createdAt
+                                    ).toLocaleString("en-US", {
+                                      day: "2-digit",
+                                      month: "short",
+                                      year: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })}
+                                  </span>
+                                </div>
+                              </li>
+                            )
+                          )
                         ) : (
                           <li className="p-4 text-gray-500 text-sm text-center">
                             No notifications
@@ -132,14 +167,7 @@ function Navbar() {
                         )}
                       </ul>
                     ),
-                    // dropDownMenus: (
-                    //   <AdminActivityDropdown
-                    //     params={params}
-                    //     updateFilterParams={updateFilterParams}
-                    //   />
-                    // ),
                   })}
-                  queryKey={notificationQueryKey}
                 />
               </div>
               <Link

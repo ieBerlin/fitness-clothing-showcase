@@ -5,23 +5,23 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { ErrorResponse } from "../types/response";
 import { openConfirmationModal } from "../features/modal";
 import { useDispatch } from "react-redux";
-import { adminQueryKey } from "../constants/queryKeys";
 import { fetchMyProfile, updateMyProfile } from "../utils/authUtils";
 import { queryClient } from "../utils/http";
+import { getQueryKey } from "../constants/queryKeys";
 
 const UpdateDetailsPage: React.FC = () => {
   const dispatch = useDispatch();
   const formRef = useRef<HTMLFormElement>(null);
   const { data: admin } = useQuery({
-    queryKey: adminQueryKey,
+    queryKey: getQueryKey("admins"),
     queryFn: fetchMyProfile,
   });
   const { mutate } = useMutation<null, ErrorResponse, string>({
-    mutationKey: adminQueryKey,
+    mutationKey: getQueryKey("admins"),
     mutationFn: updateMyProfile,
     onSuccess: () => {
       formRef.current?.reset();
-      queryClient.invalidateQueries({ queryKey: adminQueryKey });
+      queryClient.invalidateQueries({ queryKey: getQueryKey("admins") });
       dispatch(
         openConfirmationModal({
           message: "Your details have been updated successfully!",

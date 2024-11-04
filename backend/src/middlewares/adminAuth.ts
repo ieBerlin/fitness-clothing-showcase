@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import Admin from "../models/Admin";
 import { ErrorResponse } from "../utils/responseInterfaces";
-const adminAuth = async (_: Request, res: Response, next: NextFunction) => {
+
+const adminAuth = async (req: Request, res: Response, next: NextFunction) => {
   const adminEmail = res.locals.admin.email;
 
   try {
@@ -12,6 +13,16 @@ const adminAuth = async (_: Request, res: Response, next: NextFunction) => {
         success: false,
         errors: [
           { field: "authorization", message: "Unauthorized Admin Access!" },
+        ],
+      };
+      return res.status(403).json(errorResponse);
+    }
+
+    if (adminExist.status !== "active") {
+      const errorResponse: ErrorResponse = {
+        success: false,
+        errors: [
+          { field: "authorization", message: "Admin access is not active." },
         ],
       };
       return res.status(403).json(errorResponse);

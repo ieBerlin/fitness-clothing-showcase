@@ -1,11 +1,10 @@
 import { Document, Schema, model } from "mongoose";
-import NotificationType from "../enums/NotificationType";
+import NotificationTitle from "../enums/NotificationTitle";
 
 export interface INotification extends Document {
-  recipientId: string;
+  recipientId?: string;
   senderId?: string;
-  type: NotificationType;
-  title: string;
+  title: NotificationTitle;
   message: string;
   url?: string;
   isRead: boolean;
@@ -14,14 +13,13 @@ export interface INotification extends Document {
 }
 
 const NotificationSchema: Schema = new Schema({
-  recipientId: { type: String, required: true },
+  recipientId: { type: String },
   senderId: { type: String, required: false },
-  type: {
+  title: {
+    enum: Object.values(NotificationTitle),
     type: String,
-    enum: Object.values(NotificationType),
     required: true,
   },
-  title: { type: String, required: true },
   message: { type: String, required: true },
   url: { type: String, required: false },
   isRead: { type: Boolean, default: false, required: true },
@@ -29,6 +27,10 @@ const NotificationSchema: Schema = new Schema({
   updatedAt: { type: Date, required: false },
 });
 
-const Notification = model<INotification>("Notification", NotificationSchema, "Notifications");
+const Notification = model<INotification>(
+  "Notification",
+  NotificationSchema,
+  "Notifications"
+);
 
 export default Notification;

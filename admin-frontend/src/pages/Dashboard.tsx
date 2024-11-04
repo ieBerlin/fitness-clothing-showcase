@@ -5,10 +5,6 @@ import {
   EyeIcon,
   ClockIcon,
 } from "@heroicons/react/24/outline";
-import {
-  currentMonthSections,
-  previousMonthSections,
-} from "../dummy-data/sections";
 import { FC, ReactNode } from "react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -23,13 +19,14 @@ import {
   fetchAdmin,
   fetchStatistics,
 } from "../utils/authUtils";
-import Activity from "../models/Activity";
 import Admin from "../models/Admin";
 import { Link } from "react-router-dom";
-import { activityQueryKey, statisticQueryKey } from "../constants/queryKeys";
 import { defaultFilterParams } from "../types/activityFilters";
+import { currentMonthSections, previousMonthSections } from "./../utils/func";
+import Notification from "../models/Notification";
+import { getQueryKey } from "../constants/queryKeys";
 interface ActivityItemProps {
-  activity: Activity;
+  activity: Notification;
 }
 
 export const ActivityItem: FC<ActivityItemProps> = ({ activity }) => {
@@ -39,12 +36,11 @@ export const ActivityItem: FC<ActivityItemProps> = ({ activity }) => {
     isFetching,
     data: adminData,
   } = useQuery<Admin, ErrorResponse>({
-    queryKey: activityQueryKey,
-    queryFn: () => fetchAdmin(activity.adminId),
+    queryKey: getQueryKey("admins"),
+    queryFn: () => fetchAdmin(activity.senderId!),
     staleTime: Infinity,
   });
-
-  const formattedDate = new Date(activity.timestamp).toLocaleString("en-US", {
+  const formattedDate = new Date(activity.createdAt).toLocaleString("en-US", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -63,31 +59,25 @@ export const ActivityItem: FC<ActivityItemProps> = ({ activity }) => {
     );
   } else {
     content = (
-      <div className="flex flex-row w-full justify-between">
+      <div className="flex flex-row w-full justify-between h-full">
         <div className="flex flex-col">
           <p className="text-gray-800 font-semibold">
-            {activity.activityType
+            {activity.title
               .split("_")
               .map((item) => item.charAt(0).toUpperCase() + item.slice(1))
               .join(" ")}
           </p>
           <p className="text-sm text-gray-600 mt-1">
-            {activity.entityType} by{" "}
-            <Link to={`/admin/${activity.adminId}`}>
+            {activity._id} by{" "}
+            <Link to={`/admin/${activity.senderId}`}>
               <span className="font-medium text-gray-800">
                 {adminData?.adminEmail}
               </span>
             </Link>
           </p>
         </div>
-        <div className="flex items-center justify-center flex-col gap-2">
+        <div className="flex items-end justify-end flex-col gap-2">
           <p className="text-gray-500 text-sm font-semibold">{formattedDate}</p>
-          <Link
-            to={`/activity/${activity._id}`}
-            className="text-blue-600 hover:text-blue-800 font-medium"
-          >
-            View Details
-          </Link>
         </div>
       </div>
     );
@@ -103,18 +93,18 @@ export const ActivityItem: FC<ActivityItemProps> = ({ activity }) => {
 function Dashboard() {
   const results = useQueries<
     [
-      [DataResponse<Activity>, ErrorResponse],
+      [DataResponse<Notification>, ErrorResponse],
       [StatisticsResponse, ErrorResponse]
     ]
   >({
     queries: [
       {
-        queryKey: activityQueryKey,
+        queryKey: getQueryKey("activities"),
         queryFn: () => fetchActivities(defaultFilterParams),
         staleTime: Infinity,
       },
       {
-        queryKey: statisticQueryKey,
+        queryKey: getQueryKey("statistics"),
         queryFn: fetchStatistics,
         staleTime: Infinity,
       },
@@ -126,7 +116,7 @@ function Dashboard() {
   const error = results.map(
     (result) => result.error as unknown as ErrorResponse
   );
-  const activities = (results[0]?.data || []) as Activity[];
+  const activities = (results[0]?.data?.items || []) as Notification[];
   const statistics = results[1].data;
   let renderedContent: ReactNode;
   if (isFetching) {
@@ -135,7 +125,7 @@ function Dashboard() {
     renderedContent = (
       <div className="space-y-4">
         {error.map((item) => (
-          <ErrorAlert error={item} />
+          <ErrorAlert key={JSON.stringify(item)} error={item} />
         ))}
       </div>
     );
@@ -206,7 +196,10 @@ function Dashboard() {
                 difference > 0 ? "bg-emerald-100" : "bg-red-100";
 
               return (
-                <li className="bg-sky-100 p-6 flex items-center justify-between border border-sky-300 duration-300 ease-in-out hover:scale-105">
+                <li
+                  key={section._id}
+                  className="bg-sky-100 p-6 flex items-center justify-between border border-sky-300 duration-300 ease-in-out hover:scale-105"
+                >
                   <div>
                     <p className="text-gray-700 font-medium capitalize">
                       {section.name.replace(/-/g, " ")}
@@ -245,7 +238,7 @@ function Dashboard() {
               Last 7 Days' Activities
             </h2>
           </div>
-          {activities.length > 0 ? (
+          {activities.length ? (
             <ul className="space-y-3">
               {activities.map((activity) => (
                 <ActivityItem key={activity._id} activity={activity} />

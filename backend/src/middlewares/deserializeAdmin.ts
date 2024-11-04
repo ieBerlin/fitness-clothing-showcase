@@ -8,9 +8,7 @@ const deserializeAdmin = async (
   next: NextFunction
 ) => {
   try {
-    console.log("authHeader")
     const authHeader = req.headers.authorization as string;
-    console.log(authHeader)
     const accessToken = authHeader
       ? authHeader.startsWith("Bearer ")
         ? authHeader.split(" ")[1]
@@ -26,7 +24,9 @@ const deserializeAdmin = async (
       return res.status(403).json(errorResponse);
     }
 
-    const { decoded, isExpired, isValid } = await verifyJwt(accessToken);
+    const { decoded, isExpired, isValid, adminId } = await verifyJwt(
+      accessToken
+    );
     if (!isValid || isExpired) {
       const errorResponse: ErrorResponse = {
         success: false,
@@ -40,6 +40,7 @@ const deserializeAdmin = async (
       return res.status(403).json(errorResponse);
     }
     res.locals.admin = decoded;
+    res.locals.admin.adminId = adminId;
     next();
   } catch (error) {
     console.log(error);

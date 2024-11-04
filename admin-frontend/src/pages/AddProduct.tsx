@@ -9,6 +9,7 @@ import { ErrorResponse, ProductResponse } from "../types/response";
 import Product from "../models/Product";
 import Availability from "../enums/Availability";
 import Season from "../enums/Season";
+import Gender from "../enums/Gender";
 interface Step {
   id: string;
   label: string;
@@ -46,7 +47,7 @@ const AddProductPage: FC = () => {
       woolPercentage: +(fd.get("product-wool-percentage") || 0),
       price: +(fd.get("product-price") || 0),
       releaseDate: new Date(fd.get("product-release-date") as string),
-      isUnisex: fd.get("product-unisex") === "true",
+      gender: fd.get("gender") as Gender,
       availability: fd.get("product-availability") as Availability,
       season: (fd.getAll("product-season") as string[]).map(
         (season) => season.toUpperCase() as Season

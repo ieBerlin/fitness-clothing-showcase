@@ -1,10 +1,9 @@
 import { Request, Response } from "express";
-import Activity, { IActivity } from "../../models/Activity";
 import { ErrorResponse, SuccessResponse } from "../../utils/responseInterfaces";
 import mongoose from "mongoose";
 import ErrorSeverity from './../../enums/ErrorSeverity';
 import ErrorCode from './../../enums/ErrorCode';
-
+import Notification,{ INotification } from "../../models/Notification";
 const getSingleActivity = async (req: Request, res: Response) => {
   try {
     const { activityId } = req.params;
@@ -24,7 +23,7 @@ const getSingleActivity = async (req: Request, res: Response) => {
       return res.status(400).json(errorResponse);
     }
 
-    const activity = await Activity.findById(activityId);
+    const activity = await Notification.findById(activityId);
 
     if (!activity) {
       const notFoundResponse: ErrorResponse = {
@@ -41,7 +40,7 @@ const getSingleActivity = async (req: Request, res: Response) => {
       return res.status(404).json(notFoundResponse);
     }
 
-    const successResponse: SuccessResponse<IActivity> = {
+    const successResponse: SuccessResponse<INotification> = {
       success: true,
       data: activity,
     };

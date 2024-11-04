@@ -70,6 +70,13 @@ export async function getData<T>({
           statusCode: 400,
         } as ErrorResponse;
 
+      case 401: {
+        throw {
+          success: false,
+          errors: data.errors ?? [],
+          statusCode: 401,
+        } as ErrorResponse;
+      }
       case 403:
         throw {
           success: false,

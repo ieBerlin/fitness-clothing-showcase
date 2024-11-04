@@ -1,12 +1,17 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
-import Product from "../../models/Product";
+import Product, { IProduct } from "../../models/Product";
 import Section from "../../models/Section";
 import { SuccessResponse, ErrorResponse } from "../../utils/responseInterfaces";
-import ErrorCode from './../../enums/ErrorCode';
-import ErrorSeverity from './../../enums/ErrorSeverity';
+import ErrorCode from "./../../enums/ErrorCode";
+import ErrorSeverity from "./../../enums/ErrorSeverity";
+import { createNotification } from "../../utils/createNotification";
+import NotificationTitle from "../../enums/NotificationTitle";
+import getNotificationMessage from "../../utils/getNotificationMessage";
+import { INotification } from "../../models/Notification";
 
 const deleteProduct = async (req: Request, res: Response) => {
+  const senderId = res.locals.admin.adminId;
   try {
     const { productId } = req.params;
 
@@ -42,18 +47,26 @@ const deleteProduct = async (req: Request, res: Response) => {
       return res.status(404).json(notFoundResponse);
     }
 
-    // Update sections to remove the product
     const sections = await Section.find({ items: productId });
     for (const section of sections) {
       section.items = section.items.filter(
         (item) => item.toString() !== productId
       );
-      await section.save(); // Save the updated section
+      await section.save();
     }
 
     const successResponse: SuccessResponse = {
       success: true,
     };
+    await createNotification({
+      senderId,
+      title: NotificationTitle.DELETE_PRODUCT,
+      message: getNotificationMessage(NotificationTitle.DELETE_PRODUCT, {
+        _id: productId,
+      } as IProduct),
+      isRead: false,
+      createdAt: new Date(),
+    } as INotification);
 
     return res.status(200).json(successResponse);
   } catch (error) {

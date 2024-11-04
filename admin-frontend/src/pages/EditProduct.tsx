@@ -14,6 +14,7 @@ import Availability from "../enums/Availability";
 import Image from "../models/Image";
 import Size from "../models/Size";
 import Color from "../enums/Color";
+import Gender from "../enums/Gender";
 interface Step {
   id: string;
   label: string;
@@ -74,7 +75,7 @@ const EditProductPage: React.FC = () => {
       woolPercentage: +(fd.get("product-wool-percentage") || 0),
       price: +(fd.get("product-price") || 0),
       releaseDate: new Date(fd.get("product-release-date") as string),
-      isUnisex: (fd.get("product-unisex") as string) === "true",
+      gender: fd.get("gender") as Gender,
       availability: fd.get("product-availability") as Availability,
       season: (fd.getAll("product-season") as string[]).map(
         (season) => season.toUpperCase() as Season
