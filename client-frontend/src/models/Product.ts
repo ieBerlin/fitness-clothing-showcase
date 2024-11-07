@@ -8,7 +8,7 @@ interface Product {
   productName: string;
   productDescription: string;
   colors: ColorOption[];
-  isUnisex: boolean;
+  gender: Gender;
   season: Season[];
   woolPercentage?: number;
   price: number;

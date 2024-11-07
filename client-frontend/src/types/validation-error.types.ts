@@ -1,5 +1,5 @@
 import ErrorCode from "../enums/ErrorCode";
-import { ErrorSeverity } from "../enums/ErrorSeverity";
+import ErrorSeverity from "../enums/ErrorSeverity";
 
 export interface ErrorDetails {
   status: number;

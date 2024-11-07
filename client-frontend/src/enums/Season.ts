@@ -4,4 +4,5 @@ enum Season {
   Spring = "SPRING",
   Summer = "SUMMER",
 }
+
 export default Season;

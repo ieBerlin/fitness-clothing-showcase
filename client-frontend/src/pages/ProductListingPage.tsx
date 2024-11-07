@@ -17,8 +17,8 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { NavbarHeightContext } from "../store/navbarStore";
 import ProductCarousel from "../components/ProductCarousel";
-import { Link } from "react-router-dom";
 import Spinner from "../components/Spinner";
+import PageTemplate from "../components/PageTemplate";
 
 const ProductOverviewPage: React.FC = () => {
   const queries = useQueries<
@@ -57,7 +57,7 @@ const ProductOverviewPage: React.FC = () => {
     },
   ] = queries;
   const { navbarHeight } = useContext(NavbarHeightContext);
-  const productsContainerRef = useRef<HTMLElement | null>(null);
+  const productsContainerRef = useRef<HTMLDivElement | null>(null);
   const [isNavbarSticky, setIsNavbarSticky] = useState(false);
   useEffect(() => {
     const handleScrollEvent = () => {
@@ -98,28 +98,30 @@ const ProductOverviewPage: React.FC = () => {
       <section className="p-4">
         {sectionsData.map((section, index) => (
           <div key={index}>
-            <div className="bg-white rounded-lg p-4 mb-6">
-              <h2 className="text-2xl font-extrabold text-gray-900 uppercase tracking-wide mb-1">
-                {section.section.name}
-              </h2>
-              <p className="text-gray-600 mb-4 capitalize">
-                {section.section.description}
-              </p>
+            <div className="bg-white rounded-lg mb-6 border-t border-gray-300">
+              <div className="py-4 px-2 md:px-4 lg:px-8 bg-white">
+                <h2 className="text-2xl font-bold tracking-widest uppercase text-black text-left">
+                  {section.section.name}
+                </h2>
+                <p className="text-gray-900 mb-4 capitalize">
+                  {section.section.description}
+                </p>
+              </div>
 
               {section.products.items && (
-                <ProductCarousel products={section.products.items || []} />
+                <ProductCarousel
+                  products={section.products.items || []}
+                  renderedItem={(item) => <ProductCard product={item} />}
+                />
               )}
             </div>
-            {sectionsData.length - index > 1 && (
-              <hr className="border-t border-gray-300 mt-3" />
-            )}
           </div>
         ))}
       </section>
     );
   }
   return (
-    <div>
+    <PageTemplate title="All Products">
       <Navbar />
       <div className="relative w-full h-[300px]">
         <img
@@ -163,29 +165,26 @@ const ProductOverviewPage: React.FC = () => {
         <div className="container mx-auto px-4 py-8" ref={productsContainerRef}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {productData?.items?.map((product) => (
-              <Link to={product._id}>
-                <ProductCard key={product._id} product={product} />
-              </Link>
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
         </div>
       </main>
-      <main className="py-8">
-        <hr className="border-t border-gray-700 mb-3" />
+      <main className="py-8 border-t border-gray-300">
         <div className="text-start p-6 bg-white rounded-lg">
-          <h1 className="text-xl font-bold text-gray-800 mb-2 uppercase">
+          <h1 className="text-xl font-bold text-black mb-2 uppercase">
             Discover Men's Quasars
           </h1>
-          <p className="text-gray-700 text-base leading-relaxed">
+          <p className="text-black text-base leading-relaxed">
             Check out all Men's Quasars clothing. Fitness and gym attire
             designed to match your dedication and hard work in your training.
           </p>
         </div>
-        <hr className="border-t border-gray-300 mt-3" />
+
         {SectionContent}
       </main>
       <Footer />
-    </div>
+    </PageTemplate>
   );
 };
 

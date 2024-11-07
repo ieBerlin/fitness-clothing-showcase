@@ -1,10 +1,13 @@
-import { FC, useState, useRef, useEffect } from "react";
-import Product from "../models/Product";
-import ProductCard from "./ProductCard";
+import { useState, useRef, useEffect, ReactNode } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { Link } from "react-router-dom";
 
-const ProductCarousel: FC<{ products: Product[] }> = ({ products }) => {
+const ProductCarousel = <T,>({
+  products,
+  renderedItem,
+}: {
+  products: T[];
+  renderedItem: (product: T) => ReactNode;
+}) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(1);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -45,42 +48,42 @@ const ProductCarousel: FC<{ products: Product[] }> = ({ products }) => {
     <div className="relative w-full" ref={containerRef}>
       <button
         disabled={currentIndex === 0}
-        className={`absolute top-1/2 left-4 z-10 p-2 rounded-full text-white transition-all transform -translate-y-1/2 ${
-          currentIndex === 0
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-gray-800 hover:bg-gray-700"
+        className={`absolute top-1/2 left-4 z-10 p-2 rounded-full transition-all transform -translate-y-1/2 ${
+          currentIndex === 0 ? "bg-[#e7e7e7] cursor-not-allowed" : "bg-black"
         }`}
         onClick={goToPrevSlide}
       >
-        <FaChevronLeft className="text-xl" />
+        <FaChevronLeft
+          className={`text-base ${
+            currentIndex === 0 ? "text-gray-600" : " text-white"
+          }`}
+        />
       </button>
 
       <div
-        className="grid gap-4 justify-evenly w-full"
+        className="grid gap-4 justify-center w-full"
         style={{
-          gridTemplateColumns: "repeat(auto-fill, minmax(180px, 220px))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 220px))",
           transition: "transform 0.5s ease-in-out",
         }}
       >
-        {visibleProducts.map((product) => (
-          <div key={product._id}>
-            <Link to={product._id}>
-              <ProductCard product={product} />
-            </Link>
-          </div>
-        ))}
+        {visibleProducts.map((product) => renderedItem(product))}
       </div>
 
       <button
         disabled={currentIndex === maxIndex}
         className={`absolute top-1/2 right-4 z-10 p-2 rounded-full text-white transition-all transform -translate-y-1/2 ${
           currentIndex === maxIndex
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-gray-800 hover:bg-gray-700"
+            ? "bg-[#e7e7e7] cursor-not-allowed"
+            : "bg-black"
         }`}
         onClick={goToNextSlide}
       >
-        <FaChevronRight className="text-xl" />
+        <FaChevronRight
+          className={`text-base ${
+            currentIndex === maxIndex ? "text-gray-600" : " text-white"
+          }`}
+        />
       </button>
     </div>
   );

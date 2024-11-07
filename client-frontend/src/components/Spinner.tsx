@@ -1,5 +1,6 @@
 import React, { useContext } from "react";
 import { NavbarHeightContext } from "../store/navbarStore";
+import LoadingIndicator from "./LoadingIndicator";
 
 const LoadingSpinner: React.FC<{
   isNavbarHeightSignificant?: boolean;
@@ -14,7 +15,7 @@ const LoadingSpinner: React.FC<{
           : "100vh",
       }}
     >
-      <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-black border-solid"></div>
+      <LoadingIndicator dimensions="h-16 w-16" />
     </div>
   );
 };

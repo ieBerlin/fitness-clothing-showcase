@@ -31,14 +31,19 @@ const Navbar = forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(
           </div>
 
           <div className="flex flex-row text-center flex-grow justify-center">
-            <Link to="/mens">
+            <Link to="/collections/men">
               <h2 className="text-black mx-4 hover:text-gray-600 transition duration-300 font-semibold uppercase">
                 Men's
               </h2>
             </Link>
-            <Link to="/womens">
+            <Link to="/collections/women">
               <h2 className="text-black mx-4 hover:text-gray-600 transition duration-300 font-semibold uppercase">
                 Women's
+              </h2>
+            </Link>
+            <Link to="/collections/unisex">
+              <h2 className="text-black mx-4 hover:text-gray-600 transition duration-300 font-semibold uppercase">
+                Unisex's
               </h2>
             </Link>
           </div>

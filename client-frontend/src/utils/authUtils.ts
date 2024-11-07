@@ -177,7 +177,6 @@ export const fetchActivities = async <ItemsResponse>(
   const {
     adminId,
     activityType,
-    entityType,
     startDate,
     endDate,
     currentPage = 1,
@@ -198,9 +197,7 @@ export const fetchActivities = async <ItemsResponse>(
   if (activityType && activityType.length > 0) {
     activityType.forEach((type) => urlParams.append("activityType", type));
   }
-  if (entityType && entityType.length > 0) {
-    entityType.forEach((type) => urlParams.append("entityType", type));
-  }
+
   if (startDate) {
     const start = new Date(startDate);
     if (!isNaN(start.getTime())) {

@@ -1,6 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 import ErrorCode from "../enums/ErrorCode";
-import { ErrorSeverity } from "../enums/ErrorSeverity";
+import ErrorSeverity from "../enums/ErrorSeverity";
 import { ErrorResponse, SuccessResponse } from "../types/response";
 export type BaseFilterParams = {
   itemLimit?: number;

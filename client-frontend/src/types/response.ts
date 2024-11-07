@@ -1,5 +1,5 @@
 import ErrorCode from "../enums/ErrorCode";
-import { ErrorSeverity } from "../enums/ErrorSeverity";
+import ErrorSeverity from "../enums/ErrorSeverity";
 import Admin from "../models/Admin";
 import Product from "../models/Product";
 import Section from "../models/Section";

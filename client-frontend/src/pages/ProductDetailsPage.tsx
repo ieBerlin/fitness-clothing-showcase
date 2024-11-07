@@ -1,12 +1,13 @@
 import React, { FC, useContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { fetchProduct, fetchProducts } from "../utils/authUtils";
+import { useQueries, useQuery } from "@tanstack/react-query";
+import { fetchProduct, fetchProducts, fetchSections } from "../utils/authUtils";
 import Spinner from "../components/Spinner";
 import {
   DataResponse,
   ErrorResponse,
   ProductResponse,
+  SectionsResponse,
 } from "../types/response";
 import { NavbarHeightContext } from "../store/navbarStore";
 import Availability from "../enums/Availability";
@@ -21,11 +22,23 @@ import {
 } from "@heroicons/react/16/solid";
 import ProductCarousel from "../components/ProductCarousel";
 import Product from "../models/Product";
-import { productQueryKey } from "../constants/queryKeys";
+import { productQueryKey, sectionQueryKey } from "../constants/queryKeys";
 import ErrorAlert from "../components/ErrorAlert";
 import { imageUrl } from "../utils/http";
+import PageTemplate from "../components/PageTemplate";
+import CategorySection from "../components/CategoryFilterSection";
+import GetProductDetails from "../components/GetProductDetails";
+import ProductCard from "../components/ProductCard";
 
 const ProductDetailsPage: React.FC = () => {
+  const [selectedSection, setSelectedSection] = useState<
+    "popular products" | "on sale" | "trending now"
+  >("popular products");
+  function handleSectionChange(
+    section: "popular products" | "on sale" | "trending now"
+  ) {
+    setSelectedSection(section);
+  }
   const [weReachBottom, setWeReachBottom] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const [activeColor, setActiveColor] = useState<string | null>(null);
@@ -92,7 +105,24 @@ const ProductDetailsPage: React.FC = () => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, [navbarHeight]);
+  const queries = useQueries<[[SectionsResponse, ErrorResponse]]>({
+    queries: [
+      {
+        queryKey: sectionQueryKey,
+        queryFn: () => fetchSections({}),
+        select: (data: SectionsResponse) => data,
+      },
+    ],
+  });
 
+  const [
+    {
+      data: sectionsData,
+      error: fetchError,
+      isError: hasError,
+      isLoading: sectionsLoading,
+    },
+  ] = queries;
   const [isAdditionalInfoShown, setIsAdditionalInfoShown] =
     useState<boolean>(false);
   if (isLoading) {
@@ -113,9 +143,30 @@ const ProductDetailsPage: React.FC = () => {
   function handleAdditionalInfoChange() {
     setIsAdditionalInfoShown((prevVal) => !prevVal);
   }
+  let productsContent;
+  if (sectionsLoading) {
+    productsContent = <div>Loading products...</div>;
+  } else if (hasError) {
+    productsContent = (
+      <div>
+        Error occurred while fetching products: {fetchError?.toString()}
+      </div>
+    );
+  } else {
+    productsContent = sectionsData && (
+      <ProductCarousel
+        products={
+          sectionsData.find(
+            (section) => section.section.name.toLowerCase() === selectedSection
+          )?.products.items || []
+        }
+        renderedItem={(item) => <ProductCard product={item} />}
+      />
+    );
+  }
 
   return (
-    <div>
+    <PageTemplate title={product?.productName}>
       <div
         className="relative flex-grow flex-1 grid grid-cols-2 bg-white"
         style={{ minHeight: `calc(100vh - ${navbarHeight}px)` }}
@@ -307,13 +358,21 @@ const ProductDetailsPage: React.FC = () => {
           )}
 
           {/* Gender Specification */}
-          <div className="text-center py-2 bg-gray-100 border border-black ">
-            {product?.isUnisex ? (
+          <div className="text-center py-2 bg-gray-100 border border-black">
+            {product?.gender === "unisex" ? (
               <span className="text-black font-bold uppercase">
                 Unisex Product
               </span>
+            ) : product?.gender === "men" ? (
+              <span className="text-black font-bold uppercase">
+                Men's Product
+              </span>
+            ) : product?.gender === "women" ? (
+              <span className="text-black font-bold uppercase">
+                Women's Product
+              </span>
             ) : (
-              <span className="text-black font-bold">
+              <span className="text-black font-bold uppercase">
                 Gender Specific Product
               </span>
             )}
@@ -411,7 +470,47 @@ const ProductDetailsPage: React.FC = () => {
         </div>
       </div>
       <SuggestedProducts id={productId} />
-    </div>
+      <CategorySection
+        categoryTitle="WAIT THERE’S MORE…"
+        filterControls={
+          <div className="flex justify-start items-start gap-4 mb-4">
+            <button
+              className={`px-5 font-medium text-sm uppercase py-3 rounded-full transition duration-300 ease-in-out ${
+                selectedSection === "popular products"
+                  ? "bg-black text-white scale-105"
+                  : "bg-white text-black hover:bg-black hover:text-white"
+              }`}
+              onClick={() => handleSectionChange("popular products")}
+            >
+              Popular Products
+            </button>
+            <button
+              className={`px-5 font-medium text-sm uppercase py-3 rounded-full transition duration-300 ease-in-out ${
+                selectedSection === "on sale"
+                  ? "bg-black text-white scale-105"
+                  : "bg-white text-black hover:bg-black hover:text-white"
+              }`}
+              onClick={() => handleSectionChange("on sale")}
+            >
+              On Sale
+            </button>
+
+            <button
+              className={`px-5 font-medium text-sm uppercase py-3 rounded-full transition duration-300 ease-in-out ${
+                selectedSection === "trending now"
+                  ? "bg-black text-white scale-105"
+                  : "bg-white text-black hover:bg-black hover:text-white"
+              }`}
+              onClick={() => handleSectionChange("trending now")}
+            >
+              Trending Now
+            </button>
+          </div>
+        }
+      >
+        {productsContent}
+      </CategorySection>
+    </PageTemplate>
   );
 };
 
@@ -449,7 +548,12 @@ const SuggestedProducts: FC<{ id?: string }> = () => {
           You Might Like
         </h2>
       </div>
-      <ProductCarousel products={products} />
+      <ProductCarousel
+        products={products}
+        renderedItem={(product) => (
+          <GetProductDetails productId={product._id} />
+        )}
+      />
     </section>
   );
 };

@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(corsMiddleware);
 app.use(express.urlencoded({ extended: true }));
 app.use("/public", express.static("public"));
-// app.use(delayMiddleware);
+app.use(delayMiddleware);
 const PORT = process.env.PORT || 5431;
 Routes(app);
 app.listen(PORT, async () => {
