@@ -28,8 +28,13 @@ import CategorySection from "../components/CategoryFilterSection";
 import GetProductDetails from "../components/GetProductDetails";
 import ProductCard from "../components/ProductCard";
 import { useSelector } from "react-redux";
-import { openModal, updateImageIndex } from "../features/modal";
+import {
+  updateModalData,
+  updateImageIndex,
+  openModal,
+} from "../features/modal";
 import { useDispatch } from "react-redux";
+import { RootState } from "../store/modalStore";
 
 const ProductDetailsPage: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -44,29 +49,24 @@ const ProductDetailsPage: React.FC = () => {
     retry: 1,
   });
   const dispatch = useDispatch();
-  const productImages: Image[] = angles
+
+  const { currentImage, isOpen } = useSelector(
+    (state: RootState) => state.modal
+  );
+  const productImages = angles
     .map((angle) => product?.images?.find((img) => img.angle === angle))
     .filter((image): image is Image => image !== undefined);
-
-  const { isOpen, currentImageIndex, currentImageSrc } = useSelector(
-    (state: any) => state.modal
-  );
-  const [activeImage, setActiveImage] = useState<Image | null>(null);
   useEffect(() => {
-    const image = productImages.find((_, index) => index === currentImageIndex);
-    if (image) {
-      setActiveImage(image);
+    if (productImages.length) {
+      dispatch(
+        updateModalData({
+          currentImageIndex: 0,
+          totalImagesCount: productImages.length,
+          imageSources: productImages,
+        })
+      );
     }
-  }, [currentImageIndex, productImages]);
-  // useEffect(() => {
-  //   const activeIndex = productImages.findIndex(
-  //     (image) => image.angle === activeImage?.angle
-  //   );
-  //   if (activeIndex !== -1) {
-  //     dispatch(updateImageIndex(activeIndex));
-  //   }
-  // }, [activeImage, productImages, dispatch]);
-
+  }, [dispatch, JSON.stringify(productImages)]);
   const [selectedSection, setSelectedSection] = useState<
     "popular products" | "on sale" | "trending now"
   >("popular products");
@@ -174,7 +174,6 @@ const ProductDetailsPage: React.FC = () => {
       />
     );
   }
-console.log(currentImageSrc)
   return (
     <PageTemplate title={product?.productName}>
       <div
@@ -189,19 +188,21 @@ console.log(currentImageSrc)
               width: weReachBottom ? "100%" : "100%",
             }}
           >
-            {activeImage! && (
-              <img
-                ref={thumbnailRef}
-                style={{
-                  backgroundColor: activeImage.pathname.endsWith(".png")
-                    ? "#ffffff"
-                    : "transparent",
-                }}
-                src={`${imageUrl}${activeImage.pathname}`}
-                alt={activeImage.angle || "Product Image"}
-                className="w-full h-auto"
-              />
-            )}
+            <img
+              ref={thumbnailRef}
+              style={{
+                backgroundColor: currentImage.pathname.endsWith(".png")
+                  ? "#ffffff"
+                  : "transparent",
+              }}
+              src={
+                currentImage.pathname === "/NoImageAvailable.jpg"
+                  ? currentImage.pathname
+                  : `${imageUrl}${currentImage.pathname}`
+              }
+              alt={"Product Image"}
+              className="w-full h-auto"
+            />
             <div
               className={`py-2 flex flex-col items-center justify-between absolute top-0 left-0 h-full w-full `}
             >
@@ -217,16 +218,9 @@ console.log(currentImageSrc)
                     <EyeSlashIcon className="h-5 w-5 text-blue-600" />
                   )}
                 </button>
-                {!isOpen && activeImage && (
+                {!isOpen && currentImage.pathname && (
                   <button
-                    onClick={() =>
-                      dispatch(
-                        openModal({
-                          currentImageSrc: `${imageUrl}${activeImage.pathname}`,
-                          totalImagesCount: productImages.length,
-                        })
-                      )
-                    }
+                    onClick={() => dispatch(openModal())}
                     className="flex items-center justify-center p-1 rounded-full bg-white shadow-md duration-200 hover:scale-110"
                     aria-label="Toggle Zoom"
                   >
@@ -252,14 +246,16 @@ console.log(currentImageSrc)
                         return (
                           <li
                             key={image.angle}
-                            className={`transition-transform duration-300 cursor-pointer shadow-md hover:shadow-xl hover:scale-105 ${
-                              activeImage?.angle === image.angle
+                            className={`transition-transform duration-300 cursor-pointer hover:scale-105 ${
+                              currentImage?._id === image._id
                                 ? "bg-gray-800 border-gray-800 scale-110"
                                 : "bg-white border border-gray-300"
                             }`}
                           >
                             <button
-                              onClick={() => dispatch(updateImageIndex(index))}
+                              onClick={() => {
+                                dispatch(updateImageIndex(index));
+                              }}
                               className="flex flex-col items-center p-[1px]"
                             >
                               <img

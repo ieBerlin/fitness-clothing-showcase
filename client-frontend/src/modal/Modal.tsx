@@ -3,10 +3,12 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { closeModal, updateImageIndex } from "../features/modal";
 import { useDispatch } from "react-redux";
+import { RootState } from "../store/modalStore";
+import { imageUrl } from "../utils/http";
 
 function Modal() {
-  const { isOpen, currentImageSrc, currentImageIndex, totalImagesCount } =
-    useSelector((state: any) => state.modal);
+  const { isOpen, currentImage, currentImageIndex, totalImagesCount } =
+    useSelector((state: RootState) => state.modal);
   const dispatch = useDispatch();
   if (!isOpen) {
     return null;
@@ -58,7 +60,11 @@ function Modal() {
           </button>
 
           <img
-            src={currentImageSrc}
+            src={
+              currentImage.pathname === "/NoImageAvailable.jpg"
+                ? currentImage.pathname
+                : `${imageUrl}${currentImage.pathname}`
+            }
             className="h-full max-w-[90%] object-cover"
             alt="Product Image"
           />
