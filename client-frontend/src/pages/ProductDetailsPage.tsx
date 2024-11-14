@@ -12,12 +12,10 @@ import {
 import { NavbarHeightContext } from "../store/navbarStore";
 import Availability from "../enums/Availability";
 import { ChevronRightIcon } from "@heroicons/react/16/solid";
-import NoImageAvailable from "/NoImageAvailable.jpg";
 import Image, { angles } from "../models/Image";
 import {
   EyeIcon,
   EyeSlashIcon,
-  MagnifyingGlassMinusIcon,
   MagnifyingGlassPlusIcon,
 } from "@heroicons/react/16/solid";
 import ProductCarousel from "../components/ProductCarousel";
@@ -29,8 +27,46 @@ import PageTemplate from "../components/PageTemplate";
 import CategorySection from "../components/CategoryFilterSection";
 import GetProductDetails from "../components/GetProductDetails";
 import ProductCard from "../components/ProductCard";
+import { useSelector } from "react-redux";
+import { openModal, updateImageIndex } from "../features/modal";
+import { useDispatch } from "react-redux";
 
 const ProductDetailsPage: React.FC = () => {
+  const { productId } = useParams<{ productId: string }>();
+  const {
+    data: product,
+    error,
+    isError,
+    isLoading,
+  } = useQuery<ProductResponse, ErrorResponse>({
+    queryKey: ["product", productId],
+    queryFn: () => fetchProduct(productId!),
+    retry: 1,
+  });
+  const dispatch = useDispatch();
+  const productImages: Image[] = angles
+    .map((angle) => product?.images?.find((img) => img.angle === angle))
+    .filter((image): image is Image => image !== undefined);
+
+  const { isOpen, currentImageIndex, currentImageSrc } = useSelector(
+    (state: any) => state.modal
+  );
+  const [activeImage, setActiveImage] = useState<Image | null>(null);
+  useEffect(() => {
+    const image = productImages.find((_, index) => index === currentImageIndex);
+    if (image) {
+      setActiveImage(image);
+    }
+  }, [currentImageIndex, productImages]);
+  // useEffect(() => {
+  //   const activeIndex = productImages.findIndex(
+  //     (image) => image.angle === activeImage?.angle
+  //   );
+  //   if (activeIndex !== -1) {
+  //     dispatch(updateImageIndex(activeIndex));
+  //   }
+  // }, [activeImage, productImages, dispatch]);
+
   const [selectedSection, setSelectedSection] = useState<
     "popular products" | "on sale" | "trending now"
   >("popular products");
@@ -45,20 +81,8 @@ const ProductDetailsPage: React.FC = () => {
   const handleColorSelect = (colorName: string) => {
     setActiveColor(colorName === activeColor ? null : colorName);
   };
-
-  const { productId } = useParams<{ productId: string }>();
   const thumbnailRef = useRef<HTMLImageElement | null>(null);
 
-  const {
-    data: product,
-    error,
-    isError,
-    isLoading,
-  } = useQuery<ProductResponse, ErrorResponse>({
-    queryKey: ["product", productId],
-    queryFn: () => fetchProduct(productId!),
-    retry: 1,
-  });
   const { navbarHeight } = useContext(NavbarHeightContext);
   const [visibilityState, setVisibilityState] = useState<{
     showImageOverview: boolean;
@@ -67,20 +91,6 @@ const ProductDetailsPage: React.FC = () => {
     showImageOverview: true,
     zoomIn: false,
   });
-
-  const [activeImage, setActiveImage] = useState<Image | null>(null);
-
-  useEffect(() => {
-    if (product?.images?.length) {
-      setActiveImage(product.images[0]);
-    }
-  }, [product?.images]);
-
-  const handleImageSelect = (image: Image | null) => {
-    if (image) {
-      setActiveImage(image);
-    }
-  };
 
   type VisibilityKeys = keyof typeof visibilityState;
 
@@ -133,7 +143,7 @@ const ProductDetailsPage: React.FC = () => {
     return <ErrorAlert error={error as ErrorResponse} />;
   }
 
-  const selectedColor = product?.colors.find(
+  const activeColorData = product?.colors.find(
     (color) => color.name === activeColor
   );
 
@@ -164,25 +174,22 @@ const ProductDetailsPage: React.FC = () => {
       />
     );
   }
-
+console.log(currentImageSrc)
   return (
     <PageTemplate title={product?.productName}>
       <div
         className="relative flex-grow flex-1 grid grid-cols-2 bg-white"
         style={{ minHeight: `calc(100vh - ${navbarHeight}px)` }}
       >
-        {/* Image Component */}
         <div className="bg-white relative">
           <div
             className="bg-white"
             style={{
-              // position: weReachBottom ? "initial" : "fixed",
-              // width: weReachBottom ? "100%" : "50%",
               position: weReachBottom ? "initial" : "initial",
               width: weReachBottom ? "100%" : "100%",
             }}
           >
-            {activeImage ? (
+            {activeImage! && (
               <img
                 ref={thumbnailRef}
                 style={{
@@ -190,18 +197,8 @@ const ProductDetailsPage: React.FC = () => {
                     ? "#ffffff"
                     : "transparent",
                 }}
-                src={
-                  activeImage.pathname
-                    ? `${imageUrl}${activeImage.pathname}`
-                    : NoImageAvailable
-                }
+                src={`${imageUrl}${activeImage.pathname}`}
                 alt={activeImage.angle || "Product Image"}
-                className="w-full h-auto"
-              />
-            ) : (
-              <img
-                src={NoImageAvailable}
-                alt="No Image Available"
                 className="w-full h-auto"
               />
             )}
@@ -220,17 +217,22 @@ const ProductDetailsPage: React.FC = () => {
                     <EyeSlashIcon className="h-5 w-5 text-blue-600" />
                   )}
                 </button>
-                <button
-                  onClick={() => toggleVisibility("zoomIn")}
-                  className="flex items-center justify-center p-1 rounded-full bg-white shadow-md duration-200 hover:scale-110"
-                  aria-label="Toggle Zoom"
-                >
-                  {visibilityState.zoomIn ? (
+                {!isOpen && activeImage && (
+                  <button
+                    onClick={() =>
+                      dispatch(
+                        openModal({
+                          currentImageSrc: `${imageUrl}${activeImage.pathname}`,
+                          totalImagesCount: productImages.length,
+                        })
+                      )
+                    }
+                    className="flex items-center justify-center p-1 rounded-full bg-white shadow-md duration-200 hover:scale-110"
+                    aria-label="Toggle Zoom"
+                  >
                     <MagnifyingGlassPlusIcon className="h-5 w-5 text-blue-600" />
-                  ) : (
-                    <MagnifyingGlassMinusIcon className="h-5 w-5 text-blue-600" />
-                  )}
-                </button>
+                  </button>
+                )}
               </div>
               <div
                 className={` ${
@@ -245,33 +247,26 @@ const ProductDetailsPage: React.FC = () => {
                 <div className={`flex flex-row items-center justify-between `}>
                   {visibilityState.showImageOverview && (
                     <ul className="flex space-x-4 justify-center">
-                      {angles.map((angle) => {
-                        const image = product?.images?.find(
-                          (img) => img.angle === angle
-                        );
-                        if (!image) return;
-                        const imagePath = image
-                          ? `${imageUrl}${image.pathname}`
-                          : NoImageAvailable;
-
+                      {productImages.map((image, index) => {
+                        const imagePath = `${imageUrl}${image.pathname}`;
                         return (
                           <li
-                            key={angle}
+                            key={image.angle}
                             className={`transition-transform duration-300 cursor-pointer shadow-md hover:shadow-xl hover:scale-105 ${
-                              activeImage?.angle === angle
+                              activeImage?.angle === image.angle
                                 ? "bg-gray-800 border-gray-800 scale-110"
                                 : "bg-white border border-gray-300"
                             }`}
                           >
                             <button
-                              onClick={() => handleImageSelect(image!)}
+                              onClick={() => dispatch(updateImageIndex(index))}
                               className="flex flex-col items-center p-[1px]"
                             >
                               <img
                                 loading="lazy"
                                 className="w-16 h-16 object-cover"
                                 src={imagePath}
-                                alt={`${angle} view`}
+                                alt={`${image.angle} view`}
                               />
                             </button>
                           </li>
@@ -284,23 +279,18 @@ const ProductDetailsPage: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Product Details Section */}
         <div
           ref={contentRef}
           className="py-10 px-8 flex flex-col justify-center space-y-6 transform transition-transform hover:scale-105 w-[calc(100%/1.05)]"
         >
-          {/* Product Name */}
           <h2 className="text-black font-extrabold uppercase tracking-wider text-3xl">
             {product?.productName || "Product Name"}
           </h2>
 
-          {/* Product Price */}
           <h6 className="font-semibold text-gray-800 tracking-wider text-xl">
             {product?.price ? `DZD${product.price}` : "Price not available"}
           </h6>
 
-          {/* Product Colors */}
           {product?.colors.length ? (
             <ul className="flex gap-4">
               {product.colors.map((item) => (
@@ -321,13 +311,13 @@ const ProductDetailsPage: React.FC = () => {
             <div>No Colors Available</div>
           )}
 
-          {selectedColor && selectedColor.availableSizes.length > 0 && (
+          {activeColorData && activeColorData.availableSizes.length > 0 && (
             <div className="w-full px-6 py-4 bg-gradient-to-br from-gray-950 to-black  text-black text-lg font-semibold">
-              {selectedColor.availableSizes.some(
+              {activeColorData.availableSizes.some(
                 (size) => size.sizeAvailability === Availability.IN_STOCK
               ) ? (
                 <div className="flex flex-wrap justify-center gap-3">
-                  {selectedColor.availableSizes
+                  {activeColorData.availableSizes
                     .filter(
                       (size) => size.sizeAvailability === Availability.IN_STOCK
                     )
@@ -470,6 +460,7 @@ const ProductDetailsPage: React.FC = () => {
         </div>
       </div>
       <SuggestedProducts id={productId} />
+
       <CategorySection
         categoryTitle="WAIT THERE’S MORE…"
         filterControls={

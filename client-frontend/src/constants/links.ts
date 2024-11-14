@@ -11,9 +11,9 @@ interface LinkSection {
 const links: Record<"men" | "women" | "unisex", LinkSection[]> = {
   men: [
     {
-      title: "Activewear",
+      title: "Products",
       items: [
-        { label: "All Products", path: "/collections/men/activewear" },
+        { label: "All Products", path: "/collections/men/all-products" },
         { label: "Gym Shorts", path: "/collections/men/gym-shorts" },
         { label: "Gym Hoodies", path: "/collections/men/gym-hoodies" },
         { label: "Compression Tops", path: "/collections/men/compression-tops" },
@@ -25,28 +25,28 @@ const links: Record<"men" | "women" | "unisex", LinkSection[]> = {
     {
       title: "Accessories",
       items: [
-        { label: "Gym Bags", path: "/collections/men/accessories/gym-bags" },
-        { label: "Water Bottles", path: "/collections/men/accessories/water-bottles" },
-        { label: "Shaker Bottles", path: "/collections/men/accessories/shaker-bottles" },
-        { label: "Workout Gloves", path: "/collections/men/accessories/workout-gloves" },
-        { label: "Headbands", path: "/collections/men/accessories/headbands" },
+        { label: "Gym Bags", path: "/collections/men/gym-bags" },
+        { label: "Water Bottles", path: "/collections/men/water-bottles" },
+        { label: "Shaker Bottles", path: "/collections/men/shaker-bottles" },
+        { label: "Workout Gloves", path: "/collections/men/workout-gloves" },
+        { label: "Headbands", path: "/collections/men/headbands" },
       ],
     },
     {
       title: "Trending",
       items: [
-        { label: "New Arrivals", path: "/collections/men/trending/new-arrivals" },
-        { label: "Best Sellers", path: "/collections/men/trending/best-sellers" },
-        { label: "Limited Edition", path: "/collections/men/trending/limited-edition" },
-        { label: "Sale", path: "/collections/men/trending/sale" },
+        { label: "New Arrivals", path: "/collections/men/new-arrivals" },
+        { label: "Best Sellers", path: "/collections/men/best-sellers" },
+        { label: "Limited Edition", path: "/collections/men/limited-edition" },
+        { label: "Sale", path: "/collections/men/sale" },
       ],
     },
   ],
   women: [
     {
-      title: "Activewear",
+      title: "Products",
       items: [
-        { label: "All Products", path: "/collections/women/activewear" },
+        { label: "All Products", path: "/collections/women/all-products" },
         { label: "Sports Bras", path: "/collections/women/sports-bras" },
         { label: "Gym Leggings", path: "/collections/women/gym-leggings" },
         { label: "Gym Hoodies", path: "/collections/women/gym-hoodies" },
@@ -58,29 +58,29 @@ const links: Record<"men" | "women" | "unisex", LinkSection[]> = {
     {
       title: "Accessories",
       items: [
-        { label: "Gym Bags", path: "/collections/women/accessories/gym-bags" },
-        { label: "Water Bottles", path: "/collections/women/accessories/water-bottles" },
-        { label: "Shaker Bottles", path: "/collections/women/accessories/shaker-bottles" },
-        { label: "Workout Gloves", path: "/collections/women/accessories/workout-gloves" },
-        { label: "Headbands", path: "/collections/women/accessories/headbands" },
-        { label: "Yoga Mats", path: "/collections/women/accessories/yoga-mats" },
+        { label: "Gym Bags", path: "/collections/women/gym-bags" },
+        { label: "Water Bottles", path: "/collections/women/water-bottles" },
+        { label: "Shaker Bottles", path: "/collections/women/shaker-bottles" },
+        { label: "Workout Gloves", path: "/collections/women/workout-gloves" },
+        { label: "Headbands", path: "/collections/women/headbands" },
+        { label: "Yoga Mats", path: "/collections/women/yoga-mats" },
       ],
     },
     {
       title: "Trending",
       items: [
-        { label: "New Arrivals", path: "/collections/women/trending/new-arrivals" },
-        { label: "Best Sellers", path: "/collections/women/trending/best-sellers" },
-        { label: "Limited Edition", path: "/collections/women/trending/limited-edition" },
-        { label: "Sale", path: "/collections/women/trending/sale" },
+        { label: "New Arrivals", path: "/collections/women/new-arrivals" },
+        { label: "Best Sellers", path: "/collections/women/best-sellers" },
+        { label: "Limited Edition", path: "/collections/women/limited-edition" },
+        { label: "Sale", path: "/collections/women/sale" },
       ],
     },
   ],
   unisex: [
     {
-      title: "Activewear",
+      title: "Products",
       items: [
-        { label: "All Products", path: "/collections/unisex/activewear" },
+        { label: "All Products", path: "/collections/unisex/all-products" },
         { label: "Hoodies", path: "/collections/unisex/hoodies" },
         { label: "Gym Pants", path: "/collections/unisex/gym-pants" },
         { label: "T-Shirts", path: "/collections/unisex/t-shirts" },
@@ -92,21 +92,21 @@ const links: Record<"men" | "women" | "unisex", LinkSection[]> = {
     {
       title: "Accessories",
       items: [
-        { label: "Gym Bags", path: "/collections/unisex/accessories/gym-bags" },
-        { label: "Water Bottles", path: "/collections/unisex/accessories/water-bottles" },
-        { label: "Shaker Bottles", path: "/collections/unisex/accessories/shaker-bottles" },
-        { label: "Workout Gloves", path: "/collections/unisex/accessories/workout-gloves" },
-        { label: "Headbands", path: "/collections/unisex/accessories/headbands" },
-        { label: "Yoga Mats", path: "/collections/unisex/accessories/yoga-mats" },
+        { label: "Gym Bags", path: "/collections/unisex/gym-bags" },
+        { label: "Water Bottles", path: "/collections/unisex/water-bottles" },
+        { label: "Shaker Bottles", path: "/collections/unisex/shaker-bottles" },
+        { label: "Workout Gloves", path: "/collections/unisex/workout-gloves" },
+        { label: "Headbands", path: "/collections/unisex/headbands" },
+        { label: "Yoga Mats", path: "/collections/unisex/yoga-mats" },
       ],
     },
     {
       title: "Trending",
       items: [
-        { label: "New Arrivals", path: "/collections/unisex/trending/new-arrivals" },
-        { label: "Best Sellers", path: "/collections/unisex/trending/best-sellers" },
-        { label: "Limited Edition", path: "/collections/unisex/trending/limited-edition" },
-        { label: "Sale", path: "/collections/unisex/trending/sale" },
+        { label: "New Arrivals", path: "/collections/unisex/new-arrivals" },
+        { label: "Best Sellers", path: "/collections/unisex/best-sellers" },
+        { label: "Limited Edition", path: "/collections/unisex/limited-edition" },
+        { label: "Sale", path: "/collections/unisex/sale" },
       ],
     },
   ],

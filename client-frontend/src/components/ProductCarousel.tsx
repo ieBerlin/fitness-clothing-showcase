@@ -67,7 +67,9 @@ const ProductCarousel = <T,>({
           transition: "transform 0.5s ease-in-out",
         }}
       >
-        {visibleProducts.map((product) => renderedItem(product))}
+        {visibleProducts.map((product) => (
+          <div key={JSON.stringify(product)}>{renderedItem(product)}</div>
+        ))}
       </div>
 
       <button

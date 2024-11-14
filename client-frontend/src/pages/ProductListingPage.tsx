@@ -2,6 +2,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { useQueries } from "@tanstack/react-query";
 import React, { useContext, useEffect, useRef, useState } from "react";
+import ProductsCover from "/products-cover.jpg"
 import {
   DataResponse,
   ErrorResponse,
@@ -13,7 +14,7 @@ import { fetchProducts, fetchSections } from "../utils/authUtils";
 import Availability from "../enums/Availability";
 import ProductCard from "../components/ProductCard";
 import FilterSidebar from "../components/FilterSidebar";
-import Navbar from "../components/Navbar";
+// import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { NavbarHeightContext } from "../store/navbarStore";
 import ProductCarousel from "../components/ProductCarousel";
@@ -122,10 +123,10 @@ const ProductOverviewPage: React.FC = () => {
   }
   return (
     <PageTemplate title="All Products">
-      <Navbar />
+      {/* <Navbar /> */}
       <div className="relative w-full h-[300px]">
         <img
-          src="https://row.gymshark.com/_next/image?url=https%3A%2F%2Fimages.ctfassets.net%2Fwl6q2in9o7k3%2F4rRgFFaSrU4F5UTfyKEW7x%2Fd87c9e93e1dbf6f744c9d7362164c50a%2FCollection_Banner_-_Desktop.png&w=1664&q=85"
+          src={ProductsCover}
           alt="Powerhouse Men's Collection"
           className="absolute h-full w-full left-0 top-0 right-0 bottom-0 object-cover text-transparent transition-transform duration-300 ease-in-out hover:scale-110"
         />

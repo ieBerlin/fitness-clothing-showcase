@@ -6,9 +6,7 @@ import SectionPage from "./pages/SectionPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import GlobalError from "./pages/GlobalError";
 import RootLayout from "./components/RootLayout.tsx";
-import MenProductsPage from "./pages/MenProductsPage.tsx";
-import WomenProductsPage from "./pages/WomenProductsPage.tsx";
-import UnisexProductsPage from "./pages/UnisexProductsPage.tsx";
+import CollectionPage from "./pages/CollectionPage.tsx";
 
 const routes = createBrowserRouter([
   {
@@ -21,11 +19,10 @@ const routes = createBrowserRouter([
         element: <HomePage />,
       },
       {
-        path: "collections/men",
-        element: <MenProductsPage />,
+        path: "collections/:sexId/:collectionId",
+        element: <CollectionPage />,
       },
-      { path: "collections/women", element: <WomenProductsPage /> },
-      { path: "collections/unisex", element: <UnisexProductsPage /> },
+
       {
         path: "products/:productId",
         element: <ProductDetailsPage />,
